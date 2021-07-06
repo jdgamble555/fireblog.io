@@ -1,0 +1,10 @@
+<mat-dialog-content>
+    <div class="centered"><mat-icon>warning</mat-icon></div>
+    <p class="ng-dialog-text">
+        {{ message }}
+    </p>
+</mat-dialog-content>
+<mat-dialog-actions align="center">
+    <button mat-raised-button color="warn" mat-dialog-close>No</button>
+    <button mat-raised-button [mat-dialog-close]="true">Yes</button>
+</mat-dialog-actions>

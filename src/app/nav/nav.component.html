@@ -1,0 +1,13 @@
+<app-header [title]="title"></app-header>
+<mat-sidenav-container class="ng-container centered" autosize>
+  <mat-sidenav #leftNav opened mode="side" class="ng-sidenav">
+    <app-leftnav *ngIf="!nav.isMobile"></app-leftnav>
+  </mat-sidenav>
+  <mat-sidenav #rightNav closed mode="side" position="end">
+    <app-rightnav></app-rightnav>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <router-outlet></router-outlet>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+<app-footer></app-footer>

@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "fireblog-io": {
+      "hosting": {
+        "fireblog": [
+          "fireblog-io"
+        ]
+      }
+    }
+  }
+}

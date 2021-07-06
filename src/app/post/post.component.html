@@ -1,0 +1,96 @@
+<div class="ng-height">
+  <div *ngFor="let post of posts | async as p; last as isLast; index as i">
+    <mat-card class="ng-card">
+      <h1 [routerLink]="ts.getTitleURL(post.title)" class="ng-post-title">
+        <mat-icon class="ng-icon-folder">library_books</mat-icon>{{ post.title }}
+      </h1>
+      <h6><i>{{ ps.minutesToRead(post.content) }} min read</i></h6>
+      <div class="ng-author ng-link" [routerLink]="['/blog', 'user', post.userId]">
+        <!--<img class="avatar" src="{{ (post.userDoc | doc | async)?.photoURL }}" />-->
+        <img class="avatar" src="{{ post.user.photoURL }}" />
+        <!--<p class="ng-light"><small><b>{{ (post.userDoc | doc | async)?.displayName }}</b>-->
+        <p class="ng-light"><small><b>{{ post.user.displayName }}</b>
+            <ng-container *ngIf="post.createdAt"> on
+              {{ post.createdAt.toDate() | date: 'EEEE, MMMM d, yyyy' }}</ng-container>
+            <ng-container *ngIf="post.updatedAt && ps.page === 'post'"> (last modified on
+              {{ post.updatedAt.toDate() | date: 'EEEE, MMMM d, yyyy' }})</ng-container>
+          </small></p>
+      </div>
+      <br />
+      <img [routerLink]="ts.getTitleURL(post.title)" *ngIf="post.image" class="ng-image" src="{{ post.image }}"
+        alt="{{ post.title }}" />
+      <p class="post-summary">{{ post.summary }}</p>
+      <div *ngIf="ps.page === 'post'">
+        {{ ps.seo.generateTags({ domain: this.domain, image: post.image, description: post.summary, title:
+        ps.siteTitle + ': ' + post.title }) }}
+        <markdown [data]="post.content" ngPreserveWhitespaces></markdown>
+        <br>
+        <div class="mat-chip-area">
+          <mat-chip-list aria-label="Tags" *ngFor="let tag of post.tags" class="tags">
+            <!-- todo: add pipe for friendly url-->
+            <mat-chip [routerLink]="ts.getTagsURL(tag)">{{ tag }}</mat-chip>
+          </mat-chip-list>
+        </div>
+      </div>
+      <div *ngIf="ps.page !== 'post'">
+        <!-- todo: add pipe for friendly url-->
+        <p class="ng-right"><button mat-stroked-button color="primary" [routerLink]="ts.getTitleURL(post.title)"
+            routerLinkActive="active">Read More</button></p>
+      </div>
+      <ng-container *ngIf="auth.user$ | async as user">
+        <mat-card-actions align="end">
+          <div class="flex-container">
+            <div>
+              <app-like [postId]="post.id" [userId]="user!.uid"></app-like>
+            </div>
+            <div>
+              <ng-container *ngIf="user!.uid === post.userId || user!.roles?.includes('editor')">
+                <button mat-icon-button [routerLink]="['/blog', 'edit', post.id]">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button (click)="ps.delete(post.id)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </ng-container>
+            </div>
+          </div>
+        </mat-card-actions>
+      </ng-container>
+    </mat-card>
+    <div *ngIf="isLast">
+      <div class="ng-button-space">
+        <button mat-stroked-button (click)='ps.home();'>
+          <mat-icon class="ng-button-icon">home</mat-icon>Home
+        </button>
+        <button mat-stroked-button (click)='ps.loadPrev();' [disabled]='ps.pageNum == 1'>
+          <mat-icon class="settings-icon">keyboard_arrow_left</mat-icon>Previous
+        </button>
+        <button mat-stroked-button (click)='ps.loadNext();' [disabled]="ps.disableNextButton">Next<mat-icon
+            class="settings-icon">
+            keyboard_arrow_right</mat-icon></button>
+      </div>
+    </div>
+  </div>
+  <ng-container *ngIf="!(posts | async)?.length">
+    <div *ngIf="category && category !== 'home'">
+      <mat-card class="ng-card">
+        <h3 class="ng-center">There are no posts in this category!</h3>
+      </mat-card>
+    </div>
+    <div *ngIf="ps.page === 'home'">
+      <mat-card class="ng-card">
+        <h3 class="ng-center">There are no posts yet!</h3>
+      </mat-card>
+    </div>
+    <div *ngIf="ps.userSearch">
+      <mat-card class="ng-card">
+        <h3 class="ng-center">User {{ ps.userSearch }} does not have any posts!</h3>
+      </mat-card>
+    </div>
+    <div *ngIf="ps.favoriteSearch">
+      <mat-card class="ng-card">
+        <h3 class="ng-center">Heart a post to add it to your favorites!</h3>
+      </mat-card>
+    </div>
+  </ng-container>
+</div>

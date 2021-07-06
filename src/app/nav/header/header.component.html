@@ -1,0 +1,85 @@
+<mat-toolbar color="primary" class="ng-sticky-header">
+  <button mat-button (click)='ps.home();'>
+    <mat-icon class="ng-button-icon">home</mat-icon>
+    {{ title }}
+  </button>
+  <button mat-button class="ng-button-icon" (click)="this.isActiveSearch = this.isActiveSearch ? false : true">
+    <mat-icon>search</mat-icon>
+  </button>
+  <span class="ng-spacer"></span>
+  <div *ngIf="auth.user$ | async as user; else guest">
+    <mat-menu #appMenu="matMenu">
+      <mat-list>
+        <mat-list-item><a mat-menu-item routerLink="/user/account">
+            <mat-icon class="settings-icon">settings</mat-icon>Account Settings
+          </a></mat-list-item>
+        <mat-divider></mat-divider>
+        <mat-list-item><a mat-menu-item routerLink="/blog/favorites">
+            <mat-icon class="settings-icon">favorite</mat-icon>Favorites
+          </a></mat-list-item>
+        <mat-divider></mat-divider>
+        <mat-list-item><a mat-menu-item routerLink="/directory">
+            <mat-icon class="settings-icon">folder</mat-icon>Directory
+          </a></mat-list-item>
+        <mat-divider></mat-divider>
+        <ng-container *ngIf="user?.roles?.includes('editor') || user?.roles?.includes('admin')">
+          <mat-list-item><a mat-menu-item routerLink="/blog/my-posts">
+              <mat-icon class="settings-icon">account_box</mat-icon>My Posts
+            </a></mat-list-item>
+          <mat-divider></mat-divider>
+          <mat-list-item><a mat-menu-item routerLink="/blog/new">
+              <mat-icon class="settings-icon">post_add</mat-icon>New Post
+            </a></mat-list-item>
+          <mat-divider></mat-divider>
+          <mat-list-item><a mat-menu-item routerLink="/directory/new">
+              <mat-icon class="settings-icon">build</mat-icon>New Directory
+            </a></mat-list-item>
+          <mat-divider></mat-divider>
+        </ng-container>
+        <mat-list-item><a mat-menu-item (click)="auth.signOut()">
+            <mat-icon class="settings-icon">power_settings_new</mat-icon>Logout
+          </a></mat-list-item>
+      </mat-list>
+    </mat-menu>
+    <a mat-icon-button [matMenuTriggerFor]="appMenu">
+      <img class="avatar" [src]="user?.photoURL || 'assets/blank_avatar.png'">
+    </a>
+  </div>
+  <ng-template #guest>
+    <button mat-button routerLink="/login">Login</button>
+  </ng-template>
+</mat-toolbar>
+<ng-container *ngIf="isActiveSearch">
+  <mat-toolbar color="basic" class="ng-search-bar">
+    <form [formGroup]="myForm">
+      <mat-form-field color="primary" class="ng-search">
+        <input matInput placeholder="Search" formControlName="term" [matAutocomplete]="auto" (keyup)="mySerach()">
+      </mat-form-field>
+      <button mat-button class="ng-button-icon" (click)="this.isActiveSearch = this.isActiveSearch ? false : true;">
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption>
+        <mat-option style="white-space: pre" *ngFor="let option of options | async"
+          [routerLink]="['/blog/post/' + option._title.split(' ').join('-')]"
+          [innerHTML]="option.term | boldTerm : trigrams">
+        </mat-option>
+      </mat-autocomplete>
+    </form>
+  </mat-toolbar>
+</ng-container>
+<mat-toolbar color="basic" class="ng-nav">
+  <ol class="arrows" itemscope itemtype="https://schema.org/BreadcrumbList">
+    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <a itemprop="item" mat-button routerLink="/">
+        <mat-icon class="ng-button-icon">home</mat-icon><span itemprop="name">Home</span>
+      </a>
+      <meta itemprop="position" content="1" />
+    </li>
+    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" *ngFor="let c of bcs.crumbs">
+      <a itemprop="item" mat-button [routerLink]="c.link">
+        <span itemprop="name">{{ c.name }}</span>
+      </a>
+      <meta itemprop="position" content="{{ c.position }}" />
+    </li>
+  </ol>
+</mat-toolbar>
