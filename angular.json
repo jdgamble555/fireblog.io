@@ -125,6 +125,7 @@
         "deploy": {
           "builder": "@angular/fire:deploy",
           "options": {
+            "functionsNodeVersion": 12,
             "ssr": true
           }
         },

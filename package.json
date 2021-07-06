@@ -12,6 +12,9 @@
     "build:ssr": "ng build && ng run fireblog:server",
     "prerender": "ng run fireblog:prerender"
   },
+  "engines": {
+    "node": "12"
+  },
   "private": true,
   "dependencies": {
     "@angular/animations": "~12.1.1",
