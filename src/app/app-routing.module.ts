@@ -9,8 +9,7 @@ const routes: Routes = [
   { path: 'register', component: AuthComponent },
   { path: 'reset', component: AuthComponent },
   { path: 'new', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule) },
-  { path: 'blog', loadChildren: () => import('./post/post.module').then(m => m.PostModule) },
-  { path: 'directory', loadChildren: () => import('./category/category.module').then(m => m.CategoryModule) },
+  { path: 'edit/:id', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule) },
   { path: 'settings', loadChildren: () => import('./auth/auth-settings/auth-settings.module').then(m => m.AuthSettingsModule) },
   { path: '**', component: HomeComponent }
 ];

@@ -1,1 +1,122 @@
-<p>auth-settings works!</p>
+<div *ngIf="auth.user$ | async as user">
+  <form [formGroup]="accountForm">
+    <mat-card>
+      <h1>Settings</h1>
+      <mat-accordion>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Profile</mat-panel-title>
+            <mat-panel-description>Change Your Name and Picture</mat-panel-description>
+          </mat-expansion-panel-header>
+          <div libDropZone (dropped)="uploadImage($event)" (hovered)="toggleHover($event)" class="drop-zone">
+            <div (click)="file.click()" class="drop-image">
+              <img *ngIf="user?.photoURL" [src]="user?.photoURL" />
+              <mat-icon class="ng-account-icon">account_circle</mat-icon>
+            </div>
+          </div>
+          <br />
+          <div *ngIf="user?.photoURL">
+            <button mat-stroked-button (click)="deleteImage()">Delete</button>
+          </div>
+          <div>
+            <input [hidden]="true" type="file" name="file" id="file" accept="image/*" (change)="uploadImage($event)"
+              #file>
+            <div [hidden]="!is.showPercent">
+              <mat-progress-bar mode="determinate" value="{{ uploadPercent | async }}"></mat-progress-bar>
+            </div>
+          </div>
+          <div class="margin-spacer"></div>
+          <mat-form-field class="login-text" appearance="outline">
+            <mat-icon color="primary" matPrefix class="ng-form-icon">person</mat-icon>
+            <input matInput type="text" name="displayName" placeholder="Name" formControlName="displayName"
+              autocomplete="name" required />
+            <mat-error *ngIf="getField('displayName')?.invalid">
+              {{ getError('displayName') }}
+            </mat-error>
+          </mat-form-field>
+          <button class="login-button" type="submit" color="primary" mat-raised-button
+            [disabled]="getField('displayName')?.invalid" (click)="updateProfile()">
+            <mat-icon class="ng-button-icon">save</mat-icon>
+            Save
+          </button>
+        </mat-expansion-panel>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Email</mat-panel-title>
+            <mat-panel-description>Change Your Email</mat-panel-description>
+          </mat-expansion-panel-header>
+          <mat-form-field class="login-text" appearance="outline">
+            <mat-icon color="primary" matPrefix class="ng-form-icon">email</mat-icon>
+            <input matInput type="text" name="email" placeholder="Email" autocomplete="email" formControlName="email"
+              required />
+            <mat-error *ngIf="getField('email')?.invalid">
+              {{ getError('email') }}
+            </mat-error>
+          </mat-form-field>
+          <button class="login-button" type="submit" color="primary" mat-raised-button
+            [disabled]="getField('email')?.invalid" (click)="updateEmail()">
+            <mat-icon class="ng-button-icon">save</mat-icon>
+            Save
+          </button>
+        </mat-expansion-panel>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Password</mat-panel-title>
+            <mat-panel-description>{{ providers.password ? 'Change' : 'Create'}} Your Password</mat-panel-description>
+          </mat-expansion-panel-header>
+          <mat-form-field class="login-text" appearance="outline">
+            <mat-icon color="primary" matPrefix class="ng-form-icon">lock</mat-icon>
+            <mat-icon matSuffix color="primary" (click)="passhide = !passhide">{{passhide ? 'visibility_off' :
+              'visibility'}}</mat-icon>
+            <input matInput formControlName="password" type="password" placeholder="Password" autocomplete="off"
+              [type]="passhide ? 'password' : 'text'" />
+            <mat-error *ngIf="getField('password')?.invalid">
+              {{ getError('password') }}
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field class="login-text" appearance="outline">
+            <mat-icon color="primary" matPrefix class="ng-form-icon">lock</mat-icon>
+            <mat-icon color="primary" matSuffix (click)="confirmhide = !confirmhide">{{confirmhide ? 'visibility_off'
+              : 'visibility'}} </mat-icon>
+            <input matInput formControlName="confirmPassword" type="password" placeholder="Confirm password"
+              autocomplete="off" [type]="confirmhide ? 'password' : 'text'" />
+            <mat-error *ngIf="getField('confirmPassword')?.invalid">
+              {{ getError('confirmPassword') }}
+            </mat-error>
+          </mat-form-field>
+          <button class="login-button" type="submit" color="primary" mat-raised-button
+            [disabled]="getField('password')?.invalid || getField('confirmPassword')?.invalid" (click)="updatePass()">
+            <mat-icon class="ng-button-icon">save</mat-icon>
+            Save
+          </button>
+        </mat-expansion-panel>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Links</mat-panel-title>
+            <mat-panel-description>Change Your Linked Accounts</mat-panel-description>
+          </mat-expansion-panel-header>
+          <div>
+            <div>
+              <button class="g-button provider-button" mat-button>
+                Google
+              </button>
+              <mat-slide-toggle color="primary" #g [checked]="providers['google.com']"
+                (change)="updateProvider(g, 'google.com')">
+              </mat-slide-toggle>
+            </div>
+          </div>
+        </mat-expansion-panel>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Delete</mat-panel-title>
+            <mat-panel-description>Delete Your Account</mat-panel-description>
+          </mat-expansion-panel-header>
+          <button class="login-button" color="warn" mat-raised-button (click)="deleteAccount()">
+            <mat-icon class="ng-button-icon">delete_forever</mat-icon>
+            Delete Account
+          </button>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </mat-card>
+  </form>
+</div>

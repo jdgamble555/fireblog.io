@@ -1,4 +1,4 @@
-import { Component} from '@angular/core';
+import { Component } from '@angular/core';
 import { NavService } from '../nav.service';
 
 @Component({
@@ -8,7 +8,6 @@ import { NavService } from '../nav.service';
 })
 export class FooterComponent {
 
-  constructor(public nav: NavService) {  }
-
+  constructor(public ns: NavService) { }
 
 }

@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, SecurityContext } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AngularFireModule } from '@angular/fire';
@@ -15,17 +15,21 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CoreModule } from './core/core.module';
 import { HomeComponent } from './home/home.component';
 import { SharedModule } from './shared/shared.module';
-import { PostModule } from './post/post.module';
-import { CategoryModule } from './category/category.module';
 import { MarkdownModule } from 'ngx-markdown';
+import { PostComponent } from './post/post.component';
+import { PostListComponent } from './post/post-list/post-list.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    HomeComponent
+    HomeComponent,
+    PostComponent,
+    PostListComponent
   ],
   imports: [
-    MarkdownModule.forRoot(),
+    MarkdownModule.forRoot({
+      sanitize: SecurityContext.NONE
+    }),
     BrowserModule.withServerTransition({ appId: 'serverApp' }),
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAnalyticsModule,
@@ -41,9 +45,7 @@ import { MarkdownModule } from 'ngx-markdown';
     }),
     BrowserAnimationsModule,
     CoreModule,
-    SharedModule,
-    PostModule,
-    CategoryModule
+    SharedModule
   ],
   providers: [],
   bootstrap: [AppComponent]

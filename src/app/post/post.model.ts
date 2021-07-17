@@ -1,17 +1,18 @@
-import { DocumentReference } from '@angular/fire/firestore'
 import firebase from 'firebase/app';
+import { User } from '../auth/user.model';
 
-export class Post {
-    id?: string;
-    title?: string;
-    author?: string;
-    authorId?: string;
-    content?: string;
-    summary?: string;
-    image?: string;
-    published?: Date | firebase.firestore.FieldValue;
-    updated?: Date | firebase.firestore.FieldValue;
-    _tags?: any;
-    userDoc?: DocumentReference;
-    titleURL?: string;
+export interface Post {
+    id: string;
+    title: string;
+    authorId: string;
+    content: string;
+    summary: string;
+    image: string;
+    createdAt: Date | firebase.firestore.FieldValue | any;
+    updatedAt: Date | firebase.firestore.FieldValue | any;
+    tags?: any;
+    slug?: string;
+    count?: string;
+    author: User;
 }
+

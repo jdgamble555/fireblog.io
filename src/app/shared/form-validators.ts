@@ -8,7 +8,7 @@ export class MyErrorStateMatcher implements ErrorStateMatcher {
   }
 }
 
-export function matchValues(matchTo: string): (control: AbstractControl) => ValidationErrors | null {
+export function matchValidator(matchTo: string): (control: AbstractControl) => ValidationErrors | null {
   return (control: AbstractControl): ValidationErrors | null => {
     return !!control.parent &&
       !!control.parent.value &&

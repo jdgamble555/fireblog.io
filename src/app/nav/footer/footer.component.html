@@ -1,14 +1,12 @@
 <table class="ng-footer centered">
   <tr>
     <td valign="top">
-      <div *ngIf="nav.isMobile">
-        <app-tag display="footer"></app-tag>
-      </div>
+      <app-tag display="footer"></app-tag>
     </td>
   </tr>
   <tr>
     <td valign="bottom">
-      <div class="centered mat-small">&copy; 2020-2021 Fireblog.io<p></p>
+      <div class="centered mat-small">&copy; 2020-2021 {{ ns.title }}<p></p>
       </div>
     </td>
   </tr>

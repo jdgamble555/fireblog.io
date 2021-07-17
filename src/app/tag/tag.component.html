@@ -25,7 +25,7 @@
     <ul class="tag_list">
       <li [ngClass]="{
         'tag-li-footer': display == 'footer'
-      }" *ngFor="let tag of tags | async" [routerLink]="ts.getTagsURL(tag.id)">{{ tag.id }}
+      }" *ngFor="let tag of tags | async" [routerLink]="getTagsURL(tag.id)">{{ tag.id }}
         ({{ tag.count }})</li>
     </ul>
   </mat-card-content>

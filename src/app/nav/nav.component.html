@@ -1,7 +1,7 @@
-<app-header [title]="title"></app-header>
+<app-header></app-header>
 <mat-sidenav-container class="ng-container centered" autosize>
   <mat-sidenav #leftNav opened mode="side" class="ng-sidenav">
-    <app-leftnav *ngIf="!nav.isMobile"></app-leftnav>
+    <app-leftnav></app-leftnav>
   </mat-sidenav>
   <mat-sidenav #rightNav closed mode="side" position="end">
     <app-rightnav></app-rightnav>

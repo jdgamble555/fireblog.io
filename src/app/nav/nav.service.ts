@@ -1,5 +1,4 @@
-import { DOCUMENT, isPlatformBrowser } from '@angular/common';
-import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { Router } from '@angular/router';
 
@@ -8,31 +7,12 @@ import { Router } from '@angular/router';
 })
 export class NavService {
 
-  isMobile!: Boolean;
-  isBrowser!: Boolean;
+  title = 'Fireblog.io';
 
   private leftNav!: MatSidenav;
   private rightNav!: MatSidenav;
 
-  constructor(
-    private router: Router,
-    @Inject(DOCUMENT) private document: Document,
-    @Inject(PLATFORM_ID) platformId: Object,
-  ) {
-    const window = this.document.defaultView;
-
-    this.isBrowser = isPlatformBrowser(platformId);
-
-    this.isMobile = false;
-
-    if (this.isBrowser) {
-      // see if is mobile device
-      window?.matchMedia("(min-width: 600px)")
-        .addEventListener("change", (mq: MediaQueryListEvent) => {
-          this.isMobile = !mq.matches;
-        });
-    }
-  }
+  constructor(private router: Router) { }
 
   setLeftNav(leftNav: MatSidenav): void {
     this.leftNav = leftNav;

@@ -11,7 +11,7 @@
 $custom-typography: mat.define-typography-config(
   $font-family: '"Marr Sans",Helvetica,Arial,Roboto,sans-serif',
   $headline: mat.define-typography-level(32px, 48px, 700),
-  $body-1: mat.define-typography-level(16px, 24px, 500)
+  $body-1: mat.define-typography-level(16px, 24px, 500),
 );
 
 @include mat.core($custom-typography);
@@ -96,9 +96,9 @@ h3 {
 }
 
 .ng-form-icon {
-  position: relative;
-  top: 3px;
-  padding-right: 10px;
+  //position: relative;
+  //top: 3px;
+  padding-right: 15px;
 }
 
 .ng-close-icon.mat-button {
@@ -110,7 +110,7 @@ h3 {
   min-width: auto;
 }
 
-.ng-icon-folder {
+.ng-icon-text {
   padding-right: 10px;
   vertical-align: middle;
   padding-bottom: 5px;
@@ -400,6 +400,10 @@ mat-form-field.mat-form-field {
   margin: 0px 10px 0px;
 }
 
+.avatar-account {
+  font-size: 30px;
+}
+
 .mat-drawer-side {
   border-right: none !important;
 }
@@ -439,25 +443,52 @@ mat-form-field.mat-form-field {
 
 // Search
 
-.ng-search-bar {
-  justify-content: center;
-  height: 100px !important;
-  position: sticky;
-  z-index: 1000;
-  top: 50px;
+.ng-search .mat-form-field-flex {
+  margin-top: 15px !important;
+  transform: scale(0.70);
+}
+
+.ng-search .mat-form-field-outline {
+  background: white;
+  border-radius: 5px;
+}
+
+// text color
+.ng-search.mat-form-field-appearance-outline {
+  color: black !important;
+  font-size: 18px !important;
+}
+
+// hover outline color
+.ng-search .mat-form-field-outline-thick {
+  color: grey;
+  border: 2px solid black;
+}
+
+// hover border
+.ng-search .mat-form-field-outline-start, .ng-search .mat-form-field-outline-end {
+  border: none !important;
+}
+
+// hover effect
+.ng-search .mat-form-field-flex:hover .mat-form-field-outline {
+  transition: none !important;
 }
 
 .ng-search {
+  margin-top: 10px;
   width: 50% !important;
   min-width: 400px;
 }
 
 @media (max-width: 767px) {
   .ng-search {
-    width: 95% !important;
-    min-width: 0px;
+    display: none !important;
+    visibility: hidden;
   }
 }
+
+// posts
 
 .post-summary {
   margin: 20px !important;
@@ -469,10 +500,43 @@ code {
 }
 
 markdown a {
-  color: #1e88e5;;
+  color: #1e88e5;
   text-decoration: none;
 }
 
 markdown a:hover {
   text-decoration: underline;
+}
+
+/* Drop Zone */
+
+.ng-account-icon {
+  font-size: 180px;
+}
+
+.drop-zone,
+.drop-image {
+  width: 180px;
+}
+
+.drop-image {
+  display: block;
+}
+
+.drop-zone:hover,
+.drop-active {
+  opacity: 0.5;
+  border-style: dashed;
+}
+
+/* Expansion Panel */
+
+.mat-expansion-panel-header-title,
+.mat-expansion-panel-header-description {
+  flex-basis: 0;
+}
+
+.mat-expansion-panel-header-description {
+  justify-content: space-between;
+  align-items: center;
 }

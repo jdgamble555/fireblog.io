@@ -12,9 +12,6 @@ import firebase from 'firebase/app';
 export class AuthService {
 
   user$!: Observable<User | null>;
-  providers$!: Providers | any;
-  uid$!: string | any;
-  emailVerified$!: boolean | any;
 
   private messages: any = {
     accountRemoved: 'Your account has been deleted and you have been logged out.',
@@ -39,7 +36,6 @@ export class AuthService {
       .pipe(
         shareReplay(),
         switchMap((user) => {
-          this.emailVerified$ = user?.emailVerified;
           return user
             ? this.afs.doc<User>(`users/${user.uid}`).snapshotChanges()
               .pipe(
@@ -47,84 +43,61 @@ export class AuthService {
                   // return id with doc
                   const data = doc.payload.data();
                   const uid = doc.payload.id;
-                  this.uid$ = uid;
                   return { uid, ...data } as User;
                 })
               )
             : of(null);
         })
       );
-    // get list of providers to use in apps / uid
-    this.getProviders();
   }
   /**
-   * Gets the list of providers and sets them to this.providers$
-   * -- Note: also gets uid
+   * isLoggedIn
+   * @returns - true or false
    */
-  private getProviders(): void {
-    this.afAuth.user.subscribe(user => {
-      if (user) {
-        this.uid$ = user.uid;
-        // make providers available
-        const providers: any = {};
-        user.providerData.forEach(provider => {
-          let id: any = provider?.providerId;
-          // get rid of '.com' in name
-          if (id.includes('.com')) {
-            id = id.replace('.com', '');
-          }
-          providers[id] = true;
-        });
-        this.providers$ = providers;
-      }
-    });
+  async isLoggedIn(): Promise<boolean> {
+    return await new Promise((resolve: any, reject: any) =>
+      this.afAuth.onAuthStateChanged((user) => {
+        user ? resolve(true) : resolve(false);
+      }, (e: any) => reject(e))
+    );
+  }
+  /**
+   * Get's current user
+   * @returns False or User Info
+   */
+   async getUser(): Promise<User> {
+    return await new Promise((resolve: any, reject: any) =>
+      this.afAuth.onAuthStateChanged((user) => {
+        user ? resolve(user) : resolve(false);
+      }, (e: any) => reject(e))
+    );
+  }
+  /**
+   * Returns a hash of the user's providers
+   * @returns a list of providers
+   */
+  async getProviders(): Promise<Providers> {
+    return await new Promise((resolve: any, reject: any) =>
+      this.afAuth.user.subscribe(async (user: firebase.User | null) => {
+        if (user) {
+          // make providers available
+          const providers: any = {};
+          user.providerData.forEach((provider: firebase.UserInfo | null) => {
+            let id = provider!.providerId;
+            providers[id] = true;
+          });
+          resolve(providers);
+        }
+      }, (e: any) => reject(e))
+    );
   }
   /**
    * Returns the relevant provider object from a string
-   * @param p the provider id string
+   * @param p - the provider id string
    * @returns the provider object
    */
   private getProvider(p: string): any {
-
-    const auth = firebase.auth;
-
-    let provider;
-
-    switch (p) {
-      case ('google'): {
-        provider = new auth.GoogleAuthProvider();
-        break;
-      }
-      case ('twitter'): {
-        provider = new auth.TwitterAuthProvider();
-        break;
-      }
-      case ('facebook'): {
-        provider = new auth.FacebookAuthProvider();
-        break;
-      }
-      case ('github'): {
-        provider = new auth.GithubAuthProvider();
-        break;
-      }
-      case ('twitter'): {
-        provider = new auth.TwitterAuthProvider();
-        break;
-      }
-      case ('microsoft'): {
-        provider = new auth.OAuthProvider('microsoft.com');
-        break;
-      }
-      case ('yahoo'): {
-        provider = new auth.OAuthProvider('yahoo.com');
-        break;
-      }
-      case ('apple'): {
-        provider = new auth.OAuthProvider('apple.com');
-        break;
-      }
-    }
-    return provider;
+    return new firebase.auth.OAuthProvider(p);
   }
   /**
    * Login with provider by popup and add it to firebase
@@ -140,23 +113,19 @@ export class AuthService {
 
     return await user!
       .linkWithPopup(provider)
-      .then((credential: any) => {
+      .then((credential: firebase.auth.UserCredential) => {
 
         // get new provider info
-        const newProvider = credential.user.providerData[0];
+        const newProvider = credential.user!.providerData[0];
 
         // update photoURL and phoneNumber if null
-        const photoURL = credential.user.photoURL || newProvider.photoURL;
-        const phoneNumber = credential.user.phoneNumber || newProvider.phoneNumber;
+        const photoURL = credential.user!.photoURL || newProvider!.photoURL;
+        const phoneNumber = credential.user!.phoneNumber || newProvider!.phoneNumber;
 
         // update firestore User document
-        const userDef = {
-          phoneNumber,
-          photoURL
-        };
+        const userDef = { phoneNumber, photoURL };
 
         // update provider list
-        this.getProviders();
         return this.updateFirestoreDoc(userDef);
       });
   }
@@ -166,23 +135,16 @@ export class AuthService {
    */
   async removeProvider(p: string): Promise<any> {
 
-    // add .com to certain provider ids
-    if (p === 'google' || p === 'microsoft' || p === 'yahoo') {
-      p += '.com';
-    }
-
     // can't remove if only provider
-    if (Object.keys(this.providers$).length < 2) {
+    const providers = this.getProviders();
+    if (Object.keys(providers).length < 2) {
       return Promise.resolve(this.errors.removeProvider);
     }
-
     const user = await this.afAuth.currentUser;
 
     // remove provider from firebase auth
     return user!
       .unlink(p)
-      // update provider list
-      .then(() => this.getProviders())
       .then(() => {
         return { message: this.replaceMsg(this.messages.providerRemoved, p) };
       });
@@ -193,7 +155,6 @@ export class AuthService {
    * @returns promise of reAuthentication
    */
   async oAuthReLogin(p: string): Promise<any> {
-
     const provider = this.getProvider(p);
     const user = await this.afAuth.currentUser;
     return user!.reauthenticateWithPopup(provider);
@@ -212,9 +173,9 @@ export class AuthService {
     return await this.afAuth
       .signInWithPopup(provider)
       .then((credential: firebase.auth.UserCredential | any) => {
-        // create firestore User doc if first sign in
+        // add to db if first sign in
         if (credential.additionalUserInfo.isNewUser) {
-          return this.createFirestoreDoc(credential.user);
+          return this.addToDB(credential.user);
         }
         return null;
       });
@@ -254,15 +215,23 @@ export class AuthService {
         return credential.user.updateProfile({ displayName: credentials.displayName })
           // send verification email
           .then(() => credential.user.sendEmailVerification())
-          // create firestore User document
-          .then(() => this.createFirestoreDoc(credential.user));
+          // add to db
+          .then(() => this.addToDB(credential.user));
       });
   }
   /**
-   * Creates Firestore User Document
+   * Delete Firestore User Doc
+   * @param - uid - user id
+  */
+  private async delFromDB(uid: string): Promise<void> {
+    const userRef = this.afs.doc(`users/${uid}`);
+    return await userRef.delete();
+  }
+  /**
+   * Creates Firestore User Doc
    * @param user the user data
    */
-  private async createFirestoreDoc(user: any): Promise<void> {
+  private async addToDB(user: any): Promise<void> {
 
     // create the User doc
     const userDoc = {
@@ -321,14 +290,13 @@ export class AuthService {
   async deleteUser(): Promise<any> {
     // delete user from firebase authentication
     const user = await this.afAuth.currentUser;
-    await user!
+    return await user!
       .delete()
-      .then(async (): Promise<any> => {
-        // delete user from firestore database
-        const userRef: AngularFirestoreDocument<any> = this.afs.doc(`users/${user!.uid}`);
-        return await userRef.delete()
-          .then(() => { return { message: this.messages.accountRemoved } });
-      });
+      .then(() =>
+        // delete user from db
+        this.delFromDB(user!.uid)
+          .then(() => { return { message: this.messages.accountRemoved } })
+      );
   }
   /**
    * Updates a user's password
@@ -340,9 +308,7 @@ export class AuthService {
     const user = await this.afAuth.currentUser;
     await user!
       .updatePassword(pass)
-      .then(() => {
-        return { message: this.messages.passUpdated };
-      });
+      .then(() => { return { message: this.messages.passUpdated }; });
   }
   /**
    * Updates a user's email address
@@ -365,7 +331,7 @@ export class AuthService {
   /**
    * Sign a user out and navigate router to home "/"
    */
-  async signOut(): Promise<void> {
+  async logout(): Promise<void> {
     await this.afAuth.signOut();
   }
   /**

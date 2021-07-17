@@ -1,12 +1,8 @@
 <mat-card class="ng-card">
-  <div *ngIf="page === 'new'">
-    <h2>New Post</h2>
-  </div>
-  <div *ngIf="page === 'edit'">
-    <h2>Edit Post</h2>
-  </div>
+  <mat-card-title>{{ isNewPage ? 'New' : 'Edit' }} Post</mat-card-title>
+  <br />
   <mat-card-content>
-    <form [formGroup]="myForm" (ngSubmit)="submitHandler()">
+    <form [formGroup]="postForm" (ngSubmit)="onSubmit()">
       <button type="button" mat-raised-button (click)="fileInput.click()">Upload Image</button>
       <p></p>
       <input hidden type="file" name="file" id="file" accept="image/*" #fileInput (change)="showImage($event)">
@@ -17,49 +13,44 @@
         <img class="ng-image" [src]="is.imageURL || '//:0'">
       </div>
       <mat-form-field>
-        <input matInput id="title" placeholder="Title" formControlName="title" [errorStateMatcher]="matcher">
-        <mat-error *ngIf="titleRef?.hasError('uniqueField')">That title has already been taken.</mat-error>
-        <mat-error *ngIf="titleRef?.hasError('required')">The title field is required.</mat-error>
-        <mat-hint *ngIf="titleAvailable && isNewTitle">That title is available.</mat-hint>
+        <input matInput id="title" placeholder="Title" formControlName="title">
+        <mat-error *ngIf="getField('title')?.invalid">
+          {{ getError('title') }}
+        </mat-error>
       </mat-form-field>
       <mat-form-field class="chip-list">
-        <mat-chip-list #chipList aria-label="Tag selection">
-          <mat-chip *ngFor="let tag of _tags" [selectable]="selectable" [removable]="removable"
-            (removed)="removeTag(tag)">
+        <mat-chip-list #chipList aria-label="Tag selection" formControlName="tags">
+          <mat-chip *ngFor="let tag of ts.tags" [selectable]="ts.selectable" [removable]="ts.removable"
+            (removed)="ts.remove(tag)">
             {{ tag.name }}
-            <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+            <mat-icon matChipRemove *ngIf="ts.removable">cancel</mat-icon>
           </mat-chip>
-          <input placeholder="Tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-            [matChipInputAddOnBlur]="addOnBlur" (matChipInputTokenEnd)="addTag($event)" formControlName="newTags" />
+          <input placeholder="Tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="ts.separatorKeysCodes"
+            [matChipInputAddOnBlur]="ts.addOnBlur" (matChipInputTokenEnd)="ts.add($event, postForm.get('tags'))" />
         </mat-chip-list>
+        <mat-error *ngIf="getField('tags')?.invalid">
+          {{ getError('tags') }}
+        </mat-error>
       </mat-form-field>
-      <mat-form-field>
-        <mat-label>Category</mat-label>
-        <mat-select formControlName="category" disableOptionCentering panelClass="ng-select">
-          <mat-option value="">-Root</mat-option>
-          <mat-option *ngFor="let c of categories | async" [value]="c.catPath">
-            {{ c.catPath }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field>
-        <textarea matInput #summary formControlName="summary" placeholder="Summary" required></textarea>
-      </mat-form-field>
-      <h2>Content</h2>
-      <mat-form-field appearance="outline">
-        <textarea matInput rows="10" formControlName="content" [(ngModel)]="content" placeholder="Content" required></textarea>
-      </mat-form-field>
-      <h2>Preview</h2>
-      <mat-card>
-        <markdown [data]="content"></markdown>
-      </mat-card>
+      <mat-tab-group animationDuration="0ms">
+        <mat-tab label="Content">
+          <br />
+          <mat-form-field appearance="outline">
+            <textarea matInput rows="10" formControlName="content" placeholder="Content" required></textarea>
+            <mat-error *ngIf="getField('content')?.invalid">
+              {{ getError('content') }}
+            </mat-error>
+          </mat-form-field>
+        </mat-tab>
+        <mat-tab label="Preview">
+          <mat-card>
+            <markdown [data]="postForm.value.content"></markdown>
+          </mat-card>
+        </mat-tab>
+      </mat-tab-group>
       <br />
-      <button mat-raised-button [disabled]="myForm.invalid || myForm.untouched">
-        <div *ngIf="page === 'new'">
-          Add Post
-        </div>
-        <div *ngIf="page === 'edit'">
-          Edit Post
-        </div>
+      <button mat-raised-button [disabled]="postForm.invalid || postForm.untouched">
+        {{ isNewPage ? 'New' : 'Edit' }} Post
       </button>
     </form>
   </mat-card-content>

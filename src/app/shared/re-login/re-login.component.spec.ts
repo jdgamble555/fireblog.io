@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { CategoryFormComponent } from './category-form.component';
+import { ReLoginComponent } from './re-login.component';
 
-describe('CategoryFormComponent', () => {
-  let component: CategoryFormComponent;
-  let fixture: ComponentFixture<CategoryFormComponent>;
+describe('ReLoginComponent', () => {
+  let component: ReLoginComponent;
+  let fixture: ComponentFixture<ReLoginComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ CategoryFormComponent ]
+      declarations: [ ReLoginComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CategoryFormComponent);
+    fixture = TestBed.createComponent(ReLoginComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

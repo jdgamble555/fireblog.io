@@ -6,7 +6,7 @@ import {
   Validators
 } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { matchValues } from 'src/app/shared/form-validators';
+import { matchValidator } from 'src/app/shared/form-validators';
 import { NavService } from '../nav/nav.service';
 import { AuthService } from './auth.service';
 
@@ -24,6 +24,10 @@ export class AuthComponent implements OnInit {
 
   passhide = true;
   confirmhide = true;
+
+  isLogin = false;
+  isRegister = false;
+  isReset = false;
 
   serverMessage!: string;
 
@@ -59,6 +63,15 @@ export class AuthComponent implements OnInit {
 
   ngOnInit() {
 
+    // define types
+    if (this.type === 'login') {
+      this.isLogin = true;
+    } else if (this.type === 'register') {
+      this.isRegister = true;
+    } else if (this.type === 'reset') {
+      this.isReset = true;
+    }
+
     // init form controls
     const passwordControl = this.fb.control('', [
       Validators.pattern('^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$'),
@@ -69,7 +82,7 @@ export class AuthComponent implements OnInit {
 
     const confirmControl = this.fb.control('', [
       Validators.required,
-      matchValues('password')
+      matchValidator('password')
     ]);
 
     this.userForm = this.fb.group({
@@ -91,45 +104,19 @@ export class AuthComponent implements OnInit {
     }
   }
 
-  // get fields
-  get email() {
-    return this.userForm.get('email');
-  }
-  get password() {
-    return this.userForm.get('password');
-  }
-  get confirmPassword() {
-    return this.userForm.get('confirmPassword');
+  // get field
+  getField(field: string) {
+    return this.userForm.get(field);
   }
 
-  // define types
-  get isLogin() {
-    return this.type === 'login';
-  }
-  get isRegister() {
-    return this.type === 'register';
-  }
-  get isReset() {
-    return this.type === 'reset';
-  }
-
-  // errors
-  private errorMessage(field: string) {
+  // get error
+  getError(field: string) {
     const errors = this.validationMessages[field];
     for (const e of Object.keys(errors)) {
       if (this.userForm.get(field)?.hasError(e)) {
         return errors[e];
       }
     }
-  }
-  get passError() {
-    return this.errorMessage('password');
-  }
-  get confirmError() {
-    return this.errorMessage('confirmPassword');
-  }
-  get emailError() {
-    return this.errorMessage('email');
   }
 
   async onSubmit() {
@@ -144,7 +131,7 @@ export class AuthComponent implements OnInit {
         await this.auth.emailSignUp(this.userForm.value)
       }
       if (this.isReset) {
-        await this.auth.resetPassword(this.email?.value)
+        await this.auth.resetPassword(this.getField('email')?.value)
           .then((r: any) => {
             if (r.message) {
               this.serverMessage = r.message;
@@ -155,5 +142,9 @@ export class AuthComponent implements OnInit {
       this.serverMessage = e;
     }
     this.loading = false;
+  }
+
+  async googleLogin() {
+    await this.auth.oAuthLogin('google.com');
   }
 }

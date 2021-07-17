@@ -1,23 +1,11 @@
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { Observable, of } from 'rxjs';
-import { tap, take, map, debounceTime } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { PostService } from '../post.service';
-import { MatChipInputEvent } from '@angular/material/chips';
-import { Router, ActivatedRoute } from '@angular/router';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { TagService, Tag } from '../../tag/tag.service';
-import { AuthService } from 'src/app/auth/auth.service';
-import { ToolsService } from 'src/app/shared/tools.service';
-import { CategoryService } from 'src/app/category/category.service';
-import { BreadCrumbsService } from 'src/app/shared/bread-crumbs/bread-crumbs.service';
-import { SnackbarService } from 'src/app/shared/snack-bar/snack-bar.service';
-import { MyErrorStateMatcher } from 'src/app/shared/form-validators';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { take, tap } from 'rxjs/operators';
 import { ImageUploadService } from 'src/app/shared/image-upload/image-upload.service';
-
-
-//import { ClipboardModule } from '@angular/cdk/clipboard';
+import { Tag, TagService } from 'src/app/tag/tag.service';
+import { Post } from '../post.model';
 
 @Component({
   selector: 'app-post-form',
@@ -26,236 +14,102 @@ import { ImageUploadService } from 'src/app/shared/image-upload/image-upload.ser
 })
 export class PostFormComponent implements OnInit {
 
+  validationMessages: any = {
+    title: {
+      required: 'Title is required.',
+    },
+    content: {
+      required: 'Content is required.',
+    },
+    tags: {
+      required: 'At least one tag is required.',
+    }
+  };
 
-  titleAvailable!: boolean;
-  isNewTitle!: boolean;
-
-  categories!: Observable<any>;
-
-  title = '';
-
-  // old image url to delete
-  oldImage = '';
-  content = '';
-
-  buttonText: string = "Create Post";
-
-  // Form state
-  loading = false;
-  success = false;
-
-  visible = true;
-  selectable = true;
-  removable = true;
-  addOnBlur = true;
-  readonly separatorKeysCodes: number[] = [ENTER, COMMA];
-  _tags: Array<Tag> = [];
-  _tagsBefore: any;
-
-  downloadURL!: Observable<string>;
-
-  myForm!: FormGroup;
-  myDoc!: Observable<any>;
-
-  myPath!: string;
-
-  page!: string;
-
-  id = '';
-
-  matcher = new MyErrorStateMatcher();
+  postForm: FormGroup;
+  isNewPage = true;
 
   constructor(
     private fb: FormBuilder,
-    private auth: AuthService,
-    private afs: AngularFirestore,
-    private postService: PostService,
-    public tagsService: TagService,
     private router: Router,
     private route: ActivatedRoute,
-    public tools: ToolsService,
-    private cs: CategoryService,
-    private sb: SnackbarService,
+    public ts: TagService,
     public is: ImageUploadService,
-    private bcs: BreadCrumbsService
+    private afs: AngularFirestore
   ) {
-    this.categories = this.cs.getCategoriesFriendly();
-  }
 
-  get titleRef() {
-    return this.myForm.get('title');
-  }
-
-  ngOnInit() {
-
-    this.myForm = this.fb.group({
-      title: ['', Validators.required, this.checkUnique.bind(this)],
+    this.postForm = this.fb.group({
+      title: ['', Validators.required],
       content: ['', Validators.required],
-      summary: ['', Validators.required],
-      newTags: [''],
-      category: ['']
+      tags: ['', Validators.required]
     });
 
-    // Routing - New, Edit, or 404
-    let r = this.router.url;
+  }
 
-    // new post
-    if (r.endsWith('/new')) {
-      this.myPath = 'posts';
-      this.page = 'new';
+  ngOnInit(): void {
 
-      // edit a post
-    } else if (r.startsWith('/blog/edit')) {
+    const r = this.router.url;
 
-      this.page = 'edit';
-      this.id = this.route.snapshot.paramMap.get('post')!;
+    if (r.startsWith('/edit')) {
 
-      // post does not exist
-      if (!this.id) {
-        this.router.navigate(['/404']);
+      this.isNewPage = false;
+      const id = this.route.snapshot.paramMap.get('id');
+
+      if (!id) {
+        // no id input
+        this.router.navigate(['/home']);
         return;
       }
-      this.myPath = 'posts' + '/' + this.id;
 
       // fill in the form data from db
-      this.afs.doc(this.myPath)
+      this.afs.doc<Post>('posts' + '/' + id)
         .valueChanges()
         .pipe(
-          tap((post: any) => {
+          tap((post: Post | undefined) => {
             if (post) {
-              this.title = post.title;
-              this.is.imageURL = post.image ? this.oldImage = post.image : '';
-              let tags = post['tags'];
-              this._tagsBefore = tags;
-              tags.forEach((tag: any) => {
-                // Add our tag
-                this._tags = this.tagsService._addTag(this._tags, tag);
+              // add image
+              this.is.imageURL = post.image ? post.image : '';
+
+              // add tags
+              this.ts.patch(post.tags);
+
+              // add values
+              this.postForm.patchValue({
+                title: post.title,
+                content: post.content
               });
-              this.myForm.patchValue(post);
+            } else {
+              // id does not exist
+              this.router.navigate(['/home']);
             }
           }),
           take(1)
         ).subscribe();
     }
-    else {
-      // page not found
-      this.router.navigate(['/404']);
-    }
   }
 
-  isTitleChange() {
-    return this.title !== this.myForm?.get('title')?.value;
+  // get field
+  getField(field: string) {
+    return this.postForm.get(field);
+  }
+
+  // get error
+  getError(field: string) {
+    const errors = this.validationMessages[field];
+    for (const e of Object.keys(errors)) {
+      if (this.postForm.get(field)?.hasError(e)) {
+        return errors[e];
+      }
+    }
   }
 
   async showImage(event: any) {
     this.is.imageURL = await this.is.previewImage(event);
-    this.myForm.markAsTouched();
+    this.postForm.markAsTouched();
   }
 
-  async submitHandler() {
+  onSubmit() {
 
-    this.loading = true;
-
-    // prepare tags for firestore
-    const tags = this.tagsService.initTags(this._tags);
-    const formValue = this.myForm.value;
-
-    //let user: User = await this.auth.user$.pipe(take(1)).toPromise();
-
-    let titleURL = this.bcs.getFriendlyURL(formValue['title']);
-
-    try {
-
-      // create id if new doc
-      if (!this.id) {
-        this.id = this.postService.createId();
-      }
-      if (this.is.isNewImage) {
-        // delete old image
-        this.is.deleteImage(this.oldImage);
-
-        // upload new image
-        await this.is.uploadImage('posts', this.id);
-
-        // reset image
-        this.is.isNewImage = false;
-      }
-      if (this.page === 'new') {
-        const uid = this.auth.uid$;
-        // create a page
-        const data = {
-          userId: uid,
-          userDoc: this.afs.firestore.doc('users/' + uid),
-          content: formValue.content,
-          summary: formValue.summary,
-          image: this.is.imageURL,
-          title: formValue.title,
-          titleURL,
-          tags,
-          category: formValue.category
-        };
-        this.postService.create(data, this.id);
-
-      } else {
-        // edit a page
-        const data = {
-          content: formValue.content,
-          summary: formValue.summary,
-          image: this.is.imageURL,
-          title: formValue.title,
-          titleURL,
-          tags,
-          category: formValue.category
-        };
-        // update post
-        this.postService.update(data, this.id);
-      }
-      this.success = true;
-
-    } catch (err) {
-      console.error(err);
-    }
-    this.loading = false;
-    this.router.navigate(['/blog', 'post', titleURL]);
   }
 
-  // Tag tools
-  addTag(event: MatChipInputEvent) {
-    this._tags = this.tagsService.add(this._tags, event);
-    this.myForm.markAsTouched();
-  }
-
-  removeTag(tag: Tag) {
-    this._tags = this.tagsService.remove(this._tags, tag);
-    this.myForm.markAsTouched();
-  }
-
-  checkUnique(control: AbstractControl): Observable<ValidationErrors | null> {
-
-    // get the field value
-    const field = control.value;
-    const oldField = this.title;
-
-    // don't test if same as old value
-    if (!this.tools.isNewUnique(this.bcs.getFriendlyURL(field), this.bcs.getFriendlyURL(oldField))) {
-      return of(null);
-    }
-
-    return this.tools.checkUnique('posts/title', this.bcs.getFriendlyURL(field))
-      .valueChanges()
-      .pipe(
-        debounceTime(500),
-        take(1),
-        map((doc: any) => {
-          if (doc) {
-            return { 'uniqueField': { value: field } };
-          }
-          return null;
-        })
-      );
-  }
-
-  error(e: string): void {
-    this.sb.showError(e);
-  }
 }

@@ -9,14 +9,10 @@ import { NavService } from './nav.service';
 })
 export class NavComponent implements AfterViewInit {
 
-  title = 'Fireblog.io';
-
   @ViewChild('leftNav', { static: true }) leftNav!: MatSidenav;
   @ViewChild('rightNav', { static: true }) rightNav!: MatSidenav;
 
-  constructor(
-    public nav: NavService
-  ) { }
+  constructor(public nav: NavService) { }
 
   ngAfterViewInit(): void {
     this.nav.setLeftNav(this.leftNav);

@@ -1,6 +1,7 @@
+import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { Injectable } from '@angular/core';
+import { AbstractControl } from '@angular/forms';
 import { MatChipInputEvent } from '@angular/material/chips';
-import { BreadCrumbsService } from '../shared/bread-crumbs/bread-crumbs.service';
 
 export interface Tag {
   name: string;
@@ -15,45 +16,42 @@ export interface Tag {
  */
 export class TagService {
 
-  readonly tagURL = '/blog/tag';
-  readonly postURL = '/blog/post';
+  visible = true;
+  selectable = true;
+  removable = true;
+  addOnBlur = true;
 
-  constructor(private bcs: BreadCrumbsService) {
-  }
+  readonly separatorKeysCodes = [ENTER, COMMA];
+
+  tags: Tag[] = [];
+
+  constructor() { }
 
   /**
    * Change tags from associative array to array for Firestore
    * @param _tags tags
    */
-  initTags(_tags: any) {
-
+  getTags() {
     const tags: string[] = [];
-
-    _tags.forEach((tag: any) => {
+    this.tags.forEach((tag: any) => {
       tags.push(this.tagFormat(tag.name));
     });
-
     return tags;
   }
 
   // return tags with no / or uppercase characters
-  tagFormat(tag: string) {
+  private tagFormat(tag: string) {
     return tag.toLowerCase().replace(/-+/g, ' ').replace(/[^\w ]+/g, '');
   }
 
   /**
-   * Adds a tag to an array
-   * Necessary for MatChips
-   * @param tag - tag
-   * @param tags - tags array
+   * Add tags to tag array
+   * @param tags
    */
-  _addTag(tags: any, tag: any) {
-
-    // Add tag
-    if ((tag || '').trim()) {
-      tags.push({ name: tag.trim() });
+  patch(tags: string[]) {
+    for (let i = 0; i < tags.length; ++i) {
+      this.tags.push({ name: tags[i].trim() });
     }
-    return tags;
   }
 
   /**
@@ -62,17 +60,22 @@ export class TagService {
    * @param event - mat chip input event
    * @param tags - tags array
    */
-  add(tags: any, event: MatChipInputEvent): any {
+  add(event: MatChipInputEvent, form: AbstractControl | null): any {
     // add tag from keyboard
-    const input = event.input;
+    const input = event.chipInput;
     const value = event.value;
-
     // Reset the input value
     if (input) {
-      input.value = '';
+      input.clear();
     }
+    // Add tag
+    if ((value || '').trim()) {
+      this.tags.push({ name: value.trim() });
+    }
+    // set value for validation
+    form?.setValue(this.tags);
 
-    return this._addTag(tags, value);
+    return this.tags;
   }
 
   /**
@@ -81,25 +84,13 @@ export class TagService {
    * @param tag tag
    * @param tags - tags array
    */
-  remove(tags: any, tag: any): any {
+  remove(tag: any): any {
     // remove tag
-    const index = tags.indexOf(tag);
-
+    const index = this.tags.indexOf(tag);
     if (index >= 0) {
-      tags.splice(index, 1);
+      this.tags.splice(index, 1);
     }
-
-    return tags;
-  }
-
-  // return a formatted tags URL
-  getTagsURL(tag: string) {
-    return this.tagURL + '/' + this.bcs.getFriendlyURL(tag);
-  }
-
-  // return a formatted title URL
-  getTitleURL(title: string) {
-    return this.postURL + '/' + this.bcs.getFriendlyURL(title);
+    return this.tags;
   }
 
 }

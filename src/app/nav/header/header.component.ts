@@ -1,6 +1,5 @@
 import { Component, OnInit, EventEmitter, Output, Input } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-import { PostService } from 'src/app/post/post.service';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { map, take, debounceTime } from 'rxjs/operators';
@@ -33,12 +32,10 @@ export class HeaderComponent implements OnInit {
 
   constructor(
     public auth: AuthService,
-    public ps: PostService,
     public ns: NavService,
     private router: Router,
     private fb: FormBuilder,
     private afs: AngularFirestore,
-    //private aff: AngularFireFunctions,
     public bcs: BreadCrumbsService
   ) {
     this.myForm = this.fb.group({
@@ -47,6 +44,7 @@ export class HeaderComponent implements OnInit {
   }
 
   ngOnInit() {
+
     this.router.events.subscribe((event: any) => {
       if (event instanceof NavigationEnd) {
         this.bcs.getDirectories();
