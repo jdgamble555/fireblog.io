@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/firestore';
-import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { take, tap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
+import { AuthService } from 'src/app/auth/auth.service';
 import { ImageUploadService } from 'src/app/shared/image-upload/image-upload.service';
-import { Tag, TagService } from 'src/app/tag/tag.service';
+import { TagService } from 'src/app/tag/tag.service';
 import { Post } from '../post.model';
+import { PostService } from '../post.service';
 
 @Component({
   selector: 'app-post-form',
@@ -23,11 +24,13 @@ export class PostFormComponent implements OnInit {
     },
     tags: {
       required: 'At least one tag is required.',
+      min: 'You cannot have more than 5 tags.'
     }
   };
 
   postForm: FormGroup;
   isNewPage = true;
+  id!: string;
 
   constructor(
     private fb: FormBuilder,
@@ -35,13 +38,14 @@ export class PostFormComponent implements OnInit {
     private route: ActivatedRoute,
     public ts: TagService,
     public is: ImageUploadService,
-    private afs: AngularFirestore
+    private auth: AuthService,
+    private ps: PostService
   ) {
 
     this.postForm = this.fb.group({
       title: ['', Validators.required],
       content: ['', Validators.required],
-      tags: ['', Validators.required]
+      tags: this.fb.array([], [ts.tagValidatorMin(5), ts.tagValidatorRequired])
     });
 
   }
@@ -61,31 +65,39 @@ export class PostFormComponent implements OnInit {
         return;
       }
 
+      // set id
+      this.id = id;
+
       // fill in the form data from db
-      this.afs.doc<Post>('posts' + '/' + id)
-        .valueChanges()
+      this.ps.getPostById(id)
         .pipe(
           tap((post: Post | undefined) => {
             if (post) {
               // add image
-              this.is.imageURL = post.image ? post.image : '';
+              this.is.image = post.image;
 
               // add tags
-              this.ts.patch(post.tags);
+              this.ts.addTags(post.tags, this.tagsField);
 
               // add values
               this.postForm.patchValue({
                 title: post.title,
-                content: post.content
+                content: post.content,
+                //tags: post.tags
               });
             } else {
               // id does not exist
               this.router.navigate(['/home']);
             }
-          }),
-          take(1)
+          })
         ).subscribe();
     }
+
+  }
+
+  // get tags field as form array
+  get tagsField(): FormArray {
+    return this.getField('tags') as FormArray;
   }
 
   // get field
@@ -103,13 +115,48 @@ export class PostFormComponent implements OnInit {
     }
   }
 
-  async showImage(event: any) {
-    this.is.imageURL = await this.is.previewImage(event);
-    this.postForm.markAsTouched();
+  minutesToRead(data: string): string {
+    const wordCount = data.trim().split(/\s+/g).length;
+    return (wordCount / 100 + 1).toFixed(0);
   }
 
-  onSubmit() {
+  async onSubmit() {
 
+    // prepare variables for firestore
+    const formValue = this.postForm.value;
+    const uid = (await this.auth.getUser()).uid;
+    const slug = this.ts.slugify(formValue.title);
+
+    try {
+
+      // get doc id
+      if (!this.id) {
+        this.id = this.ps.getId();
+      }
+
+      // upload image
+      const imageURL = await this.is.setImage('posts', this.id);
+
+      console.log(imageURL);
+
+      let data: Post = {
+        authorId: uid,
+        tags: this.ts.getTags(this.tagsField),
+        content: formValue.content,
+        title: formValue.title,
+        image: imageURL,
+        minutes: this.minutesToRead(formValue.content),
+        slug
+      };
+
+      console.log('1')
+      await this.ps.setPost(data, this.id);
+      console.log('3')
+
+    } catch (e: any) {
+      console.error(e);
+    }
+    this.router.navigate(['/post', this.id, slug]);
   }
 
 }

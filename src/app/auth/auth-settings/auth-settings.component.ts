@@ -266,14 +266,14 @@ export class AuthSettingsComponent implements OnInit {
     const url = user?.photoURL || '';
 
     // delete the image from url
-    return this.is.deleteImage(url)
+    /*return this.is.deleteImage(url)
       .catch((e: any) => {
         // ignore invalid file type error
         if (e.code === 'storage/invalid-argument') {
           return;
         }
       })
-      .then(() => this.auth.updateProfile({ photoURL: null }));
+      .then(() => this.auth.updateProfile({ photoURL: null }));*/
   }
   /**
    * Upload profile image
@@ -293,13 +293,13 @@ export class AuthSettingsComponent implements OnInit {
     this.deleteImage()
       .then(() =>
         // upload new image and save it to profile image
-        this.is.uploadImage('profile_images', uid, file)
+        this.is.setImage('profile_images', uid, file)
           .catch((e: any) => {
             if (e.code === 'image/file-type') {
               this.sb.showError(this.messages.selectImage);
             }
           })
-          .then(() => this.auth.updateProfile({ photoURL: this.is.imageURL })))
+          .then(() => this.auth.updateProfile({ photoURL: this.is.image })))
       .catch((e: any) => this.sb.showError(e));
   }
 

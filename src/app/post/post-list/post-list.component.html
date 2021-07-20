@@ -1,11 +1,12 @@
 <ng-container *ngFor="let post of posts | async">
   <mat-card class="ng-card">
-    <h1 [routerLink]="" class="ng-post-title">
-      <mat-icon class="ng-icon-folder">library_books</mat-icon>{{ post.title }}
+    <h1 [routerLink]="['/post', post.id, post.slug]" class="ng-post-title">
+      <mat-icon class="ng-icon">library_books</mat-icon>{{ post.title }}
     </h1>
-    <h6><i>{{ post.count }} min read</i></h6>
+    <h6><i>{{ post.minutes }} min read</i></h6>
     <div class="ng-author ng-link" [routerLink]="['/user', post.authorId]">
-      <img class="avatar" src="{{ post.author?.photoURL }}" />
+      <img *ngIf="post.author?.photoURL" class="avatar" src="{{ post.author?.photoURL }}" />
+      <mat-icon class="ng-photo-icon">account_circle</mat-icon>
       <p class="ng-light"><small><b>{{ post.author?.displayName }}</b>
           <ng-container *ngIf="post.createdAt"> on
             {{ post.createdAt.toDate() | date: 'EEEE, MMMM d, yyyy' }}</ng-container>
@@ -21,9 +22,6 @@
           <div>
             <button mat-icon-button [routerLink]="['/edit', post.id]">
               <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-icon-button>
-              <mat-icon>delete</mat-icon>
             </button>
           </div>
         </div>

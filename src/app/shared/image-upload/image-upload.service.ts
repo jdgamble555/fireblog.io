@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFireStorage } from '@angular/fire/storage';
+import { AbstractControl } from '@angular/forms';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -8,53 +9,116 @@ import { Observable } from 'rxjs';
 export class ImageUploadService {
 
   uploadPercent: Observable<number> | any = null;
-
   showPercent = false;
-  isNewImage = false;
 
-  fileEvent!: any;
-  image!: any;
+  private fileTarget!: HTMLInputElement;
+  private oldImage!: string;
+  private newImage!: string | undefined;
 
-  imageURL = '';
+  constructor(private storage: AngularFireStorage) { }
 
-  constructor(
-    private storage: AngularFireStorage
-  ) { }
+  /**
+   * See if necessary to upload new image
+   * @returns - true / false
+   */
+  get isNewImage(): boolean {
+    return this.oldImage !== this.newImage;
+  }
 
-  async previewImage(event: any): Promise<any> {
+  /**
+   * Setter - Image URL
+   */
+  set image(url: string) {
+    if (url !== this.newImage) {
+      this.oldImage = url;
+    }
+  }
 
-    this.isNewImage = true;
+  /**
+   * Getter - Image URL
+   */
+  get image() {
+    return this.newImage || this.oldImage;
+  }
+
+  /**
+   * Gets an image blob before upload
+   * @param event - file event
+   * @returns - string blob of image
+   */
+  private async previewImage(event: Event): Promise<string> {
 
     // add event to image service
-    this.fileEvent = event;
+    const target = event.target as HTMLInputElement;
 
-    // view file before upload
-    const file = event.target.files[0];
+    if (target.files?.length) {
+      // view file before upload
+      const file = target.files[0];
+      this.fileTarget = target;
 
-    // return image preview
-    return await new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const image = reader.result as string;
-        resolve(image);
-      };
-      reader.readAsDataURL(file);
-    });
+      // return image preview
+      return await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const image = reader.result as string;
+          resolve(image);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+    return Promise.resolve('');
   }
 
-  async deleteImage(url: string): Promise<void> {
-
-    // check 'storage/invalid-argument' error
-    return this.storage.storage.refFromURL(url).delete();
+  /**
+   * Returns Preview Image to display
+   * @param event - file event
+   * @param form - form reference
+   */
+  async showImage(event: Event, form: AbstractControl | null) {
+    this.newImage = await this.previewImage(event);
+    form?.markAsTouched();
   }
 
-  async uploadImage(folder: string, name: string, file?: File | null): Promise<void> {
+  /**
+   * Delete Image from Storage Bucket
+   * @param url - url of bucket item to delete
+   * @returns - a resolved promise that image was deleted
+   */
+  private async deleteImage(url: string): Promise<void> {
+    return await this.storage.storage.refFromURL(url).delete();
+  }
+
+  async setImage(folder: string, name: string, file?: File | null): Promise<string> {
+
+    // don't do anything if no image change
+    if (this.newImage) {
+
+      // upload image
+      const imageURL = await this.uploadImage(folder, name, file);
+
+      // delete old image
+      if (this.isNewImage) {
+        await this.deleteImage(this.oldImage);
+      }
+      this.oldImage = imageURL;
+      this.newImage = undefined;
+      return imageURL;
+    }
+    return Promise.resolve('');
+  }
+
+  /**
+   * Uploads Image to Storage Bucket
+   * @param folder - folder containing image
+   * @param name - file name
+   * @param file - file blob
+   */
+  private async uploadImage(folder: string, name: string, file?: File | null): Promise<string> {
 
     // get file and folder name
     if (!file) {
-      file = this.fileEvent.target.files[0];
-      if (!this.fileEvent) {
-        return;
+      if (this.fileTarget.files?.length) {
+        file = this.fileTarget.files[0];
       }
     }
     const ext = file!.name.split('.').pop();
@@ -69,11 +133,10 @@ export class ImageUploadService {
       const ref = this.storage.ref(path);
       this.uploadPercent = task.percentageChanges();
 
-      // upload image, save url
+      // upload image, return url
       await task;
-      this.imageURL = await ref.getDownloadURL().toPromise();
       this.showPercent = false;
+      return await ref.getDownloadURL().toPromise();
     }
   }
 }
-

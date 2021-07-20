@@ -5,12 +5,13 @@
     <form [formGroup]="postForm" (ngSubmit)="onSubmit()">
       <button type="button" mat-raised-button (click)="fileInput.click()">Upload Image</button>
       <p></p>
-      <input hidden type="file" name="file" id="file" accept="image/*" #fileInput (change)="showImage($event)">
+      <input hidden type="file" name="file" id="file" accept="image/*" #fileInput
+        (change)="is.showImage($event, postForm)">
       <div [hidden]="!is.showPercent">
         <mat-progress-bar mode="determinate" value="{{ is.uploadPercent | async }}"></mat-progress-bar>
       </div>
-      <div class="ng-image-box" [hidden]="!is.imageURL">
-        <img class="ng-image" [src]="is.imageURL || '//:0'">
+      <div class="ng-image-box" [hidden]="!is.image">
+        <img class="ng-image" [src]="is.image || '//:0'">
       </div>
       <mat-form-field>
         <input matInput id="title" placeholder="Title" formControlName="title">
@@ -19,14 +20,15 @@
         </mat-error>
       </mat-form-field>
       <mat-form-field class="chip-list">
-        <mat-chip-list #chipList aria-label="Tag selection" formControlName="tags">
-          <mat-chip *ngFor="let tag of ts.tags" [selectable]="ts.selectable" [removable]="ts.removable"
-            (removed)="ts.remove(tag)">
-            {{ tag.name }}
+        <mat-chip-list #chipList aria-label="Tag selection">
+          <mat-chip *ngFor="let tag of tagsField.controls; let i = index" [selectable]="ts.selectable"
+            [removable]="ts.removable" (removed)="ts.remove(i, tagsField)">
+            {{ tag.value }}
             <mat-icon matChipRemove *ngIf="ts.removable">cancel</mat-icon>
           </mat-chip>
           <input placeholder="Tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="ts.separatorKeysCodes"
-            [matChipInputAddOnBlur]="ts.addOnBlur" (matChipInputTokenEnd)="ts.add($event, postForm.get('tags'))" />
+            [matChipInputAddOnBlur]="ts.addOnBlur" (matChipInputTokenEnd)="ts.add($event, tagsField, chipList)"
+            formArrayName="tags" />
         </mat-chip-list>
         <mat-error *ngIf="getField('tags')?.invalid">
           {{ getError('tags') }}
