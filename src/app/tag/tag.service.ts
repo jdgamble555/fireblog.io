@@ -63,7 +63,7 @@ export class TagService {
    * @param event - mat chip input event
    * @param tags - tags array
    */
-  add(event: MatChipInputEvent, control: FormArray, chipList: MatChipList): void {
+  add(event: MatChipInputEvent, control: FormArray): void {
     // add tag from keyboard
     const input = event.chipInput;
     const value = event.value;
@@ -83,7 +83,7 @@ export class TagService {
     }
 
     // Reset chipList Validation Bug Fix
-    chipList.errorState = control.invalid;
+    //chipList.errorState = control.invalid;
   }
 
   /**

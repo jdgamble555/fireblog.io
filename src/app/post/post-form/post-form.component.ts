@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatChipList } from '@angular/material/chips';
 import { ActivatedRoute, Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/auth/auth.service';
@@ -14,6 +15,8 @@ import { PostService } from '../post.service';
   styleUrls: ['./post-form.component.scss']
 })
 export class PostFormComponent implements OnInit {
+
+  @ViewChild('chipList') chipList!: MatChipList;
 
   validationMessages: any = {
     title: {
@@ -92,6 +95,11 @@ export class PostFormComponent implements OnInit {
           })
         ).subscribe();
     }
+
+    // tag validator
+    this.postForm.statusChanges.subscribe((status: any) => {
+      this.chipList.errorState = status === 'INVALID';
+    });
 
   }
 

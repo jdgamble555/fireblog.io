@@ -27,7 +27,7 @@
             <mat-icon matChipRemove *ngIf="ts.removable">cancel</mat-icon>
           </mat-chip>
           <input placeholder="Tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="ts.separatorKeysCodes"
-            [matChipInputAddOnBlur]="ts.addOnBlur" (matChipInputTokenEnd)="ts.add($event, tagsField, chipList)"
+            [matChipInputAddOnBlur]="ts.addOnBlur" (matChipInputTokenEnd)="ts.add($event, tagsField)"
             formArrayName="tags" />
         </mat-chip-list>
         <mat-error *ngIf="getField('tags')?.invalid">
