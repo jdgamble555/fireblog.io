@@ -43,6 +43,13 @@ export class TagService {
    * @param control
    */
   addTags(tags: string[], control: FormArray): void {
+
+    // remove all tags
+    for (let i = 0; i < tags.length; ++i) {
+      this.remove(i, control);
+    }
+
+    // add new tags
     for (let i = 0; i < tags.length; ++i) {
       this.addTag(this.tagFormat(tags[i]), control);
     }

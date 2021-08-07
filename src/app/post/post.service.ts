@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { AngularFirestore, DocumentReference } from '@angular/fire/firestore';
-import { combineLatest, EMPTY, Observable } from 'rxjs';
-import { map, switchMap, take } from 'rxjs/operators';
+import { AngularFirestore } from '@angular/fire/firestore';
+import { combineLatest, Observable } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { User } from '../auth/user.model';
 import { Post } from './post.model';
+import firebase from 'firebase/app';
 
 @Injectable({
   providedIn: 'root'
@@ -66,7 +67,16 @@ export class PostService {
    * @returns void
    */
   async setPost(data: Post, id = this.getId()): Promise<void> {
-    console.log('2');
     return await this.afs.collection<Post>('posts').doc(id).set(data, { merge: true });
+  }
+  /**
+   * Delete's an image from post doc
+   * @param id doc id
+   * @returns
+   */
+  async deleteImage(id: string) {
+    return await this.afs.doc<Post>(`posts/${id}`).update({
+      image: firebase.firestore.FieldValue.delete()
+    });
   }
 }

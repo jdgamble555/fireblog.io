@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatChipList } from '@angular/material/chips';
 import { ActivatedRoute, Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
@@ -74,10 +74,10 @@ export class PostFormComponent implements OnInit {
       // fill in the form data from db
       this.ps.getPostById(id)
         .pipe(
-          tap((post: Post | undefined) => {
+          tap((post: Post) => {
             if (post) {
               // add image
-              this.is.image = post.image;
+              this.is.image = post.image || '';
 
               // add tags
               this.ts.addTags(post.tags, this.tagsField);
@@ -85,8 +85,7 @@ export class PostFormComponent implements OnInit {
               // add values
               this.postForm.patchValue({
                 title: post.title,
-                content: post.content,
-                //tags: post.tags
+                content: post.content
               });
             } else {
               // id does not exist
@@ -128,6 +127,34 @@ export class PostFormComponent implements OnInit {
     return (wordCount / 100 + 1).toFixed(0);
   }
 
+  async deleteImage() {
+
+    // delete in firestore
+    this.ps.deleteImage(this.id);
+
+    // delete image
+    this.is.removeImage(this.is.image);
+
+  }
+
+  async addImage(event: Event) {
+
+    // preview image
+    await this.is.showImage(event);
+
+    // get doc id
+    if (!this.id) {
+      this.id = this.ps.getId();
+    }
+
+    // upload image
+    const image = await this.is.setImage('posts', this.id);
+
+    // save url to db
+    await this.ps.setPost({ image }, this.id).catch((e: any) => console.log(e));
+
+  }
+
   async onSubmit() {
 
     // prepare variables for firestore
@@ -137,29 +164,16 @@ export class PostFormComponent implements OnInit {
 
     try {
 
-      // get doc id
-      if (!this.id) {
-        this.id = this.ps.getId();
-      }
-
-      // upload image
-      const imageURL = await this.is.setImage('posts', this.id);
-
-      console.log(imageURL);
-
       let data: Post = {
         authorId: uid,
         tags: this.ts.getTags(this.tagsField),
         content: formValue.content,
         title: formValue.title,
-        image: imageURL,
         minutes: this.minutesToRead(formValue.content),
         slug
       };
 
-      console.log('1')
-      await this.ps.setPost(data, this.id);
-      console.log('3')
+      await this.ps.setPost(data, this.id).catch((e: any) => console.log(e));
 
     } catch (e: any) {
       console.error(e);

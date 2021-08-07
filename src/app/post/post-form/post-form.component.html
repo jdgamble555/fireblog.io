@@ -3,14 +3,17 @@
   <br />
   <mat-card-content>
     <form [formGroup]="postForm" (ngSubmit)="onSubmit()">
-      <button type="button" mat-raised-button (click)="fileInput.click()">Upload Image</button>
+      <button class="ng-button-space" type="button" mat-raised-button (click)="fileInput.click()">{{ is.image ? 'Change'
+        : 'Upload' }}
+        Image</button>
+      <button class="ng-button-space" *ngIf="is.image" type="button" mat-raised-button (click)="deleteImage()">Delete
+        Image</button>
       <p></p>
-      <input hidden type="file" name="file" id="file" accept="image/*" #fileInput
-        (change)="is.showImage($event, postForm)">
+      <input hidden type="file" name="file" id="file" accept="image/*" #fileInput (change)="addImage($event)">
       <div [hidden]="!is.showPercent">
         <mat-progress-bar mode="determinate" value="{{ is.uploadPercent | async }}"></mat-progress-bar>
       </div>
-      <div class="ng-image-box" [hidden]="!is.image">
+      <div class="ng-image-box" *ngIf="is.image">
         <img class="ng-image" [src]="is.image || '//:0'">
       </div>
       <mat-form-field>
@@ -37,12 +40,14 @@
       <mat-tab-group animationDuration="0ms">
         <mat-tab label="Content">
           <br />
+          <h5><a href="https://www.markdownguide.org/basic-syntax/" target="_new">Markdown Guide</a></h5>
           <mat-form-field appearance="outline">
             <textarea matInput rows="10" formControlName="content" placeholder="Content" required></textarea>
             <mat-error *ngIf="getField('content')?.invalid">
               {{ getError('content') }}
             </mat-error>
           </mat-form-field>
+          <b>Upload Images</b>
         </mat-tab>
         <mat-tab label="Preview">
           <mat-card>

@@ -13,7 +13,7 @@ export class ImageUploadService {
 
   private fileTarget!: HTMLInputElement;
   private oldImage!: string;
-  private newImage!: string | undefined;
+  private newImage!: string;
 
   constructor(private storage: AngularFireStorage) { }
 
@@ -22,7 +22,7 @@ export class ImageUploadService {
    * @returns - true / false
    */
   get isNewImage(): boolean {
-    return this.oldImage !== this.newImage;
+    return this.newImage !== undefined;
   }
 
   /**
@@ -37,7 +37,7 @@ export class ImageUploadService {
   /**
    * Getter - Image URL
    */
-  get image() {
+  get image(): string {
     return this.newImage || this.oldImage;
   }
 
@@ -66,7 +66,7 @@ export class ImageUploadService {
         reader.readAsDataURL(file);
       });
     }
-    return Promise.resolve('');
+    return '';
   }
 
   /**
@@ -74,9 +74,8 @@ export class ImageUploadService {
    * @param event - file event
    * @param form - form reference
    */
-  async showImage(event: Event, form: AbstractControl | null) {
+  async showImage(event: Event) {
     this.newImage = await this.previewImage(event);
-    form?.markAsTouched();
   }
 
   /**
@@ -84,27 +83,45 @@ export class ImageUploadService {
    * @param url - url of bucket item to delete
    * @returns - a resolved promise that image was deleted
    */
-  private async deleteImage(url: string): Promise<void> {
-    return await this.storage.storage.refFromURL(url).delete();
+  async deleteImage(url: string): Promise<void> {
+
+    try {
+      // delete image
+      return await this.storage.storage.refFromURL(url).delete();
+    } catch (e: any) {
+      if (e.code === 'storage/invalid-argument') {
+        // don't delete anything if no previous image
+        return;
+      }
+    }
+    return;
+  }
+
+  async removeImage(url: string): Promise<void> {
+
+    this.oldImage = '';
+    this.newImage = '';
+
+    return await this.deleteImage(url);
+
   }
 
   async setImage(folder: string, name: string, file?: File | null): Promise<string> {
 
     // don't do anything if no image change
-    if (this.newImage) {
+    if (this.isNewImage) {
+
+      // delete old image
+      await this.deleteImage(this.oldImage);
 
       // upload image
       const imageURL = await this.uploadImage(folder, name, file);
 
-      // delete old image
-      if (this.isNewImage) {
-        await this.deleteImage(this.oldImage);
-      }
       this.oldImage = imageURL;
-      this.newImage = undefined;
+      this.newImage = '';
       return imageURL;
     }
-    return Promise.resolve('');
+    return this.oldImage;
   }
 
   /**
@@ -113,7 +130,7 @@ export class ImageUploadService {
    * @param name - file name
    * @param file - file blob
    */
-  private async uploadImage(folder: string, name: string, file?: File | null): Promise<string> {
+  async uploadImage(folder: string, name: string, file?: File | null): Promise<string> {
 
     // get file and folder name
     if (!file) {
@@ -134,7 +151,7 @@ export class ImageUploadService {
       this.uploadPercent = task.percentageChanges();
 
       // upload image, return url
-      await task;
+      await task.catch((e: any) => console.log(e));
       this.showPercent = false;
       return await ref.getDownloadURL().toPromise();
     }
