@@ -8,7 +8,6 @@ import { FirestoreService } from './firestore.service';
   declarations: [],
   imports: [
     CoreModule
-  ],
-  providers: [FirestoreService]
+  ]
 })
 export class FirestoreModule { }

@@ -68,11 +68,12 @@
       </a>
       <meta itemprop="position" content="1" />
     </li>
-    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem" *ngFor="let c of bcs.crumbs">
-      <a itemprop="item" mat-button [routerLink]="c.link">
+    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"
+      *ngFor="let c of ns.directories; index as i">
+      <a itemprop="item" mat-button [routerLink]="c.location ? c.location : []">
         <span itemprop="name">{{ c.name }}</span>
       </a>
-      <meta itemprop="position" content="{{ c.position }}" />
+      <meta itemprop="position" content="{{ i + 2 }}" />
     </li>
   </ol>
 </mat-toolbar>

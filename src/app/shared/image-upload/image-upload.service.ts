@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { AngularFireStorage } from '@angular/fire/storage';
-import { AbstractControl } from '@angular/forms';
 import { Observable } from 'rxjs';
+import { ImageUploadModule } from './image-upload.module';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: ImageUploadModule
 })
 export class ImageUploadService {
 
@@ -12,41 +12,15 @@ export class ImageUploadService {
   showPercent = false;
 
   private fileTarget!: HTMLInputElement;
-  private oldImage!: string;
-  private newImage!: string;
 
   constructor(private storage: AngularFireStorage) { }
-
-  /**
-   * See if necessary to upload new image
-   * @returns - true / false
-   */
-  get isNewImage(): boolean {
-    return this.newImage !== undefined;
-  }
-
-  /**
-   * Setter - Image URL
-   */
-  set image(url: string) {
-    if (url !== this.newImage) {
-      this.oldImage = url;
-    }
-  }
-
-  /**
-   * Getter - Image URL
-   */
-  get image(): string {
-    return this.newImage || this.oldImage;
-  }
 
   /**
    * Gets an image blob before upload
    * @param event - file event
    * @returns - string blob of image
    */
-  private async previewImage(event: Event): Promise<string> {
+  async previewImage(event: Event): Promise<string> {
 
     // add event to image service
     const target = event.target as HTMLInputElement;
@@ -70,15 +44,6 @@ export class ImageUploadService {
   }
 
   /**
-   * Returns Preview Image to display
-   * @param event - file event
-   * @param form - form reference
-   */
-  async showImage(event: Event) {
-    this.newImage = await this.previewImage(event);
-  }
-
-  /**
    * Delete Image from Storage Bucket
    * @param url - url of bucket item to delete
    * @returns - a resolved promise that image was deleted
@@ -95,33 +60,6 @@ export class ImageUploadService {
       }
     }
     return;
-  }
-
-  async removeImage(url: string): Promise<void> {
-
-    this.oldImage = '';
-    this.newImage = '';
-
-    return await this.deleteImage(url);
-
-  }
-
-  async setImage(folder: string, name: string, file?: File | null): Promise<string> {
-
-    // don't do anything if no image change
-    if (this.isNewImage) {
-
-      // delete old image
-      await this.deleteImage(this.oldImage);
-
-      // upload image
-      const imageURL = await this.uploadImage(folder, name, file);
-
-      this.oldImage = imageURL;
-      this.newImage = '';
-      return imageURL;
-    }
-    return this.oldImage;
   }
 
   /**

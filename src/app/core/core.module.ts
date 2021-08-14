@@ -27,7 +27,6 @@ const components = [
     ...modules,
     ...components
   ],
-  providers: [AuthService],
   declarations: [...components]
 })
 export class CoreModule { }

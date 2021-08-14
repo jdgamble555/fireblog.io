@@ -448,7 +448,7 @@ mat-form-field.mat-form-field {
 
 .ng-search .mat-form-field-flex {
   margin-top: 15px !important;
-  transform: scale(0.70);
+  transform: scale(0.7);
 }
 
 .ng-search .mat-form-field-outline {
@@ -469,7 +469,8 @@ mat-form-field.mat-form-field {
 }
 
 // hover border
-.ng-search .mat-form-field-outline-start, .ng-search .mat-form-field-outline-end {
+.ng-search .mat-form-field-outline-start,
+.ng-search .mat-form-field-outline-end {
   border: none !important;
 }
 
@@ -542,4 +543,15 @@ markdown a:hover {
 .mat-expansion-panel-header-description {
   justify-content: space-between;
   align-items: center;
+}
+
+.img-preview > .mat-menu-content {
+  padding-bottom: 0px !important;
+  padding-top: 0px !important;
+  margin-bottom: -8px;
+  max-width: none !important;
+}
+
+.img-preview {
+  overflow-y: hidden !important;
 }

@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { Router } from '@angular/router';
+import { BehaviorSubject } from 'rxjs';
+
+interface Link {
+  name: string;
+  location: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +18,30 @@ export class NavService {
   private leftNav!: MatSidenav;
   private rightNav!: MatSidenav;
 
-  constructor(private router: Router) { }
+  directories: Link[];
+
+  constructor(private router: Router) {
+    this.directories = [];
+  }
+
+  // set bread crumb
+  setBC(name: string, location?: string) {
+    this.directories = [];
+    this.addBC(name, location);
+  }
+
+  // add bread crumb
+  addBC(name: string, location?: string) {
+
+    if (!location) {
+      location = '';
+    }
+    const data: Link = {
+      name,
+      location
+    };
+    this.directories.push(data);
+  }
 
   setLeftNav(leftNav: MatSidenav): void {
     this.leftNav = leftNav;

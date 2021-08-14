@@ -27,7 +27,6 @@ const modules = [
     ...components,
     BoldTermPipe
   ],
-  providers: [NavService],
   imports: [...modules],
   exports: [
     ...components,

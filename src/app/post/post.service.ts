@@ -66,8 +66,20 @@ export class PostService {
    * @param data doc data
    * @returns void
    */
-  async setPost(data: Post, id = this.getId()): Promise<void> {
-    return await this.afs.collection<Post>('posts').doc(id).set(data, { merge: true });
+  async setPost(data: Post, id?: string): Promise<void> {
+    if (data.id || id) {
+      if (data.id) {
+        id = data.id;
+        delete data.id;
+      }
+    } else {
+      id = this.getId();
+    }
+    try {
+      return await this.afs.collection<Post>('posts').doc(id).set(data, { merge: true });
+    } catch (e) {
+      console.error(e);
+    }
   }
   /**
    * Delete's an image from post doc
@@ -75,8 +87,34 @@ export class PostService {
    * @returns
    */
   async deleteImage(id: string) {
-    return await this.afs.doc<Post>(`posts/${id}`).update({
-      image: firebase.firestore.FieldValue.delete()
-    });
+    try {
+      return await this.afs.doc<Post>(`posts/${id}`).update({
+        image: firebase.firestore.FieldValue.delete()
+      });
+    } catch (e) {
+      console.error(e);
+    }
   }
+
+  async addPostImage(id: string, val: string) {
+    try {
+      return await this.afs.doc<Post>(`posts/${id}`).update({
+        imageUploads: firebase.firestore.FieldValue.arrayUnion(val)
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async deletePostImage(id: string, val: string) {
+    try {
+      return await this.afs.doc<Post>(`posts/${id}`).update({
+        imageUploads: firebase.firestore.FieldValue.arrayRemove(val)
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+
 }

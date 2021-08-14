@@ -293,13 +293,13 @@ export class AuthSettingsComponent implements OnInit {
     this.deleteImage()
       .then(() =>
         // upload new image and save it to profile image
-        this.is.setImage('profile_images', uid, file)
+        this.is.uploadImage('profile_images', uid, file)
           .catch((e: any) => {
             if (e.code === 'image/file-type') {
               this.sb.showError(this.messages.selectImage);
             }
           })
-          .then(() => this.auth.updateProfile({ photoURL: this.is.image })))
+          .then((image: string | void) => this.auth.updateProfile({ photoURL: image })))
       .catch((e: any) => this.sb.showError(e));
   }
 

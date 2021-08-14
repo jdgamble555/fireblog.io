@@ -1,10 +1,13 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatChipList } from '@angular/material/chips';
 import { ActivatedRoute, Router } from '@angular/router';
-import { tap } from 'rxjs/operators';
+import { take, tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/auth/auth.service';
+import { NavService } from 'src/app/nav/nav.service';
 import { ImageUploadService } from 'src/app/shared/image-upload/image-upload.service';
+import { SeoService } from 'src/app/shared/seo/seo.service';
+import { SnackbarService } from 'src/app/shared/snack-bar/snack-bar.service';
 import { TagService } from 'src/app/tag/tag.service';
 import { Post } from '../post.model';
 import { PostService } from '../post.service';
@@ -35,6 +38,14 @@ export class PostFormComponent implements OnInit {
   isNewPage = true;
   id!: string;
 
+  image!: string;
+
+  imageUploads!: string[];
+
+  imageLoading = false;
+
+  title!: string;
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -42,7 +53,10 @@ export class PostFormComponent implements OnInit {
     public ts: TagService,
     public is: ImageUploadService,
     private auth: AuthService,
-    private ps: PostService
+    private ps: PostService,
+    public sb: SnackbarService,
+    private ns: NavService,
+    private seo: SeoService
   ) {
 
     this.postForm = this.fb.group({
@@ -77,10 +91,13 @@ export class PostFormComponent implements OnInit {
           tap((post: Post) => {
             if (post) {
               // add image
-              this.is.image = post.image || '';
+              this.image = post.image || '';
 
               // add tags
               this.ts.addTags(post.tags, this.tagsField);
+
+              // image uploads
+              this.imageUploads = post.imageUploads;
 
               // add values
               this.postForm.patchValue({
@@ -91,7 +108,8 @@ export class PostFormComponent implements OnInit {
               // id does not exist
               this.router.navigate(['/home']);
             }
-          })
+          }),
+          take(1)
         ).subscribe();
     }
 
@@ -99,6 +117,14 @@ export class PostFormComponent implements OnInit {
     this.postForm.statusChanges.subscribe((status: any) => {
       this.chipList.errorState = status === 'INVALID';
     });
+
+    // add title
+    this.title = (this.isNewPage ? 'New' : 'Edit') + ' Post';
+
+    this.seo.generateTags({ title: this.ns.title + ': ' + this.title });
+
+    // add page bread crumb
+    this.ns.setBC(this.title);
 
   }
 
@@ -129,29 +155,77 @@ export class PostFormComponent implements OnInit {
 
   async deleteImage() {
 
-    // delete in firestore
+    // delete image in db
     this.ps.deleteImage(this.id);
 
-    // delete image
-    this.is.removeImage(this.is.image);
+    // delete image file
+    this.is.deleteImage(this.image);
 
   }
 
   async addImage(event: Event) {
 
     // preview image
-    await this.is.showImage(event);
-
-    // get doc id
-    if (!this.id) {
-      this.id = this.ps.getId();
-    }
+    this.image = await this.is.previewImage(event);
 
     // upload image
-    const image = await this.is.setImage('posts', this.id);
+    const image = await this.is.uploadImage('posts', this.id);
+
+    const data = {
+      id: this.id,
+      image
+    };
 
     // save url to db
-    await this.ps.setPost({ image }, this.id).catch((e: any) => console.log(e));
+    await this.ps.setPost(data);
+  }
+
+  async addPostImage(event: Event) {
+
+    // add event to image service
+    const target = event.target as HTMLInputElement;
+
+    if (target.files?.length) {
+
+      // view file before upload
+      const file = target.files[0];
+
+      // generate image id
+      const randId = this.ps.getId();
+
+      // upload image with spinner
+      this.imageLoading = true;
+      const image = await this.is.uploadImage('posts', randId, file);
+      this.imageLoading = false;
+
+      // save url to db
+      await this.ps.addPostImage(this.id, image);
+
+      // add url to imageUploads array
+      this.imageUploads.push(image);
+
+      // show msg
+      this.sb.showMsg('Image Added!', 500);
+
+    }
+  }
+
+  async deletePostImage(val: string) {
+
+    // delete image in db
+    await this.ps.deletePostImage(this.id, val);
+
+    // delete image file
+    await this.is.deleteImage(val);
+
+    // delete from ImageUploads array
+    const index = this.imageUploads.indexOf(val, 0);
+    if (index > -1) {
+      this.imageUploads.splice(index, 1);
+    }
+
+    // show msg
+    this.sb.showMsg('Image Removed!', 500);
 
   }
 
@@ -162,22 +236,19 @@ export class PostFormComponent implements OnInit {
     const uid = (await this.auth.getUser()).uid;
     const slug = this.ts.slugify(formValue.title);
 
-    try {
+    const data: Post = {
+      id: this.id,
+      authorId: uid,
+      tags: this.ts.getTags(this.tagsField),
+      content: formValue.content,
+      title: formValue.title,
+      minutes: this.minutesToRead(formValue.content),
+      slug
+    };
 
-      let data: Post = {
-        authorId: uid,
-        tags: this.ts.getTags(this.tagsField),
-        content: formValue.content,
-        title: formValue.title,
-        minutes: this.minutesToRead(formValue.content),
-        slug
-      };
+    // add post to db
+    await this.ps.setPost(data);
 
-      await this.ps.setPost(data, this.id).catch((e: any) => console.log(e));
-
-    } catch (e: any) {
-      console.error(e);
-    }
     this.router.navigate(['/post', this.id, slug]);
   }
 

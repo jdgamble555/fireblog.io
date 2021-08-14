@@ -2,7 +2,6 @@ import { Component, OnInit, Input } from '@angular/core';
 
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { BreadCrumbsService } from '../shared/bread-crumbs/bread-crumbs.service';
 import { ToolsService } from '../shared/tools.service';
 import { TagService } from './tag.service';
 
@@ -25,8 +24,7 @@ export class TagComponent implements OnInit {
 
   constructor(
     private tools: ToolsService,
-    public ts: TagService,
-    private bcs: BreadCrumbsService
+    public ts: TagService
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -43,11 +41,11 @@ export class TagComponent implements OnInit {
 
   // return a formatted tags URL
   getTagsURL(tag: string) {
-    return this.tagURL + '/' + this.bcs.getFriendlyURL(tag);
+    return this.tagURL + '/' + this.ts.slugify(tag);
   }
 
   // return a formatted title URL
   getTitleURL(title: string) {
-    return this.postURL + '/' + this.bcs.getFriendlyURL(title);
+    return this.postURL + '/' + this.ts.slugify(title);
   }
 }

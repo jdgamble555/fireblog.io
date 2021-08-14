@@ -1,13 +1,10 @@
-import { Component, OnInit, EventEmitter, Output, Input } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
+import { Component, EventEmitter, Output, Input } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { map, take, debounceTime } from 'rxjs/operators';
 import { Observable, from, combineLatest } from 'rxjs';
 import { AuthService } from 'src/app/auth/auth.service';
 import { NavService } from '../nav.service';
-import { BreadCrumbsService } from 'src/app/shared/bread-crumbs/bread-crumbs.service';
-
 
 @Component({
   selector: 'app-header',
@@ -15,7 +12,7 @@ import { BreadCrumbsService } from 'src/app/shared/bread-crumbs/bread-crumbs.ser
   styleUrls: ['./header.component.scss']
 })
 
-export class HeaderComponent implements OnInit {
+export class HeaderComponent {
 
   @Output() menuButtonClicked = new EventEmitter();
   @Input() title!: string;
@@ -33,22 +30,11 @@ export class HeaderComponent implements OnInit {
   constructor(
     public auth: AuthService,
     public ns: NavService,
-    private router: Router,
     private fb: FormBuilder,
-    private afs: AngularFirestore,
-    public bcs: BreadCrumbsService
+    private afs: AngularFirestore
   ) {
     this.myForm = this.fb.group({
       term: [''],
-    });
-  }
-
-  ngOnInit() {
-
-    this.router.events.subscribe((event: any) => {
-      if (event instanceof NavigationEnd) {
-        this.bcs.getDirectories();
-      }
     });
   }
 

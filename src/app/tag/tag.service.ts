@@ -1,7 +1,7 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { Injectable } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors } from '@angular/forms';
-import { MatChipInputEvent, MatChipList } from '@angular/material/chips';
+import { AbstractControl, FormArray, FormBuilder, ValidationErrors } from '@angular/forms';
+import { MatChipInputEvent } from '@angular/material/chips';
 
 export interface Tag {
   name: string;
@@ -43,11 +43,6 @@ export class TagService {
    * @param control
    */
   addTags(tags: string[], control: FormArray): void {
-
-    // remove all tags
-    for (let i = 0; i < tags.length; ++i) {
-      this.remove(i, control);
-    }
 
     // add new tags
     for (let i = 0; i < tags.length; ++i) {

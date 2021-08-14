@@ -8,6 +8,7 @@ export interface Post {
     authorId?: string;
     content?: string;
     image?: string | firebase.firestore.FieldValue | any;
+    imageUploads?: string[] | firebase.firestore.FieldValue | any;
     createdAt?: Date | firebase.firestore.FieldValue | any;
     updatedAt?: Date | firebase.firestore.FieldValue | any;
     tags?: any;

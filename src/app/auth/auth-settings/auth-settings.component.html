@@ -10,8 +10,8 @@
           </mat-expansion-panel-header>
           <div libDropZone (dropped)="uploadImage($event)" (hovered)="toggleHover($event)" class="drop-zone">
             <div (click)="file.click()" class="drop-image">
-              <img *ngIf="user?.photoURL" [src]="user?.photoURL" />
-              <mat-icon class="ng-account-icon">account_circle</mat-icon>
+              <img *ngIf="user.photoURL" [src]="user.photoURL" width="180px" />
+              <mat-icon *ngIf="!user.photoURL" class="ng-account-icon">account_circle</mat-icon>
             </div>
           </div>
           <br />

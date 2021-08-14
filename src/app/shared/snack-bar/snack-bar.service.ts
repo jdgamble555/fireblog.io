@@ -13,11 +13,11 @@ export class SnackbarService {
    * Shows a snackbar message
    * @param msg message to display
    */
-  showMsg(msg: string): void {
+  showMsg(msg: string, dur?: number): void {
     // fix close bug
     this.zone.run(() => {
       this.snackBar.open(msg, 'Close', {
-        duration: 5000
+        duration: dur || 5000
       });
     });
   }
