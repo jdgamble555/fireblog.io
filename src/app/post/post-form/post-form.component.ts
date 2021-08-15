@@ -97,7 +97,7 @@ export class PostFormComponent implements OnInit {
               this.ts.addTags(post.tags, this.tagsField);
 
               // image uploads
-              this.imageUploads = post.imageUploads;
+              this.imageUploads = post.imageUploads || [];
 
               // add values
               this.postForm.patchValue({
@@ -111,8 +111,6 @@ export class PostFormComponent implements OnInit {
           }),
           take(1)
         ).subscribe();
-    } else {
-      this.id = this.ps.getId();
     }
 
     // tag validator
@@ -205,7 +203,7 @@ export class PostFormComponent implements OnInit {
       this.imageLoading = false;
 
       // save url to db
-      await this.ps.addPostImage(this.id, image);
+      this.id = await this.ps.addPostImage(this.id, image);
 
       // add url to imageUploads array
       this.imageUploads.push(image);
@@ -242,10 +240,11 @@ export class PostFormComponent implements OnInit {
     const uid = (await this.auth.getUser()).uid;
     const slug = this.ts.slugify(formValue.title);
 
-    const data: Post = {
+    let data: Post = {
       id: this.id,
       authorId: uid,
       tags: this.ts.getTags(this.tagsField),
+      [this.isNewPage ? 'createdAt' : 'updatedAt']: this.ps.getDate(),
       content: formValue.content,
       title: formValue.title,
       minutes: this.minutesToRead(formValue.content),

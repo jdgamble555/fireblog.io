@@ -104,7 +104,7 @@ export class FireFormDirective implements OnInit, OnDestroy {
         await this.docRef.set({updatedAt, ...data}, { merge: true });
       }
       this.state = 'synced';
-    } catch (err) {
+    } catch (err: any) {
       console.log(err);
       this.formError.emit(err.message);
       this.state = 'error';

@@ -17,9 +17,9 @@ export class PostService {
    * Gets all posts
    * @returns posts joined by authorDoc
    */
-  getPosts(): Observable<Post[]> {
+  getPosts(fieldSort = 'createdAt'): Observable<Post[]> {
     let data: Post[];
-    return this.afs.collection<Post>('posts').valueChanges({ idField: 'id' }).pipe(
+    return this.afs.collection<Post>('posts', ref => ref.orderBy(fieldSort)).valueChanges({ idField: 'id' }).pipe(
       switchMap((r: Post[]) => {
         data = r;
         const docs = r.map(
@@ -31,7 +31,6 @@ export class PostService {
         let i = 0;
         return d.map(
           (doc: User) => {
-            console.log('c')
             return { ...data[i++], author: doc };
           }
         );
@@ -41,7 +40,7 @@ export class PostService {
   /**
    * Get Post by post id
    * @param id post id
-   * @returns post observable
+   * @returns post observable joined by author doc
    */
   getPostById(id: string): Observable<Post> {
     let data: Post;
@@ -61,61 +60,59 @@ export class PostService {
   getId() {
     return this.afs.createId();
   }
+
+  /**
+   * Generates a server timestamp
+   * @returns
+   */
+  getDate(): firebase.firestore.FieldValue {
+    return firebase.firestore.FieldValue.serverTimestamp();
+  }
+
   /**
    * Edit an existing post
    * @param id doc id
    * @param data doc data
    * @returns void
    */
-  async setPost(data: Post, id?: string): Promise<void> {
-    if (data.id || id) {
+  async setPost(data: Post, id?: string): Promise<string> {
+    if (data.id !== 'undefined' || id) {
       if (data.id) {
+        // take id out of data
         id = data.id;
         delete data.id;
       }
     } else {
+      // generate id if there is none
       id = this.getId();
     }
+    // add or update firestore
     try {
-      return await this.afs.collection<Post>('posts').doc(id).set(data, { merge: true });
+      await this.afs.collection<Post>('posts').doc(id).set(data, { merge: true });
+      return id as string;
     } catch (e) {
       console.error(e);
     }
+    return '';
   }
   /**
    * Delete's an image from post doc
    * @param id doc id
    * @returns
    */
-  async deleteImage(id: string) {
-    try {
-      return await this.afs.doc<Post>(`posts/${id}`).set({
-        image: firebase.firestore.FieldValue.delete()
-      }, { merge: true });
-    } catch (e) {
-      console.error(e);
-    }
+  async deleteImage(id: string): Promise<string> {
+    const image = firebase.firestore.FieldValue.delete();
+    return await this.setPost({ image }, id);
   }
 
-  async addPostImage(id: string, val: string) {
-    try {
-      return await this.afs.doc<Post>(`posts/${id}`).set({
-        imageUploads: firebase.firestore.FieldValue.arrayUnion(val)
-      }, { merge: true });
-    } catch (e) {
-      console.error(e);
-    }
+  async addPostImage(id: string, val: string): Promise<string> {
+    const imageUploads = firebase.firestore.FieldValue.arrayUnion(val);
+    return await this.setPost({ imageUploads }, id);
   }
 
-  async deletePostImage(id: string, val: string) {
-    try {
-      return await this.afs.doc<Post>(`posts/${id}`).set({
-        imageUploads: firebase.firestore.FieldValue.arrayRemove(val)
-      }, { merge: true });
-    } catch (e) {
-      console.error(e);
-    }
+  async deletePostImage(id: string, val: string): Promise<string> {
+    const imageUploads = firebase.firestore.FieldValue.arrayRemove(val);
+    return await this.setPost({ imageUploads }, id);
   }
-
 
 }
