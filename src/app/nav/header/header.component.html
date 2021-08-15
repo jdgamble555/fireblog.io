@@ -52,8 +52,8 @@
       </mat-list>
     </mat-menu>
     <a mat-icon-button [matMenuTriggerFor]="appMenu">
-      <img class="avatar" *ngIf="user?.photoURL" [src]="user?.photoURL" />
-      <mat-icon class="avatar avatar-account">account_circle</mat-icon>
+      <img class="avatar" *ngIf="user.photoURL" [src]="user?.photoURL" />
+      <mat-icon *ngIf="!user.photoURL" class="avatar avatar-account">account_circle</mat-icon>
     </a>
   </div>
   <ng-template #guest>

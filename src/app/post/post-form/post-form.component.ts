@@ -111,6 +111,8 @@ export class PostFormComponent implements OnInit {
           }),
           take(1)
         ).subscribe();
+    } else {
+      this.id = this.ps.getId();
     }
 
     // tag validator
@@ -166,10 +168,14 @@ export class PostFormComponent implements OnInit {
   async addImage(event: Event) {
 
     // preview image
-    this.image = await this.is.previewImage(event);
+    const blob = await this.is.previewImage(event) as Blob;
+
+    this.image = await this.is.blobToData(blob);
+
+    const file = new File([blob], 'new.png', { type: "image/png" });
 
     // upload image
-    const image = await this.is.uploadImage('posts', this.id);
+    const image = await this.is.uploadImage('posts', this.id, file);
 
     const data = {
       id: this.id,
@@ -248,6 +254,8 @@ export class PostFormComponent implements OnInit {
 
     // add post to db
     await this.ps.setPost(data);
+
+    this.sb.showMsg('Post ' + (this.isNewPage ? 'Added!' : 'Edited!'));
 
     this.router.navigate(['/post', this.id, slug]);
   }

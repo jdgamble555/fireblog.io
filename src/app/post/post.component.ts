@@ -33,6 +33,8 @@ export class PostComponent implements OnInit {
     this.route.params.subscribe(async (p: any) => {
       this.post = this.ps.getPostById(p.id).pipe(
         tap((r: Post) => {
+          // add bread crumbs
+          this.ns.setBC(r.title as string);
           // generate seo tags
           this.seo.generateTags({
             domain: this.ns.title,

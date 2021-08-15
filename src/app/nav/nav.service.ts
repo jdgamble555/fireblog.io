@@ -24,9 +24,14 @@ export class NavService {
     this.directories = [];
   }
 
+  // reset bread crumb
+  resetBC() {
+    this.directories = [];
+  }
+
   // set bread crumb
   setBC(name: string, location?: string) {
-    this.directories = [];
+    this.resetBC();
     this.addBC(name, location);
   }
 

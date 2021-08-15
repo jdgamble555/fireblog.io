@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable } from '@angular/core';
 import { AngularFireStorage } from '@angular/fire/storage';
 import { Observable } from 'rxjs';
 import { ImageUploadModule } from './image-upload.module';
@@ -11,16 +12,59 @@ export class ImageUploadService {
   uploadPercent: Observable<number> | any = null;
   showPercent = false;
 
-  private fileTarget!: HTMLInputElement;
-
-  constructor(private storage: AngularFireStorage) { }
+  constructor(
+    private storage: AngularFireStorage,
+    @Inject(DOCUMENT) private document: Document
+  ) { }
 
   /**
-   * Gets an image blob before upload
-   * @param event - file event
-   * @returns - string blob of image
+   *
+   * Canvas tools to resize image
+   *
    */
-  async previewImage(event: Event): Promise<string> {
+
+  async blobToData(blob: Blob): Promise<string> {
+    return new Promise((res: any) => {
+      const reader = new FileReader();
+      reader.onloadend = () => res(reader.result as string);
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  drawImageScaled(img: HTMLImageElement, ctx: CanvasRenderingContext2D): void {
+    const canvas = ctx.canvas;
+    const hRatio = canvas.width / img.width;
+    const vRatio = canvas.height / img.height;
+    const ratio = Math.max(hRatio, vRatio);
+    const centerShift_x = (canvas.width - img.width * ratio) / 2;
+    const centerShift_y = (canvas.height - img.height * ratio) / 2;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, img.width, img.height,
+      centerShift_x, centerShift_y, img.width * ratio, img.height * ratio);
+  }
+
+  async compressImage(src: any, newX: number, newY: number): Promise<Blob> {
+    return new Promise((res: any, rej: any) => {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => {
+        const elem = this.document.createElement('canvas');
+        elem.width = newX;
+        elem.height = newY;
+        const ctx = elem.getContext('2d') as CanvasRenderingContext2D;
+        this.drawImageScaled(img, ctx);
+        ctx.canvas.toBlob(res, 'image/png');
+      }
+      img.onerror = error => rej(error);
+    });
+  }
+
+  /**
+ * Gets an image blob before upload
+ * @param event - file event
+ * @returns - string blob of image
+ */
+  async previewImage(event: Event): Promise<Blob | string> {
 
     // add event to image service
     const target = event.target as HTMLInputElement;
@@ -28,17 +72,12 @@ export class ImageUploadService {
     if (target.files?.length) {
       // view file before upload
       const file = target.files[0];
-      this.fileTarget = target;
 
-      // return image preview
-      return await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const image = reader.result as string;
-          resolve(image);
-        };
-        reader.readAsDataURL(file);
-      });
+      // get image preview
+      const image = await this.blobToData(file);
+
+      // return resized version
+      return await this.compressImage(image, 800, 418);
     }
     return '';
   }
@@ -68,14 +107,8 @@ export class ImageUploadService {
    * @param name - file name
    * @param file - file blob
    */
-  async uploadImage(folder: string, name: string, file?: File | null): Promise<string> {
+  async uploadImage(folder: string, name: string, file: File | null): Promise<string> {
 
-    // get file and folder name
-    if (!file) {
-      if (this.fileTarget.files?.length) {
-        file = this.fileTarget.files[0];
-      }
-    }
     const ext = file!.name.split('.').pop();
     const path = `${folder}/${name}.${ext}`;
 

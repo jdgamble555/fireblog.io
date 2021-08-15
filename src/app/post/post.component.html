@@ -1,12 +1,12 @@
 <mat-card class="ng-card" *ngIf="post | async as post">
-  <img *ngIf="post.image" class="ng-image" src="{{ post.image }}" alt="{{ post.title }}" />
+  <img *ngIf="post.image" mat-card-image src="{{ post.image }}" alt="{{ post.title }}" />
   <h1>
     <mat-icon class="ng-icon">library_books</mat-icon>{{ post.title }}
   </h1>
   <h6><i>{{ post.minutes }} min read</i></h6>
   <div class="ng-author ng-link" [routerLink]="['/user', post.authorId]">
     <img *ngIf="post.author?.photoURL" class="avatar" src="{{ post.author?.photoURL }}" />
-    <mat-icon class="ng-photo-icon">account_circle</mat-icon>
+    <mat-icon *ngIf="!post.author?.photoURL" class="ng-photo-icon">account_circle</mat-icon>
     <p class="ng-light"><small><b>{{ post.author?.displayName }}</b>
         <ng-container *ngIf="post.createdAt"> on
           {{ post.createdAt.toDate() | date: 'EEEE, MMMM d, yyyy' }}</ng-container>

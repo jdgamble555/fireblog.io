@@ -226,7 +226,7 @@ h3 {
 .ng-container {
   margin-top: 15px;
   margin-bottom: 15px;
-  max-width: 1000px;
+  max-width: 995px;
   background-color: transparent !important;
 }
 
@@ -300,7 +300,6 @@ mat-form-field.mat-form-field {
 }
 
 .ng-image {
-  max-width: 400px;
   height: auto;
   cursor: pointer;
 }
@@ -400,7 +399,7 @@ mat-form-field.mat-form-field {
   width: 2.5em;
   height: 2.5em;
   border-radius: 50%;
-  margin: 0px 10px 0px;
+  margin-bottom: 12px;
 }
 
 .avatar-account {
@@ -549,9 +548,17 @@ markdown a:hover {
   padding-bottom: 0px !important;
   padding-top: 0px !important;
   margin-bottom: -8px;
-  max-width: none !important;
 }
 
 .img-preview {
   overflow-y: hidden !important;
+}
+
+.post-image {
+  min-width: 100%;
+}
+
+div.trim {
+  max-height: 400px;
+  overflow: hidden;
 }

@@ -1,89 +1,89 @@
 <mat-card class="ng-card">
+  <form [formGroup]="postForm" (ngSubmit)="onSubmit()">
   <mat-card-title>{{ title }}</mat-card-title>
   <br />
   <mat-card-content>
-    <form [formGroup]="postForm" (ngSubmit)="onSubmit()">
-      <button class="ng-button-space" type="button" mat-raised-button (click)="imageInput.click()">
-        {{ image ? 'Change' : 'Upload' }} Image
-      </button>
-      <button class="ng-button-space" *ngIf="image" type="button" mat-raised-button (click)="deleteImage()">Delete
-        Image</button>
-      <p></p>
-      <input hidden type="file" accept="image/*" #imageInput (change)="addImage($event)">
-      <div [hidden]="!is.showPercent">
-        <mat-progress-bar mode="determinate" value="{{ is.uploadPercent | async }}"></mat-progress-bar>
-      </div>
-      <div class="ng-image-box" *ngIf="image">
-        <img class="ng-image" [src]="image || '//:0'">
-      </div>
-      <mat-form-field>
-        <input matInput id="title" placeholder="Title" formControlName="title">
-        <mat-error *ngIf="getField('title')?.invalid">
-          {{ getError('title') }}
-        </mat-error>
-      </mat-form-field>
-      <mat-form-field class="chip-list">
-        <mat-chip-list #chipList aria-label="Tag selection">
-          <mat-chip *ngFor="let tag of tagsField.controls; let i = index" [selectable]="ts.selectable"
-            [removable]="ts.removable" (removed)="ts.remove(i, tagsField)">
-            {{ tag.value }}
-            <mat-icon matChipRemove *ngIf="ts.removable">cancel</mat-icon>
-          </mat-chip>
-          <input placeholder="Tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="ts.separatorKeysCodes"
-            [matChipInputAddOnBlur]="ts.addOnBlur" (matChipInputTokenEnd)="ts.add($event, tagsField)"
-            formArrayName="tags" />
-        </mat-chip-list>
-        <mat-error *ngIf="getField('tags')?.invalid">
-          {{ getError('tags') }}
-        </mat-error>
-      </mat-form-field>
-      <mat-tab-group animationDuration="0ms">
-        <mat-tab label="Content">
-          <br />
-          <h5><a href="https://www.markdownguide.org/basic-syntax/" target="_new">Markdown Guide</a></h5>
-          <mat-form-field appearance="outline">
-            <textarea matInput rows="10" formControlName="content" placeholder="Content" required></textarea>
-            <mat-error *ngIf="getField('content')?.invalid">
-              {{ getError('content') }}
-            </mat-error>
+    <button class="ng-button-space" type="button" mat-raised-button (click)="imageInput.click()">
+      {{ image ? 'Change' : 'Upload' }} Image
+    </button>
+    <button class="ng-button-space" *ngIf="image" type="button" mat-raised-button (click)="deleteImage()">Delete
+      Image</button>
+    <p></p>
+    <input hidden type="file" accept="image/*" #imageInput (change)="addImage($event)">
+    <div [hidden]="!is.showPercent">
+      <mat-progress-bar mode="determinate" value="{{ is.uploadPercent | async }}"></mat-progress-bar>
+    </div>
+  </mat-card-content>
+  <img *ngIf="image" mat-card-image [src]="image || '//:0'">
+  <mat-card-content>
+    <mat-form-field>
+      <input matInput id="title" placeholder="Title" formControlName="title">
+      <mat-error *ngIf="getField('title')?.invalid">
+        {{ getError('title') }}
+      </mat-error>
+    </mat-form-field>
+    <mat-form-field class="chip-list">
+      <mat-chip-list #chipList aria-label="Tag selection">
+        <mat-chip *ngFor="let tag of tagsField.controls; let i = index" [selectable]="ts.selectable"
+          [removable]="ts.removable" (removed)="ts.remove(i, tagsField)">
+          {{ tag.value }}
+          <mat-icon matChipRemove *ngIf="ts.removable">cancel</mat-icon>
+        </mat-chip>
+        <input placeholder="Tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="ts.separatorKeysCodes"
+          [matChipInputAddOnBlur]="ts.addOnBlur" (matChipInputTokenEnd)="ts.add($event, tagsField)"
+          formArrayName="tags" />
+      </mat-chip-list>
+      <mat-error *ngIf="getField('tags')?.invalid">
+        {{ getError('tags') }}
+      </mat-error>
+    </mat-form-field>
+    <mat-tab-group animationDuration="0ms">
+      <mat-tab label="Content">
+        <br />
+        <h5><a href="https://www.markdownguide.org/basic-syntax/" target="_new">Markdown Guide</a></h5>
+        <mat-form-field appearance="outline">
+          <textarea matInput rows="10" formControlName="content" placeholder="Content" required></textarea>
+          <mat-error *ngIf="getField('content')?.invalid">
+            {{ getError('content') }}
+          </mat-error>
+        </mat-form-field>
+      </mat-tab>
+      <mat-tab label="Preview">
+        <mat-card>
+          <markdown [data]="postForm.value.content"></markdown>
+        </mat-card>
+      </mat-tab>
+      <mat-tab label="Images">
+        <mat-card>
+          <button type="button" class="ng-button-space" mat-raised-button (click)="inlineInput.click()">Upload
+            Image</button>
+          <p></p>
+          <input hidden type="file" accept="image/*" #inlineInput (change)="addPostImage($event)" multiple>
+          <mat-spinner *ngIf="imageLoading"></mat-spinner>
+          <mat-form-field *ngFor="let url of imageUploads" appearance="fill">
+            <input matInput value="![Alt Text]({{ url }})">
+            <button type="button" matSuffix mat-icon-button cdkCopyToClipboard="![Alt Text]({{ url }})"
+              (click)="sb.showMsg('Copied!', 500)">
+              <mat-icon>content_copy</mat-icon>
+            </button>
+            <button type="button" matSuffix mat-icon-button [matMenuTriggerFor]="menu">
+              <mat-icon>preview</mat-icon>
+            </button>
+            <mat-menu class="img-preview" #menu="matMenu" xPosition="before">
+              <img [src]="url" width="200px">
+            </mat-menu>
+            <button type="button" matSuffix mat-icon-button (click)="deletePostImage(url)">
+              <mat-icon>delete</mat-icon>
+            </button>
           </mat-form-field>
-        </mat-tab>
-        <mat-tab label="Preview">
-          <mat-card>
-            <markdown [data]="postForm.value.content"></markdown>
-          </mat-card>
-        </mat-tab>
-        <mat-tab label="Images">
-          <mat-card>
-            <button type="button" class="ng-button-space" mat-raised-button (click)="inlineInput.click()">Upload
-              Image</button>
-            <p></p>
-            <input hidden type="file" accept="image/*" #inlineInput (change)="addPostImage($event)" multiple>
-            <mat-spinner *ngIf="imageLoading"></mat-spinner>
-            <mat-form-field *ngFor="let url of imageUploads" appearance="fill">
-              <input matInput value="![Alt Text]({{ url }})">
-              <button type="button" matSuffix mat-icon-button cdkCopyToClipboard="![Alt Text]({{ url }})"
-                (click)="sb.showMsg('Copied!', 500)">
-                <mat-icon>content_copy</mat-icon>
-              </button>
-              <button type="button" matSuffix mat-icon-button [matMenuTriggerFor]="menu">
-                <mat-icon>preview</mat-icon>
-              </button>
-              <mat-menu class="img-preview" #menu="matMenu" xPosition="before">
-                <img [src]="url" width="200px">
-              </mat-menu>
-              <button type="button" matSuffix mat-icon-button (click)="deletePostImage(url)">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </mat-form-field>
-          </mat-card>
-        </mat-tab>
-      </mat-tab-group>
-      <br />
-      <button mat-raised-button [disabled]="postForm.invalid || postForm.untouched">
-        {{ isNewPage ? 'New' : 'Edit' }} Post
-      </button>
-    </form>
+        </mat-card>
+      </mat-tab>
+    </mat-tab-group>
+    <br />
+    <button mat-raised-button [disabled]="postForm.invalid || postForm.untouched">
+      {{ isNewPage ? 'New' : 'Edit' }} Post
+    </button>
   </mat-card-content>
   <mat-card-actions></mat-card-actions>
+  </form>
 </mat-card>

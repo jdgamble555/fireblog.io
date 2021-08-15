@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { combineLatest, Observable } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { User } from '../auth/user.model';
 import { Post } from './post.model';
 import firebase from 'firebase/app';
@@ -24,15 +24,16 @@ export class PostService {
         data = r;
         const docs = r.map(
           (d: Post) => this.afs.doc<User>(`users/${d.authorId}`).valueChanges()
-        );
-        return combineLatest(docs).pipe(
-          map((arr: any) => arr.reduce((acc: any, cur: any) => [acc].concat(cur)))
-        );
+        ) as Observable<User>[];
+        return combineLatest(docs);
       }),
       map((d: User[]) => {
         let i = 0;
         return d.map(
-          (doc: User) => { return { ...data[i++], author: doc }; }
+          (doc: User) => {
+            console.log('c')
+            return { ...data[i++], author: doc };
+          }
         );
       })
     );
@@ -88,9 +89,9 @@ export class PostService {
    */
   async deleteImage(id: string) {
     try {
-      return await this.afs.doc<Post>(`posts/${id}`).update({
+      return await this.afs.doc<Post>(`posts/${id}`).set({
         image: firebase.firestore.FieldValue.delete()
-      });
+      }, { merge: true });
     } catch (e) {
       console.error(e);
     }
@@ -98,9 +99,9 @@ export class PostService {
 
   async addPostImage(id: string, val: string) {
     try {
-      return await this.afs.doc<Post>(`posts/${id}`).update({
+      return await this.afs.doc<Post>(`posts/${id}`).set({
         imageUploads: firebase.firestore.FieldValue.arrayUnion(val)
-      });
+      }, { merge: true });
     } catch (e) {
       console.error(e);
     }
@@ -108,9 +109,9 @@ export class PostService {
 
   async deletePostImage(id: string, val: string) {
     try {
-      return await this.afs.doc<Post>(`posts/${id}`).update({
+      return await this.afs.doc<Post>(`posts/${id}`).set({
         imageUploads: firebase.firestore.FieldValue.arrayRemove(val)
-      });
+      }, { merge: true });
     } catch (e) {
       console.error(e);
     }
