@@ -35,6 +35,7 @@ import { PostListComponent } from './post/post-list/post-list.component';
     AngularFireAnalyticsModule,
     AngularFireStorageModule,
     AngularFireAuthModule,
+    // remove here if using another db
     AngularFirestoreModule,
     AppRoutingModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
