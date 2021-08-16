@@ -1,11 +1,12 @@
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import {
   FormGroup,
   FormBuilder,
   Validators
 } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { matchValidator } from 'src/app/shared/form-validators';
 import { NavService } from '../nav/nav.service';
 import { AuthService } from './auth.service';
@@ -15,11 +16,13 @@ import { AuthService } from './auth.service';
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.scss']
 })
-export class AuthComponent implements OnInit {
+export class AuthComponent implements OnInit, OnDestroy {
 
   userForm!: FormGroup;
 
-  type!: string;
+  passSub!: Subscription;
+
+  type!: 'login' | 'register' | 'reset';
   loading = false;
 
   passhide = true;
@@ -97,8 +100,9 @@ export class AuthComponent implements OnInit {
     }
     if (this.isRegister) {
       this.userForm.addControl('confirmPassword', confirmControl);
+      
       // check confirm password validity
-      this.userForm.controls.password.valueChanges.subscribe(
+      this.passSub = this.userForm.controls.password.valueChanges.subscribe(
         () => this.userForm.controls.confirmPassword.updateValueAndValidity()
       );
     }
@@ -147,4 +151,9 @@ export class AuthComponent implements OnInit {
   async googleLogin() {
     await this.auth.oAuthLogin('google.com');
   }
+
+  ngOnDestroy() {
+    this.passSub.unsubscribe();
+  }
+
 }

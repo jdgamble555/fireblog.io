@@ -82,7 +82,7 @@
     </mat-card-content>
     <mat-card-actions>
       <div class="flex-container">
-        <button mat-button [disabled]="postForm.invalid || postForm.untouched">
+        <button mat-button [disabled]="postForm.invalid || postForm.pristine">
           <b>Save</b>
         </button>
         <button type="button" matSuffix mat-icon-button>

@@ -1,7 +1,7 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormGroupDirective } from '@angular/forms';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormGroup, FormBuilder, Validators, FormGroupDirective, AbstractControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { NavService } from 'src/app/nav/nav.service';
 import { DialogService } from 'src/app/shared/confirm-dialog/dialog.service';
 import { ImageUploadService } from 'src/app/shared/image-upload/image-upload.service';
@@ -15,7 +15,7 @@ import { ReLoginComponent } from 'src/app/shared/re-login/re-login.component';
   templateUrl: './auth-settings.component.html',
   styleUrls: ['./auth-settings.component.scss']
 })
-export class AuthSettingsComponent implements OnInit {
+export class AuthSettingsComponent implements OnInit, OnDestroy {
 
   @ViewChild(FormGroupDirective) private passFormDirective!: FormGroupDirective;
 
@@ -25,6 +25,8 @@ export class AuthSettingsComponent implements OnInit {
 
   passhide = true;
   confirmhide = true;
+
+  passSub!: Subscription;
 
   // providers
   providers: any;
@@ -74,19 +76,21 @@ export class AuthSettingsComponent implements OnInit {
     this.buildAccountForm();
 
     // check confirm password validity
-    this.accountForm.controls.password.valueChanges.subscribe(
+    this.passSub = this.accountForm.controls.password.valueChanges.subscribe(
       () => this.accountForm.controls.confirmPassword.updateValueAndValidity()
     );
-    // set email, displayName, and !photoURL from user database
+    // get user info
     const user = await this.auth.getUser();
     this.providers = await this.auth.getProviders();
-    this.accountForm.get('displayName')!.setValue(user.displayName);
-    this.accountForm.get('email')!.setValue(user.email);
+
+    // patch values
+    this.getField('displayName').setValue(user.displayName);
+    this.getField('email').setValue(user.email);
   }
 
   // get field
-  getField(field: string) {
-    return this.accountForm.get(field);
+  getField(field: string): AbstractControl {
+    return this.accountForm.get(field) as AbstractControl;
   }
 
   // errors
@@ -161,6 +165,7 @@ export class AuthSettingsComponent implements OnInit {
       .catch(async (e: any) => {
         if (e.code === 'auth/requires-recent-login') {
           const ra = await this.reAuth();
+          // update code here
           ra.afterClosed()
             .subscribe((closed: any) => {
               if (!closed) {
@@ -185,6 +190,7 @@ export class AuthSettingsComponent implements OnInit {
       .catch(async (e: any) => {
         if (e.code === 'auth/requires-recent-login') {
           const ra = await this.reAuth();
+          // update code here
           ra.afterClosed()
             .subscribe((closed: any) => {
               if (!closed) {
@@ -301,6 +307,10 @@ export class AuthSettingsComponent implements OnInit {
           })
           .then((image: string | void) => this.auth.updateProfile({ photoURL: image })))
       .catch((e: any) => this.sb.showError(e));
+  }
+
+  ngOnDestroy() {
+    this.passSub.unsubscribe();
   }
 
 }

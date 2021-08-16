@@ -97,11 +97,11 @@ export class FireFormDirective implements OnInit, OnDestroy {
       const data = this.formGroup.value;
       if (this.isNewDoc) {
         const createdAt = new Date();
-        await this.docRef.set({createdAt, ...data}, { merge: true });
+        await this.docRef.set({ createdAt, ...data }, { merge: true });
       }
       else {
         const updatedAt = new Date();
-        await this.docRef.set({updatedAt, ...data}, { merge: true });
+        await this.docRef.set({ updatedAt, ...data }, { merge: true });
       }
       this.state = 'synced';
     } catch (err: any) {

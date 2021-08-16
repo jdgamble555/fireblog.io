@@ -1,8 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatChipList } from '@angular/material/chips';
 import { ActivatedRoute, Router } from '@angular/router';
-import { take, tap } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+import { debounceTime, take, tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/auth/auth.service';
 import { NavService } from 'src/app/nav/nav.service';
 import { ImageUploadService } from 'src/app/shared/image-upload/image-upload.service';
@@ -17,7 +18,7 @@ import { PostService } from '../post.service';
   templateUrl: './post-form.component.html',
   styleUrls: ['./post-form.component.scss']
 })
-export class PostFormComponent implements OnInit {
+export class PostFormComponent implements OnInit, OnDestroy {
 
   @ViewChild('chipList') chipList!: MatChipList;
 
@@ -44,7 +45,13 @@ export class PostFormComponent implements OnInit {
 
   imageLoading = false;
 
+  postSaving = false;
+
   title!: string;
+
+  // subscriptions
+  tagSub!: Subscription;
+  formSub!: Subscription;
 
   constructor(
     private fb: FormBuilder,
@@ -85,36 +92,35 @@ export class PostFormComponent implements OnInit {
       // set id
       this.id = id;
 
-      // fill in the form data from db
-      this.ps.getPostById(id)
-        .pipe(
-          tap((post: Post) => {
-            if (post) {
-              // add image
-              this.image = post.image || '';
+      this.ps.getPostById(id).pipe(take(1)).toPromise()
+        .then((post: Post) => {
+          if (post) {
+            // add image
+            this.image = post.image || '';
 
-              // add tags
-              this.ts.addTags(post.tags, this.tagsField);
+            // add tags
+            this.ts.addTags(post.tags, this.tagsField);
 
-              // image uploads
-              this.imageUploads = post.imageUploads || [];
+            // image uploads
+            this.imageUploads = post.imageUploads || [];
 
-              // add values
-              this.postForm.patchValue({
-                title: post.title,
-                content: post.content
-              });
-            } else {
-              // id does not exist
-              this.router.navigate(['/home']);
-            }
-          }),
-          take(1)
-        ).subscribe();
+            // add values
+            this.postForm.patchValue({
+              title: post.title,
+              content: post.content
+            });
+            this.postForm.markAsPristine();
+
+          } else {
+            // id does not exist
+            this.router.navigate(['/home']);
+          }
+        });
+
     }
 
     // tag validator
-    this.postForm.statusChanges.subscribe((status: any) => {
+    this.tagSub = this.tagsField.statusChanges.subscribe((status: string) => {
       this.chipList.errorState = status === 'INVALID';
     });
 
@@ -125,6 +131,18 @@ export class PostFormComponent implements OnInit {
 
     // add page bread crumb
     this.ns.setBC(this.title);
+
+    // auto save
+    this.formSub = this.postForm.valueChanges
+      .pipe(
+        debounceTime(2000),
+        tap(() => {
+          if (this.postForm.valid && this.postForm.dirty) {
+            this.onSubmit();
+            this.postForm.markAsPristine();
+          }
+        })
+      ).subscribe();
 
   }
 
@@ -252,11 +270,16 @@ export class PostFormComponent implements OnInit {
     };
 
     // add post to db
+    this.postSaving = true;
     await this.ps.setPost(data);
+    this.postSaving = false;
 
-    this.sb.showMsg('Post ' + (this.isNewPage ? 'Added!' : 'Edited!'));
+    //this.router.navigate(['/post', this.id, slug]);
+  }
 
-    this.router.navigate(['/post', this.id, slug]);
+  ngOnDestroy(): void {
+    this.formSub.unsubscribe();
+    this.tagSub.unsubscribe();
   }
 
 }
