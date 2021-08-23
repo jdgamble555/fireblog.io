@@ -1,9 +1,9 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatChipList } from '@angular/material/chips';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { debounceTime, take, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { AuthService } from 'src/app/auth/auth.service';
 import { NavService } from 'src/app/nav/nav.service';
 import { ImageUploadService } from 'src/app/shared/image-upload/image-upload.service';
@@ -18,7 +18,7 @@ import { PostService } from '../post.service';
   templateUrl: './post-form.component.html',
   styleUrls: ['./post-form.component.scss']
 })
-export class PostFormComponent implements OnInit, OnDestroy {
+export class PostFormComponent implements OnInit {
 
   @ViewChild('chipList') chipList!: MatChipList;
 
@@ -49,9 +49,9 @@ export class PostFormComponent implements OnInit, OnDestroy {
 
   title!: string;
 
-  // subscriptions
-  tagSub!: Subscription;
-  formSub!: Subscription;
+  patchPost!: Observable<Post>;
+
+  state!: string;
 
   constructor(
     private fb: FormBuilder,
@@ -81,20 +81,18 @@ export class PostFormComponent implements OnInit, OnDestroy {
     if (r.startsWith('/edit')) {
 
       this.isNewPage = false;
-      const id = this.route.snapshot.paramMap.get('id');
+      this.id = this.route.snapshot.paramMap.get('id') as string;
 
-      if (!id) {
-        // no id input
+      if (!this.id) {
+        // error, no id input
         this.router.navigate(['/home']);
         return;
       }
 
-      // set id
-      this.id = id;
-
-      this.ps.getPostById(id).pipe(take(1)).toPromise()
-        .then((post: Post) => {
+      this.patchPost = this.ps.getPostById(this.id).pipe(
+        tap((post: Post) => {
           if (post) {
+
             // add image
             this.image = post.image || '';
 
@@ -104,25 +102,12 @@ export class PostFormComponent implements OnInit, OnDestroy {
             // image uploads
             this.imageUploads = post.imageUploads || [];
 
-            // add values
-            this.postForm.patchValue({
-              title: post.title,
-              content: post.content
-            });
-            this.postForm.markAsPristine();
-
           } else {
-            // id does not exist
-            this.router.navigate(['/home']);
+            // error, id does not exist in db
+            this.router.navigate(['home']);
           }
-        });
-
+        }));
     }
-
-    // tag validator
-    this.tagSub = this.tagsField.statusChanges.subscribe((status: string) => {
-      this.chipList.errorState = status === 'INVALID';
-    });
 
     // add title
     this.title = (this.isNewPage ? 'New' : 'Edit') + ' Post';
@@ -131,18 +116,6 @@ export class PostFormComponent implements OnInit, OnDestroy {
 
     // add page bread crumb
     this.ns.setBC(this.title);
-
-    // auto save
-    this.formSub = this.postForm.valueChanges
-      .pipe(
-        debounceTime(2000),
-        tap(() => {
-          if (this.postForm.valid && this.postForm.dirty) {
-            this.onSubmit();
-            this.postForm.markAsPristine();
-          }
-        })
-      ).subscribe();
 
   }
 
@@ -213,7 +186,7 @@ export class PostFormComponent implements OnInit, OnDestroy {
       const file = target.files[0];
 
       // generate image id
-      const randId = this.ps.getId();
+      const randId = this.ps.getId(); // <===
 
       // upload image with spinner
       this.imageLoading = true;
@@ -228,7 +201,6 @@ export class PostFormComponent implements OnInit, OnDestroy {
 
       // show msg
       this.sb.showMsg('Image Added!', 500);
-
     }
   }
 
@@ -270,16 +242,16 @@ export class PostFormComponent implements OnInit, OnDestroy {
     };
 
     // add post to db
-    this.postSaving = true;
     await this.ps.setPost(data);
-    this.postSaving = false;
 
+  }
+
+  onPublish() {
     //this.router.navigate(['/post', this.id, slug]);
   }
 
-  ngOnDestroy(): void {
-    this.formSub.unsubscribe();
-    this.tagSub.unsubscribe();
+  updateState(e: any) {
+    this.state = e;
   }
 
 }

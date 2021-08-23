@@ -64,7 +64,7 @@ export class ImageUploadService {
  * @param event - file event
  * @returns - string blob of image
  */
-  async previewImage(event: Event): Promise<Blob | string> {
+  async previewImage(event: Event): Promise<Blob | undefined> {
 
     // add event to image service
     const target = event.target as HTMLInputElement;
@@ -79,7 +79,7 @@ export class ImageUploadService {
       // return resized version
       return await this.compressImage(image, 800, 418);
     }
-    return '';
+    return;
   }
 
   /**
@@ -98,7 +98,6 @@ export class ImageUploadService {
         return;
       }
     }
-    return;
   }
 
   /**
@@ -122,7 +121,7 @@ export class ImageUploadService {
       this.uploadPercent = task.percentageChanges();
 
       // upload image, return url
-      await task.catch((e: any) => console.log(e));
+      await task.catch((e: any) => console.error(e));
       this.showPercent = false;
       return await ref.getDownloadURL().toPromise();
     }

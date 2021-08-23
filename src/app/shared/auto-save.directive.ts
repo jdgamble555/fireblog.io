@@ -1,0 +1,90 @@
+import { Directive, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { Observable, Subscription } from 'rxjs';
+import { debounceTime, take, tap } from 'rxjs/operators';
+
+@Directive({
+  selector: '[appAutoSave]'
+})
+export class AutoSaveDirective implements OnInit, OnDestroy {
+
+  // Inputs
+  @Input() formGroup!: FormGroup;
+  @Input() getData!: Observable<any>;
+  @Input() setData = async () => { };
+
+  // Internal state
+  private _state!: 'loading' | 'synced' | 'modified' | 'saving' | 'error';
+
+  // Outputs
+  @Output() stateChange = new EventEmitter<string>();
+
+  // Subscriptions
+  private formSub!: Subscription;
+
+  constructor() { }
+
+  ngOnInit(): void {
+    this.preloadData();
+    this.autoSave();
+  }
+
+  // Loads initial form data from db
+  preloadData<T>(): void {
+    this._state = 'loading';
+    this.getData
+      .pipe(
+        tap((data: T) => {
+          if (data) {
+            this.formGroup.patchValue(data);
+            this.formGroup.markAsPristine();
+            this.state = 'synced';
+          }
+        }),
+        take(1)
+      )
+      .subscribe();
+  }
+
+  // Autosaves form changes
+  autoSave(): void {
+    this.formSub = this.formGroup.valueChanges
+      .pipe(
+        tap(() => {
+          this.state = this.formGroup.invalid ? 'error' : 'modified';
+        }),
+        debounceTime(2000),
+        tap(() => {
+          this._setData();
+        })
+      )
+      .subscribe();
+  }
+
+  // Writes changes
+  private async _setData(): Promise<void> {
+    if (this.formGroup.valid && this._state === 'modified') {
+      this.state = 'saving';
+      await this.setData();
+      this.state = 'synced';
+      this.formGroup.markAsPristine();
+    }
+  }
+
+  // Intercept form submissions to perform the document write
+  @HostListener('ngSubmit', ['$event'])
+  onSubmit(): void {
+    this._setData();
+  }
+
+  // Setter for state changes
+  set state(val: any) {
+    this._state = val;
+    this.stateChange.emit(val);
+  }
+
+  ngOnDestroy(): void {
+    this.formSub.unsubscribe();
+  }
+
+}

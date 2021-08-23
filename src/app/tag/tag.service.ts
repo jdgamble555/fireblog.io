@@ -1,7 +1,7 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { Injectable } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, ValidationErrors } from '@angular/forms';
-import { MatChipInputEvent } from '@angular/material/chips';
+import { MatChipInputEvent, MatChipList } from '@angular/material/chips';
 
 export interface Tag {
   name: string;
@@ -65,7 +65,7 @@ export class TagService {
    * @param event - mat chip input event
    * @param tags - tags array
    */
-  add(event: MatChipInputEvent, control: FormArray): void {
+  add(event: MatChipInputEvent, control: FormArray, chipList: MatChipList): void {
     // add tag from keyboard
     const input = event.chipInput;
     const value = event.value;
@@ -84,8 +84,8 @@ export class TagService {
       input.clear();
     }
 
-    // Reset chipList Validation Bug Fix
-    //chipList.errorState = control.invalid;
+    // update chip error state
+    chipList.errorState = control.status === 'INVALID';
   }
 
   /**
@@ -94,8 +94,12 @@ export class TagService {
    * @param tag tag
    * @param tags - tags array
    */
-  remove(index: number, control: FormArray): void {
+  remove(index: number, control: FormArray, chipList: MatChipList): void {
+
     control.removeAt(index);
+
+    // update chip error state
+    chipList.errorState = control.status === 'INVALID';
   }
 
   /**
