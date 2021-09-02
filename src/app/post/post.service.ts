@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { combineLatest, EMPTY, empty, Observable } from 'rxjs';
-import { defaultIfEmpty, map, switchMap, take, tap } from 'rxjs/operators';
+import { combineLatest, Observable } from 'rxjs';
+import { map, switchMap, take } from 'rxjs/operators';
 import { User } from '../auth/user.model';
 import { Post } from './post.model';
 import firebase from 'firebase/app';
-import { Router } from '@angular/router';
+
 
 @Injectable({
   providedIn: 'root'
@@ -14,36 +14,30 @@ export class PostService {
 
   constructor(
     private afs: AngularFirestore,
-    private router: Router
-  ) {
-
-    //this.getClasses();
-  }
+  ) { }
 
   /**
    * Gets all posts
    * @returns posts joined by authorDoc
    */
   getPosts(fieldSort = 'createdAt'): Observable<Post[]> {
-    let data: Post[];
     return this.afs.collection<Post>('posts',
       ref => ref.orderBy(fieldSort).where('published', '==', true)
     ).valueChanges({ idField: 'id' }).pipe(
       switchMap((r: Post[]) => {
-        data = r;
         const docs = r.map(
           (d: Post) => this.afs.doc<User>(`users/${d.authorId}`).valueChanges()
         ) as Observable<User>[];
-        return combineLatest(docs);
-      }),
-      map((d: User[]) => {
-        let i = 0;
-        return d.map(
-          (doc: User) => {
-            return { ...data[i++], author: doc };
-          }
+        return combineLatest(docs).pipe(
+          map((d: User[]) => {
+            return d.map(
+              (doc: User, i: number) => {
+                return { ...r[i++], author: doc };
+              }
+            );
+          })
         );
-      })
+      }),
     );
   }
   /**
@@ -123,46 +117,5 @@ export class PostService {
     const imageUploads = firebase.firestore.FieldValue.arrayRemove(val);
     return await this.setPost({ imageUploads }, id);
   }
-
-  async getClasses() {
-
-    const s = this.afs.doc<any[]>('students/amiRD7k6Y2hNAu54BEDI').valueChanges().pipe(
-      switchMap((r: any) => {
-        const docs: Observable<any>[] = r.classes.map(
-          (d: any) => this.afs.doc(`classes/${d}`).valueChanges()
-        );
-        return combineLatest(docs);
-      }),
-      map((s: any) => s.sort((a: any, b: any): number => {
-        if (a.name < b.name) { return -1; }
-        if (b.name < a.name) { return 1; }
-        return 0;
-      }))
-    );
-
-    const s2 = this.afs.collection('classes', ref => ref.where('students', 'array-contains', 'amiRD7k6Y2hNAu54BEDI').orderBy('name')).valueChanges();
-
-    const x = await s.pipe(take(1)).toPromise();
-
-    /*const batch = this.afs.firestore.batch();
-
-    const studentID = 'MXSNZAUSn3aVCtIT3W5m';
-    const classID = 'vLnngqszL2yhoSqKIG2D';
-
-    const studentRef = this.afs.doc(`students/${studentID}`).ref;
-    batch.set(studentRef, {
-      classes: firebase.firestore.FieldValue.arrayUnion(classID)
-    });
-
-    const classRef = this.afs.doc(`classes/${classID}`).ref;
-    batch.set(classRef, {
-      students: firebase.firestore.FieldValue.arrayUnion(studentID)
-    });
-
-    await batch.commit();*/
-
-    console.log(x)
-  }
-
 
 }

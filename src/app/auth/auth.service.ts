@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore, AngularFirestoreDocument, Action, DocumentSnapshot } from '@angular/fire/firestore';
 import { Observable, of } from 'rxjs';
-import { switchMap, shareReplay, map } from 'rxjs/operators';
+import { switchMap, shareReplay, map, take } from 'rxjs/operators';
 import { User, EmailPasswordCredentials, Providers } from './user.model';
 import firebase from 'firebase/app';
 
@@ -28,11 +28,11 @@ export class AuthService {
   };
 
   constructor(
-    public afAuth: AngularFireAuth,
+    public afa: AngularFireAuth,
     private afs: AngularFirestore
   ) {
     // get auth data, then get firestore user document || null
-    this.user$ = this.afAuth.authState
+    this.user$ = this.afa.authState
       .pipe(
         shareReplay(),
         switchMap((user) => {
@@ -56,7 +56,7 @@ export class AuthService {
    */
   async isLoggedIn(): Promise<boolean> {
     return await new Promise((resolve: any, reject: any) =>
-      this.afAuth.onAuthStateChanged((user) => {
+      this.afa.onAuthStateChanged((user) => {
         user ? resolve(true) : resolve(false);
       }, (e: any) => reject(e))
     );
@@ -65,12 +65,10 @@ export class AuthService {
    * Get's current user
    * @returns False or User Info
    */
-   async getUser(): Promise<User> {
-    return await new Promise((resolve: any, reject: any) =>
-      this.afAuth.onAuthStateChanged((user) => {
-        user ? resolve(user) : resolve(false);
-      }, (e: any) => reject(e))
-    );
+  async getUser(): Promise<User> {
+    return new Observable((o: any) => {
+      this.afa.onAuthStateChanged(o);
+    }).pipe(take(1)).toPromise() as Promise<User>;
   }
   /**
    * Returns a hash of the user's providers
@@ -78,10 +76,10 @@ export class AuthService {
    */
   async getProviders(): Promise<Providers> {
     return await new Promise((resolve: any, reject: any) =>
-      this.afAuth.user.subscribe(async (user: firebase.User | null) => {
+      this.afa.user.subscribe(async (user: firebase.User | null) => {
         if (user) {
           // make providers available
-          const providers: any = {};
+          const providers: any = { };
           user.providerData.forEach((provider: firebase.UserInfo | null) => {
             let id = provider!.providerId;
             providers[id] = true;
@@ -109,7 +107,7 @@ export class AuthService {
     // get provider object from id
     const provider = this.getProvider(p);
 
-    const user = await this.afAuth.currentUser;
+    const user = await this.afa.currentUser;
 
     return await user!
       .linkWithPopup(provider)
@@ -140,7 +138,7 @@ export class AuthService {
     if (Object.keys(providers).length < 2) {
       return Promise.resolve(this.errors.removeProvider);
     }
-    const user = await this.afAuth.currentUser;
+    const user = await this.afa.currentUser;
 
     // remove provider from firebase auth
     return user!
@@ -156,7 +154,7 @@ export class AuthService {
    */
   async oAuthReLogin(p: string): Promise<any> {
     const provider = this.getProvider(p);
-    const user = await this.afAuth.currentUser;
+    const user = await this.afa.currentUser;
     return user!.reauthenticateWithPopup(provider);
   }
   /**
@@ -170,7 +168,7 @@ export class AuthService {
     // get provider object
     const provider = this.getProvider(p);
 
-    return await this.afAuth
+    return await this.afa
       .signInWithPopup(provider)
       .then((credential: firebase.auth.UserCredential | any) => {
         // add to db if first sign in
@@ -186,7 +184,7 @@ export class AuthService {
    * @returns UserCredential object
    */
   async emailLogin(credentials: EmailPasswordCredentials): Promise<any> {
-    return await this.afAuth
+    return await this.afa
       .signInWithEmailAndPassword(credentials.email, credentials.password);
   }
   /**
@@ -195,7 +193,7 @@ export class AuthService {
    */
   async resetPassword(email: string): Promise<any> {
     // sends reset password email
-    return await this.afAuth
+    return await this.afa
       .sendPasswordResetEmail(email)
       .then(() => {
         return { message: this.messages.resetPassword };
@@ -207,7 +205,7 @@ export class AuthService {
    * @returns UserCredential object
    */
   async emailSignUp(credentials: EmailPasswordCredentials): Promise<any> {
-    return await this.afAuth
+    return await this.afa
       // create user
       .createUserWithEmailAndPassword(credentials.email, credentials.password)
       .then((credential: any) => {
@@ -250,7 +248,7 @@ export class AuthService {
   private async updateFirestoreDoc(user: any): Promise<any> {
 
     // get User ID
-    const u = await this.afAuth.currentUser;
+    const u = await this.afa.currentUser;
     const uid = u?.uid;
 
     // get User doc
@@ -266,7 +264,7 @@ export class AuthService {
    */
   async updateProfile(profile: any): Promise<any> {
     // update in firebase authentication
-    const user: any = await this.afAuth.currentUser;
+    const user: any = await this.afa.currentUser;
     return user.updateProfile(profile)
       // update in firestore database
       .then(() => this.updateFirestoreDoc(profile))
@@ -277,7 +275,7 @@ export class AuthService {
    * @param msgFunction - message function
    */
   async sendVerificationEmail(): Promise<any> {
-    const user = await this.afAuth.currentUser;
+    const user = await this.afa.currentUser;
     // send verification email
     return user!.sendEmailVerification()
       .then(() => { return { message: this.messages.emailVerifySent } });
@@ -289,7 +287,7 @@ export class AuthService {
    */
   async deleteUser(): Promise<any> {
     // delete user from firebase authentication
-    const user = await this.afAuth.currentUser;
+    const user = await this.afa.currentUser;
     return await user!
       .delete()
       .then(() =>
@@ -305,7 +303,7 @@ export class AuthService {
    */
   async updatePass(pass: string): Promise<void> {
     // update in firebase authentication
-    const user = await this.afAuth.currentUser;
+    const user = await this.afa.currentUser;
     await user!
       .updatePassword(pass)
       .then(() => { return { message: this.messages.passUpdated }; });
@@ -318,7 +316,7 @@ export class AuthService {
   async updateEmail(email: string): Promise<any> {
 
     // update in firebase authentication
-    const user: any = await this.afAuth.currentUser;
+    const user: any = await this.afa.currentUser;
     await user
       .updateEmail(email)
       // update in firestore database
@@ -332,7 +330,7 @@ export class AuthService {
    * Sign a user out and navigate router to home "/"
    */
   async logout(): Promise<void> {
-    await this.afAuth.signOut();
+    await this.afa.signOut();
   }
   /**
    *
