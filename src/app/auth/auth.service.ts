@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { AngularFirestore, AngularFirestoreDocument, Action, DocumentSnapshot } from '@angular/fire/firestore';
-import { Observable, of } from 'rxjs';
-import { switchMap, shareReplay, map, take } from 'rxjs/operators';
+import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/firestore';
+import { Observable } from 'rxjs';
+import { switchMap, shareReplay, take, map } from 'rxjs/operators';
 import { User, EmailPasswordCredentials, Providers } from './user.model';
 import firebase from 'firebase/app';
 
@@ -35,19 +35,12 @@ export class AuthService {
     this.user$ = this.afa.authState
       .pipe(
         shareReplay(),
-        switchMap((user) => {
-          return user
-            ? this.afs.doc<User>(`users/${user.uid}`).snapshotChanges()
-              .pipe(
-                map((doc: Action<DocumentSnapshot<User>>) => {
-                  // return id with doc
-                  const data = doc.payload.data();
-                  const uid = doc.payload.id;
-                  return { uid, ...data } as User;
-                })
-              )
-            : of(null);
-        })
+        switchMap(
+          (user) => this.afs.doc<User>(`users/${user!.uid}`)
+            .valueChanges({ idField: 'id' }).pipe(
+              map((doc) => { return { ...doc, ...user } })
+            ) as Observable<User | null>
+        )
       );
   }
   /**

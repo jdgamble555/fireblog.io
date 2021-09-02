@@ -26,6 +26,7 @@
     }
   ],
   "functions": {
-    "source": "dist/fireblog"
+    "source": "dist/fireblog",
+    "predeploy": "npm --prefix \"$RESOURCE_DIR\" run build"
   }
 }
