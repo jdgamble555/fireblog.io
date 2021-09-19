@@ -5,37 +5,32 @@
   </button>
   <div *ngIf="auth.user$ | async as user; else guest">
     <mat-menu #appMenu="matMenu">
-      <mat-list>
-        <mat-list-item><a mat-menu-item routerLink="/settings">
-            <mat-icon class="settings-icon">settings</mat-icon>Account Settings
-          </a></mat-list-item>
+      <button mat-menu-item routerLink="/settings">
+        <mat-icon>settings</mat-icon>
+        <span>Account Settings</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item routerLink="/bookmarks">
+        <mat-icon>bookmarks</mat-icon>
+        <span>Bookmarks</span>
+      </button>
+      <mat-divider></mat-divider>
+      <ng-container *ngIf="isAdmin">
+        <button mat-menu-item [routerLink]="['/user', user.uid]">
+          <mat-icon>account_box</mat-icon>
+          <span>My Posts</span>
+        </button>
         <mat-divider></mat-divider>
-        <mat-list-item><a mat-menu-item routerLink="/favorites">
-            <mat-icon class="settings-icon">favorite</mat-icon>Favorites
-          </a></mat-list-item>
+        <button mat-menu-item routerLink="/new">
+          <mat-icon>post_add</mat-icon>
+          <span>New Post</span>
+        </button>
         <mat-divider></mat-divider>
-        <mat-list-item><a mat-menu-item routerLink="/directory">
-            <mat-icon class="settings-icon">folder</mat-icon>Directory
-          </a></mat-list-item>
-        <mat-divider></mat-divider>
-        <ng-container *ngIf="isAdmin">
-          <mat-list-item><a mat-menu-item routerLink="/my-posts">
-              <mat-icon class="settings-icon">account_box</mat-icon>My Posts
-            </a></mat-list-item>
-          <mat-divider></mat-divider>
-          <mat-list-item><a mat-menu-item routerLink="/new">
-              <mat-icon class="settings-icon">post_add</mat-icon>New Post
-            </a></mat-list-item>
-          <mat-divider></mat-divider>
-          <mat-list-item><a mat-menu-item routerLink="/directory/new">
-              <mat-icon class="settings-icon">build</mat-icon>New Directory
-            </a></mat-list-item>
-          <mat-divider></mat-divider>
-        </ng-container>
-        <mat-list-item><a mat-menu-item (click)="auth.logout()">
-            <mat-icon class="settings-icon">power_settings_new</mat-icon>Logout
-          </a></mat-list-item>
-      </mat-list>
+      </ng-container>
+      <button mat-menu-item (click)="auth.logout()">
+        <mat-icon>power_settings_new</mat-icon>
+        <span>Logout</span>
+      </button>
     </mat-menu>
     <a mat-icon-button [matMenuTriggerFor]="appMenu">
       <img class="avatar" *ngIf="user.photoURL" [src]="user?.photoURL" />

@@ -101,10 +101,6 @@ export class DbService {
    */
   async setPost(data: Post, id = this.getId(), publish = false): Promise<string> {
 
-    // id and published
-    data.postID = id;
-    data.published = publish;
-
     // create author doc ref
     if (data.authorId) {
 
@@ -119,14 +115,6 @@ export class DbService {
       // remove tags from update
       let { tags, ...tmp } = data;
       data = tmp;
-
-      if (!publish) {
-        // save tags normally for drafts
-        data.tags = tags.reduce((obj: any, t: string) => {
-          obj[t] = true;
-          return obj;
-        }, {});
-      }
 
       // get timestamp
       if (docSnap.exists()) {
@@ -151,8 +139,8 @@ export class DbService {
         await this.deleteWithCounter(draftRef);
 
         // update tags
-        this.updateTags(id, Object.keys(docData.tags), tags);
-
+        const beforeTags = docData.tags || [];
+        this.updateTags(id, beforeTags, tags);
       }
     }
     return id;
@@ -185,8 +173,12 @@ export class DbService {
 
   async updateTags(id: string, before: string[], after: string[]) {
 
-    const removed = before.filter((x: string) => !after.includes(x));
-    const added = after.filter((x: string) => !before.includes(x));
+    const removed = before.length > 0
+      ? before.filter((x: string) => !after.includes(x))
+      : [];
+    const added = after.length > 0
+      ? after.filter((x: string) => !before.includes(x))
+      : [];
 
     const batch = writeBatch(this.afs);
 
@@ -211,7 +203,7 @@ export class DbService {
 
       // add tag
       batch.update(postRef, {
-        [`tags.${t}`]: true
+        tags: arrayUnion(t)
       });
     }
 
@@ -232,7 +224,7 @@ export class DbService {
 
       // remove tag
       batch.update(postRef, {
-        [`tags.${t}`]: deleteField()
+        tags: arrayRemove(t)
       });
     }
     batch.commit();

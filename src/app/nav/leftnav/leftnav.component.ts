@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { Observable } from 'rxjs';
+import { ReadService } from 'src/app/platform/firebase/read.service';
 
 @Component({
   selector: 'app-leftnav',
@@ -7,9 +9,10 @@ import { Component } from '@angular/core';
 })
 export class LeftnavComponent {
 
-  total!: string;
+  total: Observable<string>;
 
-  constructor() { }
-
+  constructor(private read: ReadService) {
+    this.total = this.read.getTotal('posts');
+  }
 
 }

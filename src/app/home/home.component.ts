@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { NavService } from '../nav/nav.service';
 
 @Component({
@@ -6,15 +6,8 @@ import { NavService } from '../nav/nav.service';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent {
 
-  constructor(
-    public ns: NavService
-  ) { }
-
-  ngOnInit() {
-    this.ns.openLeftNav();
-    this.ns.resetBC();
-  }
+  constructor(public ns: NavService) { }
 
 }

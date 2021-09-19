@@ -569,5 +569,35 @@ div.trim {
   overflow: hidden;
 }
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+// mobile
+
+@media (max-width: 767px) {
+  .ng-browser {
+    display: none !important;
+    visibility: hidden;
+  }
+  .ng-mobile {
+    display: block;
+    visibility: visible;
+  }
+}
+
+@media (min-width: 767px) {
+  .ng-mobile {
+    display: none !important;
+    visibility: hidden;
+  }
+  .ng-browser {
+    display: block;
+    visibility: visible;
+  }
+}

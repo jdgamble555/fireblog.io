@@ -1,7 +1,7 @@
 import { User } from '../auth/user.model';
 
 export interface Post {
-  postID?: string;
+  id?: string;
   title?: string;
   authorId?: string;
   content?: string;
@@ -14,5 +14,10 @@ export interface Post {
   minutes?: string;
   authorDoc?: User | any;
   published?: boolean;
+}
+
+export interface Tag {
+  name?: string;
+  count?: number;
 }
 

@@ -1,1 +1,4 @@
-<h3><b>Total Posts: {{ total }}</b></h3>
+<div class="ng-browser">
+  <h3><b>Total Posts: {{ total | async }}</b></h3>
+  <app-tag-list></app-tag-list>
+</div>

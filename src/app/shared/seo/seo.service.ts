@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
 })
 export class SeoService {
 
-  cachetitle = '!';
+  private cachetitle = '!';
 
   constructor(private title: Title, private meta: Meta, private router: Router) { }
 
@@ -54,7 +54,7 @@ export class SeoService {
       this.setTags([{ name: 'og:locale', content: locale }]);
     }
   }
-  setTags(tags: any): void {
+  private setTags(tags: any): void {
     tags.forEach((tag: any) => {
       const k = tag[Object.keys(tag)[0]];
       const t = `name='${k}'`;

@@ -3,7 +3,7 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatChipList } from '@angular/material/chips';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { map, take, tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { NavService } from 'src/app/nav/nav.service';
 import { ImageUploadService } from 'src/app/platform/firebase/image-upload.service';
 import { AuthService } from 'src/app/platform/firebase/auth.service';
@@ -103,7 +103,7 @@ export class PostFormComponent implements OnInit {
             this.image = this.oldImage = post.image || '';
 
             // add tags
-            this.ts.addTags(Object.keys(post.tags), this.tagsField);
+            this.ts.addTags(post.tags, this.tagsField);
 
             // image uploads
             this.imageUploads = post.imageUploads || [];
@@ -122,11 +122,11 @@ export class PostFormComponent implements OnInit {
     // add title
     this.title = (this.isNewPage ? 'New' : 'Edit') + ' Post';
 
-    this.seo.generateTags({ title: this.ns.title + ': ' + this.title });
+    this.seo.generateTags({ title: this.title + ' - ' + this.ns.title });
 
-    // add page bread crumb
+    // nav bar
     this.ns.setBC(this.title);
-
+    this.ns.closeLeftNav();
   }
 
   // get tags field as form array

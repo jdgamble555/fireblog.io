@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthComponent } from './auth/auth.component';
 import { LoginGuard, EmailGuard, NotLoginGuard } from './auth/auth.guard';
 import { HomeComponent } from './home/home.component';
+import { PostListComponent } from './post/post-list/post-list.component';
 import { PostComponent } from './post/post.component';
 
 const routes: Routes = [
@@ -17,6 +18,8 @@ const routes: Routes = [
   // posts
   { path: 'post/:id', component: PostComponent },
   { path: 'post/:id/:slug', component: PostComponent },
+  { path: 't/:tag', component: PostListComponent },
+  { path: 'user/:uid', component: PostListComponent },
 
   // logged in
   { path: 'new', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [EmailGuard, LoginGuard] },

@@ -10,12 +10,13 @@ import {
   Firestore,
   orderBy,
   query,
-  where
+  where,
+  OrderByDirection
 } from '@angular/fire/firestore';
 import { combineLatest, Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { User } from 'src/app/auth/user.model';
-import { Post } from 'src/app/post/post.model';
+import { Post, Tag } from 'src/app/post/post.model';
 import { AuthService } from './auth.service';
 
 //
@@ -39,7 +40,29 @@ export class ReadService {
       switchMap((user: Auth | null) => user ? this.getUser(user.uid) : of(null))
     );
   }
-
+  /**
+   * Get a total count for the collection
+   * @param col - Collection Path
+   * @returns - total count
+   */
+  getTotal(col: string): Observable<string> {
+    return docData<any>(
+      doc(this.afs, '_counters', col)
+    ).pipe(
+      map((r: any) => r.count)
+    );
+  }
+  /**
+   * Get all tags and their count
+   * @returns tags
+   */
+  getTags(): Observable<Tag[]> {
+    return collectionData<Tag>(
+      query<Tag>(
+        collection(this.afs, 'tags'),
+      ), { idField: 'name' }
+    );
+  }
   /**
    * Get user document
    * @param id
@@ -51,25 +74,54 @@ export class ReadService {
     );
   }
   /**
+   * Get all posts from a certain uid
+   * @param uid
+   * @returns
+   */
+  getPostsByUser<Post>(uid: string): Observable<Post[]> {
+    return this.getPosts({ uid });
+  }
+  /**
+   * Get all posts with a certain tag
+   * @param tag
+   * @returns
+   */
+  getPostsByTag<Post>(tag: string): Observable<Post[]> {
+    return this.getPosts({ tag });
+  }
+  /**
    * Gets all posts
    * @returns posts joined by authorDoc
    */
-  getPosts<Post>(fieldSort = 'createdAt'): Observable<Post[]> {
+  getPosts<Post>(opts?: {
+    sortField?: string,
+    sortDirection?: OrderByDirection,
+    tag?: string,
+    uid?: string
+  }): Observable<Post[]> {
+    opts = opts || {};
+    opts.sortField = opts.sortField || 'createdAt';
+    opts.sortDirection = opts.sortDirection || 'desc';
+    const filters = [
+      orderBy(opts.sortField, opts.sortDirection)
+    ];
+    if (opts.tag) {
+      filters.push(
+        where('tags', 'array-contains', opts.tag)
+      );
+    }
+    if (opts.uid) {
+      filters.push(
+        where('authorId', '==', opts.uid)
+      );
+    }
     return this.expandRefs<Post>(
       collectionData<Post>(
         query<Post>(
           collection(this.afs, 'posts') as CollectionReference<Post>,
-          where('published', '==', true),
-          orderBy(fieldSort)
-        )
-      ), ['authorDoc']).pipe(
-        map((docs: any) =>
-          docs.map((r: any) => {
-            r.tags = Object.keys(r.tags);
-            return r;
-          })
-        )
-      );
+          ...filters
+        ), { idField: 'id' }
+      ), ['authorDoc']);
   }
   /**
    * Get Post by post id
@@ -81,11 +133,8 @@ export class ReadService {
       docData<Post>(
         doc(this.afs, 'posts', id)
       ), ['authorDoc']).pipe(
-        map((p: Post) => p ? { ...p, id } : p),
-        map((r: any) => {
-          r.tags = Object.keys(r.tags);
-          return r;
-        })
+        // add id field
+        map((p: Post) => p ? { ...p, id } : p)
       );
   }
   //

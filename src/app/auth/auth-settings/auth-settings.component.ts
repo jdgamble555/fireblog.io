@@ -11,6 +11,7 @@ import { matchValidator } from 'src/app/shared/form-validators';
 import { ReLoginComponent } from 'src/app/auth/auth-settings/re-login/re-login.component';
 import { AuthService } from 'src/app/platform/firebase/auth.service';
 import { take } from 'rxjs/operators';
+import { SeoService } from 'src/app/shared/seo/seo.service';
 
 @Component({
   selector: 'app-auth-settings',
@@ -66,9 +67,11 @@ export class AuthSettingsComponent implements OnInit {
     private dialog: DialogService,
     private d: MatDialog,
     private nav: NavService,
-    public is: ImageUploadService
+    public is: ImageUploadService,
+    private seo: SeoService
   ) {
     this.nav.closeLeftNav();
+    this.seo.generateTags({ title: 'Settings - ' + this.nav.title });
   }
 
   async ngOnInit() {

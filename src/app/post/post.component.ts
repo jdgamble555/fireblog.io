@@ -40,7 +40,7 @@ export class PostComponent implements OnInit {
               domain: this.ns.title,
               image: r.image,
               description: r.content,
-              title: this.ns.title + ': ' + r.title
+              title: r.title + ' - ' + this.ns.title
             });
             // check slug
             if (r.slug !== p.slug) {
