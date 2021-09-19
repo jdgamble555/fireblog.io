@@ -150,6 +150,9 @@ export class DbService {
    * @param id
    */
   async deletePost(id: string): Promise<void> {
+
+    // TODO - Delete Images First...
+
     await this.deleteWithCounter(
       doc(this.afs, 'posts', id)
     );

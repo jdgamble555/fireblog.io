@@ -6,29 +6,29 @@
   <div *ngIf="auth.user$ | async as user; else guest">
     <mat-menu #appMenu="matMenu">
       <button mat-menu-item routerLink="/settings">
-        <mat-icon>settings</mat-icon>
+        <mat-icon class="ng-menu-icon">settings</mat-icon>
         <span>Account Settings</span>
       </button>
       <mat-divider></mat-divider>
       <button mat-menu-item routerLink="/bookmarks">
-        <mat-icon>bookmarks</mat-icon>
+        <mat-icon class="ng-menu-icon">bookmarks</mat-icon>
         <span>Bookmarks</span>
       </button>
       <mat-divider></mat-divider>
       <ng-container *ngIf="isAdmin">
         <button mat-menu-item [routerLink]="['/user', user.uid]">
-          <mat-icon>account_box</mat-icon>
+          <mat-icon class="ng-menu-icon">account_box</mat-icon>
           <span>My Posts</span>
         </button>
         <mat-divider></mat-divider>
         <button mat-menu-item routerLink="/new">
-          <mat-icon>post_add</mat-icon>
+          <mat-icon class="ng-menu-icon">post_add</mat-icon>
           <span>New Post</span>
         </button>
         <mat-divider></mat-divider>
       </ng-container>
       <button mat-menu-item (click)="auth.logout()">
-        <mat-icon>power_settings_new</mat-icon>
+        <mat-icon class="ng-menu-icon">power_settings_new</mat-icon>
         <span>Logout</span>
       </button>
     </mat-menu>
