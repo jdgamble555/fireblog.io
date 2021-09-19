@@ -1,19 +1,19 @@
 import { NgModule } from '@angular/core';
-import { FireFormDirective } from './fire-form.directive';
-import { NavModule } from '../nav/nav.module';
-import { AutoSaveDirective } from './auto-save.directive';
 import { FormsModule } from '@angular/forms';
+import { AutoSaveDirective } from './auto-save/auto-save.directive';
+import { ConfirmDialogModule } from './confirm-dialog/confirm-dialog.module';
+import { DropZoneDirective } from './drop-zone/drop-zone.directive';
 
 
 const modules = [
-  NavModule,
-  FormsModule
+  FormsModule,
+  ConfirmDialogModule
 ];
 
 const directives = [
-  FireFormDirective,
-  AutoSaveDirective
-]
+  AutoSaveDirective,
+  DropZoneDirective
+];
 
 @NgModule({
   declarations: [

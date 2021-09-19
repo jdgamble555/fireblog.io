@@ -4,10 +4,7 @@ import { FooterComponent } from '../nav/footer/footer.component';
 import { LeftnavComponent } from '../nav/leftnav/leftnav.component';
 import { RightnavComponent } from '../nav/rightnav/rightnav.component';
 import { NavComponent } from '../nav/nav.component';
-import { NavService } from '../nav/nav.service';
 import { CoreModule } from '../core/core.module';
-import { TagModule } from '../tag/tag.module';
-import { BoldTermPipe } from '../shared/bold-term.pipe';
 
 const components = [
   NavComponent,
@@ -18,16 +15,16 @@ const components = [
 ];
 
 const modules = [
-  CoreModule,
-  TagModule
+  CoreModule
 ];
 
 @NgModule({
   declarations: [
-    ...components,
-    BoldTermPipe
+    ...components
   ],
-  imports: [...modules],
+  imports: [
+    ...modules
+  ],
   exports: [
     ...components,
     ...modules

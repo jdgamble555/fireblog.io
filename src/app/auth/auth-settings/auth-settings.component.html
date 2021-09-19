@@ -9,21 +9,22 @@
             <mat-panel-description>Change Your Name and Picture</mat-panel-description>
           </mat-expansion-panel-header>
           <div libDropZone (dropped)="uploadImage($event)" (hovered)="toggleHover($event)" class="drop-zone">
-            <div (click)="file.click()" class="drop-image">
-              <img *ngIf="user.photoURL" [src]="user.photoURL" width="180px" />
+            <div (click)="file.click()">
+              <img *ngIf="user.photoURL" [src]="user.photoURL" class="drop-image" />
               <mat-icon *ngIf="!user.photoURL" class="ng-account-icon">account_circle</mat-icon>
             </div>
           </div>
           <br />
-          <div *ngIf="user?.photoURL">
-            <button mat-stroked-button (click)="deleteImage()">Delete</button>
-          </div>
           <div>
             <input [hidden]="true" type="file" name="file" id="file" accept="image/*" (change)="uploadImage($event)"
               #file>
-            <div [hidden]="!is.showPercent">
+            <div [hidden]="!is.uploadingImage">
               <mat-progress-bar mode="determinate" value="{{ uploadPercent | async }}"></mat-progress-bar>
+              <div class="margin-spacer"></div>
             </div>
+          </div>
+          <div *ngIf="user?.photoURL">
+            <button mat-stroked-button (click)="deleteImage()">Delete</button>
           </div>
           <div class="margin-spacer"></div>
           <mat-form-field class="login-text" appearance="outline">
@@ -62,7 +63,8 @@
         <mat-expansion-panel>
           <mat-expansion-panel-header>
             <mat-panel-title>Password</mat-panel-title>
-            <mat-panel-description>{{ providers.password ? 'Change' : 'Create'}} Your Password</mat-panel-description>
+            <mat-panel-description>{{ isProvider('password') ? 'Change' : 'Create'}} Your Password
+            </mat-panel-description>
           </mat-expansion-panel-header>
           <mat-form-field class="login-text" appearance="outline">
             <mat-icon color="primary" matPrefix class="ng-form-icon">lock</mat-icon>
@@ -97,10 +99,10 @@
           </mat-expansion-panel-header>
           <div>
             <div>
-              <button class="g-button provider-button" mat-button>
+              <button class="g-button provider-button ng-button-space" mat-button>
                 Google
               </button>
-              <mat-slide-toggle color="primary" #g [checked]="providers['google.com']"
+              <mat-slide-toggle color="primary" #g [checked]="isProvider('google.com')"
                 (change)="updateProvider(g, 'google.com')">
               </mat-slide-toggle>
             </div>

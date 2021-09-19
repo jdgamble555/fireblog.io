@@ -1,22 +1,49 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
-import { AngularFireStorage } from '@angular/fire/storage';
+import {
+  Storage,
+  ref,
+  deleteObject,
+  uploadBytesResumable,
+  percentage,
+  getDownloadURL
+} from '@angular/fire/storage';
 import { Observable } from 'rxjs';
-import { ImageUploadModule } from './image-upload.module';
+
 
 @Injectable({
-  providedIn: ImageUploadModule
+  providedIn: 'root'
 })
 export class ImageUploadService {
 
+  // image type
+  type = 'image/jpeg';
+
+  fileName!: string;
+
+  // use for progress bar
   uploadPercent: Observable<number> | any = null;
-  showPercent = false;
+
+  // use for spinners
+  uploadingImage = false;
 
   constructor(
-    private storage: AngularFireStorage,
+    private storage: Storage,
     @Inject(DOCUMENT) private document: Document
   ) { }
 
+  /**
+   * Generate Random ID for Image Name
+   * @returns randomly generated ID
+   */
+  randomID(): string {
+    // generate image id
+    return Array(16)
+      .fill(0)
+      .map(() => String.fromCharCode(Math.floor(Math.random() * 26) + 97))
+      .join('') +
+      Date.now().toString(24);
+  }
   /**
    *
    * Canvas tools to resize image
@@ -31,6 +58,10 @@ export class ImageUploadService {
     });
   }
 
+  blobToFile(blob: Blob, fileName: string): File {
+    return new File([blob], fileName, { type: this.type });
+  }
+
   drawImageScaled(img: HTMLImageElement, ctx: CanvasRenderingContext2D): void {
     const canvas = ctx.canvas;
     const hRatio = canvas.width / img.width;
@@ -43,17 +74,21 @@ export class ImageUploadService {
       centerShift_x, centerShift_y, img.width * ratio, img.height * ratio);
   }
 
-  async compressImage(src: any, newX: number, newY: number): Promise<Blob> {
+  async scaleImage(src: any, newX?: number, newY?: number): Promise<Blob> {
     return new Promise((res: any, rej: any) => {
       const img = new Image();
       img.src = src;
       img.onload = () => {
         const elem = this.document.createElement('canvas');
-        elem.width = newX;
-        elem.height = newY;
+        if (newX) {
+          elem.width = newX;
+        }
+        if (newY) {
+          elem.height = newY;
+        }
         const ctx = elem.getContext('2d') as CanvasRenderingContext2D;
         this.drawImageScaled(img, ctx);
-        ctx.canvas.toBlob(res, 'image/png');
+        ctx.canvas.toBlob(res, this.type, 1);
       }
       img.onerror = error => rej(error);
     });
@@ -70,14 +105,16 @@ export class ImageUploadService {
     const target = event.target as HTMLInputElement;
 
     if (target.files?.length) {
+      
       // view file before upload
       const file = target.files[0];
+      this.fileName = file.name;
 
       // get image preview
       const image = await this.blobToData(file);
 
       // return resized version
-      return await this.compressImage(image, 800, 418);
+      return await this.scaleImage(image, 800, 418);
     }
     return;
   }
@@ -91,7 +128,9 @@ export class ImageUploadService {
 
     try {
       // delete image
-      return await this.storage.storage.refFromURL(url).delete();
+      return await deleteObject(
+        ref(this.storage, url)
+      );
     } catch (e: any) {
       if (e.code === 'storage/invalid-argument') {
         // don't delete anything if no previous image
@@ -103,27 +142,32 @@ export class ImageUploadService {
   /**
    * Uploads Image to Storage Bucket
    * @param folder - folder containing image
-   * @param name - file name
    * @param file - file blob
+   * @param name - image file name, default random name
    */
-  async uploadImage(folder: string, name: string, file: File | null): Promise<string> {
+  async uploadImage(folder: string, file: File | null, name = this.randomID()): Promise<string> {
 
     const ext = file!.name.split('.').pop();
     const path = `${folder}/${name}.${ext}`;
 
-    if (file!.type.split('/')[0] !== 'image') {
-      throw { code: 'image/file-type' };
-    }
-    else {
-      this.showPercent = true;
-      const task = this.storage.upload(path, file);
-      const ref = this.storage.ref(path);
-      this.uploadPercent = task.percentageChanges();
+    if (file) {
+      if (file!.type.split('/')[0] !== 'image') {
+        throw { code: 'image/file-type' };
+      }
+      else {
+        const storageRef = ref(this.storage, path);
+        const task = uploadBytesResumable(storageRef, file);
+        this.uploadPercent = percentage(task);
 
-      // upload image, return url
-      await task.catch((e: any) => console.error(e));
-      this.showPercent = false;
-      return await ref.getDownloadURL().toPromise();
+        // upload image
+        this.uploadingImage = true;
+        await task;
+        this.uploadingImage = false;
+
+        return await getDownloadURL(storageRef);
+      }
+    } else {
+      throw { code: 'invalid-file' };
     }
   }
 }

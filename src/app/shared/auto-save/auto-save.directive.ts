@@ -19,7 +19,6 @@ export class AutoSaveDirective implements OnInit, OnDestroy {
   // Outputs
   @Output() stateChange = new EventEmitter<string>();
 
-  // Subscriptions
   private formSub!: Subscription;
 
   constructor() { }
@@ -32,18 +31,19 @@ export class AutoSaveDirective implements OnInit, OnDestroy {
   // Loads initial form data from db
   preloadData<T>(): void {
     this._state = 'loading';
-    this.getData
-      .pipe(
-        tap((data: T) => {
-          if (data) {
-            this.formGroup.patchValue(data);
-            this.formGroup.markAsPristine();
-            this.state = 'synced';
-          }
-        }),
-        take(1)
-      )
-      .subscribe();
+    if (this.getData) {
+      this.getData
+        .pipe(
+          tap((data: T) => {
+            if (data) {
+              this.formGroup.patchValue(data);
+              this.formGroup.markAsPristine();
+              this.state = 'synced';
+            }
+          }),
+          take(1)
+        ).subscribe();
+    }
   }
 
   // Autosaves form changes

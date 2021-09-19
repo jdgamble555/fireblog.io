@@ -11,9 +11,6 @@
         Image</button>
       <p></p>
       <input hidden type="file" accept="image/*" #imageInput (change)="addImage($event)">
-      <div [hidden]="!is.showPercent">
-        <mat-progress-bar mode="determinate" value="{{ is.uploadPercent | async }}"></mat-progress-bar>
-      </div>
     </mat-card-content>
     <img *ngIf="image" mat-card-image [src]="image || '//:0'">
     <mat-card-content>
@@ -54,7 +51,7 @@
             <markdown [data]="postForm.value.content"></markdown>
           </mat-card>
         </mat-tab>
-        <mat-tab label="Images">
+        <mat-tab label="Images" [disabled]="state !== 'synced'">
           <mat-card>
             <button type="button" class="ng-button-space" mat-raised-button (click)="inlineInput.click()">Upload
               Image</button>
@@ -84,17 +81,17 @@
     <mat-card-actions>
       <div class="flex-container">
         <p>
-          <button type="button" matSuffix mat-raised-button>
+          <button type="button" matSuffix mat-raised-button (click)="onSubmit(true)" [disabled]="state !== 'synced'">
             <b>Publish</b>
           </button>
           <button mat-button color="{{ state !== 'modified' ? 'warn' : 'accent'}}" [disabled]="state === 'synced'">
-            <b *ngIf="state === 'synced'">Synced</b>
-            <b *ngIf="state ==='modified'">Typing...</b>
+            <b *ngIf="state === 'synced'">Draft Saved</b>
+            <b *ngIf="state ==='modified'">Modifying...</b>
             <b *ngIf="state ==='error'">Form Not Ready</b>
-            <b *ngIf="state === 'saving'">Saving...</b>
+            <b *ngIf="state === 'saving'">Saving Draft...</b>
           </button>
         </p>
-        <button type="button" matSuffix mat-icon-button>
+        <button type="button" matSuffix mat-icon-button (click)="deletePost()">
           <mat-icon>delete</mat-icon>
         </button>
       </div>

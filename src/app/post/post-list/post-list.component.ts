@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { AuthService } from 'src/app/auth/auth.service';
+import { AuthService } from 'src/app/platform/firebase/auth.service';
+import { ReadService } from 'src/app/platform/firebase/read.service';
 import { Post } from '../post.model';
-import { PostService } from '../post.service';
+
 
 @Component({
   selector: 'app-post-list',
@@ -14,10 +15,10 @@ export class PostListComponent implements OnInit {
   posts: Observable<Post[]>;
 
   constructor(
-    public ps: PostService,
+    public read: ReadService,
     public auth: AuthService
   ) {
-    this.posts = this.ps.getPosts();
+    this.posts = this.read.getPosts();
   }
 
   ngOnInit(): void { }

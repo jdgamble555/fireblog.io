@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from './confirm-dialog.component';
 
 @Injectable({
@@ -9,7 +9,7 @@ export class DialogService {
 
   constructor(public dialog: MatDialog) { }
 
-  confirmDialog(msg: string): any {
+  confirmDialog(msg: string): MatDialogRef<any> {
     return this.dialog.open(ConfirmDialogComponent, {
       height: '',
       width: '300px',

@@ -1,23 +1,19 @@
 import { NgModule, SecurityContext } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
-import { AngularFireModule } from '@angular/fire';
-import { AngularFireStorageModule } from '@angular/fire/storage';
-import { AngularFireAuthModule } from '@angular/fire/auth';
-import { AngularFirestoreModule } from '@angular/fire/firestore';
-import { AngularFireAnalyticsModule } from '@angular/fire/analytics';
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+
+import { environment } from 'src/environments/environment';
+import { HomeComponent } from './home/home.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
-import { environment } from '../environments/environment';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CoreModule } from './core/core.module';
-import { HomeComponent } from './home/home.component';
-import { SharedModule } from './shared/shared.module';
 import { MarkdownModule } from 'ngx-markdown';
 import { PostComponent } from './post/post.component';
 import { PostListComponent } from './post/post-list/post-list.component';
+import { FirebaseModule } from './platform/firebase/firebase.module';
+import { NavModule } from './nav/nav.module';
 
 @NgModule({
   declarations: [
@@ -27,17 +23,10 @@ import { PostListComponent } from './post/post-list/post-list.component';
     PostListComponent
   ],
   imports: [
-    MarkdownModule.forRoot({
-      sanitize: SecurityContext.NONE
-    }),
     BrowserModule.withServerTransition({ appId: 'serverApp' }),
-    AngularFireModule.initializeApp(environment.firebase),
-    AngularFireAnalyticsModule,
-    AngularFireStorageModule,
-    AngularFireAuthModule,
-    // remove here if using another db
-    AngularFirestoreModule,
     AppRoutingModule,
+    FirebaseModule,
+    NavModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production,
       // Register the ServiceWorker as soon as the app is stable
@@ -46,7 +35,9 @@ import { PostListComponent } from './post/post-list/post-list.component';
     }),
     BrowserAnimationsModule,
     CoreModule,
-    SharedModule
+    MarkdownModule.forRoot({
+      sanitize: SecurityContext.NONE
+    }),
   ],
   providers: [],
   bootstrap: [AppComponent]

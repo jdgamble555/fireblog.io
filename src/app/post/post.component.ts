@@ -2,12 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { AuthService } from '../auth/auth.service';
 import { NavService } from '../nav/nav.service';
+import { AuthService } from '../platform/firebase/auth.service';
+import { ReadService } from '../platform/firebase/read.service';
 import { SeoService } from '../shared/seo/seo.service';
-import { TagService } from '../tag/tag.service';
 import { Post } from './post.model';
-import { PostService } from './post.service';
 
 @Component({
   selector: 'app-post',
@@ -21,9 +20,8 @@ export class PostComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private ps: PostService,
+    private read: ReadService,
     public auth: AuthService,
-    public ts: TagService,
     private seo: SeoService,
     private ns: NavService
   ) { }
@@ -31,20 +29,25 @@ export class PostComponent implements OnInit {
   ngOnInit(): void {
 
     this.route.params.subscribe(async (p: any) => {
-      this.post = this.ps.getPostById(p.id).pipe(
+      this.post = this.read.getPostById(p.id).pipe(
         tap((r: Post) => {
-          // add bread crumbs
-          this.ns.setBC(r.title as string);
-          // generate seo tags
-          this.seo.generateTags({
-            domain: this.ns.title,
-            image: r.image,
-            description: r.content,
-            title: this.ns.title + ': ' + r.title
-          });
-          // check slug
-          if (r.slug !== p.slug) {
-            this.router.navigate(['/post', p.id, r.slug]);
+          // if post from id
+          if (r) {
+            // add bread crumbs
+            this.ns.setBC(r.title as string);
+            // generate seo tags
+            this.seo.generateTags({
+              domain: this.ns.title,
+              image: r.image,
+              description: r.content,
+              title: this.ns.title + ': ' + r.title
+            });
+            // check slug
+            if (r.slug !== p.slug) {
+              this.router.navigate(['/post', p.id, r.slug]);
+            }
+          } else {
+            this.router.navigate(['/home']);
           }
         })
       );

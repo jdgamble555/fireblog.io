@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
 
 interface Link {
   name: string;

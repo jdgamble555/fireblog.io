@@ -1,8 +1,0 @@
-<button mat-icon-button>
-  <ng-container *ngIf="(likes | async)">
-    <mat-icon class="ng-like" (click)='ls.removeLike(userId, postId)'>favorite</mat-icon>
-  </ng-container>
-  <ng-container *ngIf="!(likes | async)">
-    <mat-icon class="ng-like" (click)='ls.setLike(userId, postId)'>favorite_border</mat-icon>
-  </ng-container>
-</button>

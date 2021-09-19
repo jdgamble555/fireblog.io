@@ -21,11 +21,15 @@ const components = [
 
 
 @NgModule({
-  imports: [...modules],
+  imports: [
+    ...modules
+  ],
   exports: [
     ...modules,
     ...components
   ],
-  declarations: [...components]
+  declarations: [
+    ...components
+  ]
 })
 export class CoreModule { }

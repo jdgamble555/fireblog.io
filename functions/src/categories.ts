@@ -15,11 +15,11 @@ import {
 
 exports = module.exports = functions.firestore
     .document('categories/{categoryId}')
-    .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
+    .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext): Promise<void> => {
 
         // don't run if repeated function
         if (await eventExists(context) || isTriggerFunction(change, context)) {
-            return null;
+            return;
         }
         console.log("First function run: ", context.eventId);
 
@@ -47,6 +47,4 @@ exports = module.exports = functions.firestore
         }
         // run trigger function, if necessary
         await triggerFunction(change, data);
-
-        return null;
     });

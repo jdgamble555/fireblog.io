@@ -3,20 +3,6 @@
     <mat-icon class="ng-button-icon">home</mat-icon>
     {{ ns.title }}
   </button>
-  <form [formGroup]="myForm">
-    <div class="ng-search-box">
-      <mat-form-field color="accent" class="ng-search" appearance="outline">
-        <mat-icon class="ng-form-icon" matPrefix>search</mat-icon>
-        <input matInput placeholder="Search..." formControlName="term" [matAutocomplete]="auto" (keyup)="mySerach()">
-      </mat-form-field>
-      <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption>
-        <mat-option style="white-space: pre" *ngFor="let option of options | async"
-          [routerLink]="['/blog/post/' + option._title.split(' ').join('-')]"
-          [innerHTML]="option.term | boldTerm : trigrams">
-        </mat-option>
-      </mat-autocomplete>
-    </div>
-  </form>
   <div *ngIf="auth.user$ | async as user; else guest">
     <mat-menu #appMenu="matMenu">
       <mat-list>
@@ -32,7 +18,7 @@
             <mat-icon class="settings-icon">folder</mat-icon>Directory
           </a></mat-list-item>
         <mat-divider></mat-divider>
-        <ng-container *ngIf="user?.roles?.includes('editor') || user?.roles?.includes('admin')">
+        <ng-container *ngIf="isAdmin">
           <mat-list-item><a mat-menu-item routerLink="/my-posts">
               <mat-icon class="settings-icon">account_box</mat-icon>My Posts
             </a></mat-list-item>

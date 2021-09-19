@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { NavService } from '../nav/nav.service';
-import { SeoService } from '../shared/seo/seo.service';
 
 @Component({
   selector: 'app-home',
@@ -10,13 +9,12 @@ import { SeoService } from '../shared/seo/seo.service';
 export class HomeComponent implements OnInit {
 
   constructor(
-    private ns: NavService,
-    private seo: SeoService
+    public ns: NavService
   ) { }
 
-  ngOnInit(): void {
-    this.ns.resetBC();
+  ngOnInit() {
     this.ns.openLeftNav();
-    this.seo.generateTags({ domain: this.ns.title, title: this.ns.title + ': Home' });
+    this.ns.resetBC();
   }
+
 }

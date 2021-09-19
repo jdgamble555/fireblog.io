@@ -1,13 +1,13 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
-import { AuthService } from 'src/app/auth/auth.service';
-import { SnackbarService } from '../snack-bar/snack-bar.service';
+import { AuthService } from '../../../platform/firebase/auth.service';
+import { SnackbarService } from '../../../shared/snack-bar/snack-bar.service';
 
 @Component({
   selector: 'app-re-login',
   templateUrl: './re-login.component.html',
-  styleUrls: ['./re-login.component.scss', '../../auth/auth.component.scss']
+  styleUrls: ['./re-login.component.scss']
 })
 export class ReLoginComponent implements OnInit {
 
@@ -39,7 +39,10 @@ export class ReLoginComponent implements OnInit {
   }
 
   login(): void {
-    this.auth.emailLogin(this.userForm.value);
+    this.auth.emailLogin(
+      this.getField('email').value,
+      this.getField('password').value
+    );
   }
 
   error(e: string) {
@@ -53,6 +56,10 @@ export class ReLoginComponent implements OnInit {
       ]
       ]
     });
+  }
+
+  getField(field: string): AbstractControl {
+    return this.userForm.get(field) as AbstractControl;
   }
 
 }

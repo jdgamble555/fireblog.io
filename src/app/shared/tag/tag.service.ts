@@ -42,11 +42,13 @@ export class TagService {
    * @param tags
    * @param control
    */
-  addTags(tags: string[], control: FormArray): void {
+  addTags(tags: any, control: FormArray): void {
 
-    // add new tags
-    for (let i = 0; i < tags.length; ++i) {
-      this.addTag(this.tagFormat(tags[i]), control);
+    if (tags) {
+      // add new tags
+      for (let i = 0; i < tags.length; ++i) {
+        this.addTag(this.tagFormat(tags[i]), control);
+      }
     }
   }
 

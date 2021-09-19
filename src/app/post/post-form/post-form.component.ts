@@ -3,15 +3,17 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatChipList } from '@angular/material/chips';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { AuthService } from 'src/app/auth/auth.service';
+import { map, take, tap } from 'rxjs/operators';
 import { NavService } from 'src/app/nav/nav.service';
-import { ImageUploadService } from 'src/app/shared/image-upload/image-upload.service';
+import { ImageUploadService } from 'src/app/platform/firebase/image-upload.service';
+import { AuthService } from 'src/app/platform/firebase/auth.service';
+import { DbService } from 'src/app/platform/firebase/db.service';
 import { SeoService } from 'src/app/shared/seo/seo.service';
 import { SnackbarService } from 'src/app/shared/snack-bar/snack-bar.service';
-import { TagService } from 'src/app/tag/tag.service';
+import { TagService } from 'src/app/shared/tag/tag.service';
 import { Post } from '../post.model';
-import { PostService } from '../post.service';
+import { DialogService } from 'src/app/shared/confirm-dialog/dialog.service';
+
 
 @Component({
   selector: 'app-post-form',
@@ -35,22 +37,26 @@ export class PostFormComponent implements OnInit {
     }
   };
 
+  messages = {
+    published: 'Your post is now published!',
+    deleted: 'Your post is now deleted!',
+    deleteConfirm: 'Are you sure you want to delete your post?'
+  };
+
   postForm: FormGroup;
   isNewPage = true;
   id!: string;
+  uid!: string;
 
   image!: string;
-
-  imageUploads!: string[];
-
+  imageFile!: File;
+  oldImage!: string;
+  imageUploads: string[] = [];
   imageLoading = false;
 
   postSaving = false;
-
   title!: string;
-
   patchPost!: Observable<Post>;
-
   state!: string;
 
   constructor(
@@ -60,24 +66,24 @@ export class PostFormComponent implements OnInit {
     public ts: TagService,
     public is: ImageUploadService,
     private auth: AuthService,
-    private ps: PostService,
+    private db: DbService,
     public sb: SnackbarService,
     private ns: NavService,
-    private seo: SeoService
+    private seo: SeoService,
+    private dialog: DialogService
   ) {
-
     this.postForm = this.fb.group({
       title: ['', Validators.required],
       content: ['', Validators.required],
       tags: this.fb.array([], [ts.tagValidatorMin(5), ts.tagValidatorRequired])
     });
-
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
 
     const r = this.router.url;
 
+    // edit post
     if (r.startsWith('/edit')) {
 
       this.isNewPage = false;
@@ -89,15 +95,15 @@ export class PostFormComponent implements OnInit {
         return;
       }
 
-      this.patchPost = this.ps.getPostById(this.id).pipe(
+      this.patchPost = this.db.getPostData(this.id).pipe(
         tap((post: Post) => {
           if (post) {
 
             // add image
-            this.image = post.image || '';
+            this.image = this.oldImage = post.image || '';
 
             // add tags
-            this.ts.addTags(post.tags, this.tagsField);
+            this.ts.addTags(Object.keys(post.tags), this.tagsField);
 
             // image uploads
             this.imageUploads = post.imageUploads || [];
@@ -106,6 +112,10 @@ export class PostFormComponent implements OnInit {
             // error, id does not exist in db
             this.router.navigate(['home']);
           }
+        }),
+        map((r) => {
+          const { tags, ...rest } = r;
+          return rest;
         }));
     }
 
@@ -125,12 +135,12 @@ export class PostFormComponent implements OnInit {
   }
 
   // get field
-  getField(field: string) {
+  getField(field: string): any {
     return this.postForm.get(field);
   }
 
   // get error
-  getError(field: string) {
+  getError(field: string): any {
     const errors = this.validationMessages[field];
     for (const e of Object.keys(errors)) {
       if (this.postForm.get(field)?.hasError(e)) {
@@ -144,57 +154,46 @@ export class PostFormComponent implements OnInit {
     return (wordCount / 100 + 1).toFixed(0);
   }
 
-  async deleteImage() {
+  deleteImage(): void {
 
     // delete image in db
-    this.ps.deleteImage(this.id);
+    this.db.deleteImage(this.id);
 
     // delete image file
     this.is.deleteImage(this.image);
 
   }
 
-  async addImage(event: Event) {
+  async addImage(event: Event): Promise<void> {
 
     // preview image
-    const blob = await this.is.previewImage(event) as Blob;
+    const blob = await this.is.previewImage(event);
 
-    this.image = await this.is.blobToData(blob);
+    if (blob) {
+      this.image = await this.is.blobToData(blob);
+      this.imageFile = this.is.blobToFile(blob, this.is.fileName);
+    }
 
-    const file = new File([blob], 'new.png', { type: "image/png" });
-
-    // upload image
-    const image = await this.is.uploadImage('posts', this.id, file);
-
-    const data = {
-      id: this.id,
-      image
-    };
-
-    // save url to db
-    await this.ps.setPost(data);
+    this.postForm.updateValueAndValidity();
   }
 
-  async addPostImage(event: Event) {
+  async addPostImage(event: Event): Promise<void> {
 
     // add event to image service
     const target = event.target as HTMLInputElement;
 
-    if (target.files?.length) {
+    if (target.files?.length && this.id) {
 
       // view file before upload
       const file = target.files[0];
 
-      // generate image id
-      const randId = this.ps.getId(); // <===
-
       // upload image with spinner
       this.imageLoading = true;
-      const image = await this.is.uploadImage('posts', randId, file);
+      const image = await this.is.uploadImage('posts', file);
       this.imageLoading = false;
 
       // save url to db
-      this.id = await this.ps.addPostImage(this.id, image);
+      await this.db.addPostImage(this.id, image);
 
       // add url to imageUploads array
       this.imageUploads.push(image);
@@ -204,10 +203,10 @@ export class PostFormComponent implements OnInit {
     }
   }
 
-  async deletePostImage(val: string) {
+  async deletePostImage(val: string): Promise<void> {
 
     // delete image in db
-    await this.ps.deletePostImage(this.id, val);
+    await this.db.deletePostImage(this.id, val);
 
     // delete image file
     await this.is.deleteImage(val);
@@ -223,35 +222,59 @@ export class PostFormComponent implements OnInit {
 
   }
 
-  async onSubmit() {
+  async onSubmit(publish = false): Promise<void> {
 
-    // prepare variables for firestore
+    // prepare variables for db
     const formValue = this.postForm.value;
-    const uid = (await this.auth.getUser()).uid;
     const slug = this.ts.slugify(formValue.title);
 
     let data: Post = {
-      id: this.id,
-      authorId: uid,
+      authorId: (await this.auth.getUser())?.uid,
       tags: this.ts.getTags(this.tagsField),
-      [this.isNewPage ? 'createdAt' : 'updatedAt']: this.ps.getDate(),
       content: formValue.content,
       title: formValue.title,
       minutes: this.minutesToRead(formValue.content),
       slug
     };
 
+    // upload image
+    if (this.imageFile) {
+      try {
+        const image = await this.is.uploadImage('posts', this.imageFile);
+        data = { ...data, image };
+      } catch (e: any) {
+        console.error(e);
+      }
+    }
+
     // add post to db
-    await this.ps.setPost(data);
+    try {
+      this.id = await this.db.setPost(data, this.id, publish);
+    } catch (e: any) {
+      console.error(e);
+    }
 
+    if (publish) {
+      this.sb.showMsg(this.messages.published);
+      this.router.navigate(['/post', this.id, slug]);
+    }
   }
 
-  onPublish() {
-    //this.router.navigate(['/post', this.id, slug]);
-  }
-
-  updateState(e: any) {
+  updateState(e: any): void {
     this.state = e;
   }
 
+  deletePost(): void {
+
+    const confirm = this.dialog.confirmDialog(this.messages.deleteConfirm);
+    // delete when confirmed
+    confirm.afterClosed()
+      .subscribe((confirmed: any) => {
+        if (confirmed) {
+          this.db.deletePost(this.id);
+          this.sb.showMsg(this.messages.deleted)
+          this.ns.home();
+        }
+      });
+  }
 }

@@ -1,15 +1,15 @@
 <ng-container *ngFor="let post of posts | async">
   <mat-card class="ng-card">
     <img *ngIf="post.image" mat-card-image src="{{ post.image }}" alt="{{ post.title }}"
-      [routerLink]="['/post', post.id, post.slug]" class="ng-link" />
-    <h1 [routerLink]="['/post', post.id, post.slug]" class="ng-post-title">
-      <mat-icon class="ng-icon">library_books</mat-icon>{{ post.title }}
+      [routerLink]="['/post', post.postID, post.slug]" class="ng-link" />
+    <h1 [routerLink]="['/post', post.postID, post.slug]" class="ng-post-title">
+      <mat-icon class="ng-icon">library_books</mat-icon>{{ post.title }} - {{ post.postID }}
     </h1>
     <h6><i>{{ post.minutes }} min read</i></h6>
     <div class="ng-author ng-link" [routerLink]="['/user', post.authorId]">
-      <img *ngIf="post.author?.photoURL" class="avatar" src="{{ post.author?.photoURL }}" />
-      <mat-icon *ngIf="!post.author?.photoURL" class="ng-photo-icon">account_circle</mat-icon>
-      <p class="ng-light"><small><b>{{ post.author?.displayName }}</b>
+      <img *ngIf="post.authorDoc?.photoURL" class="avatar" src="{{ post.authorDoc?.photoURL }}" />
+      <mat-icon *ngIf="!post.authorDoc?.photoURL" class="ng-photo-icon">account_circle</mat-icon>
+      <p class="ng-light"><small><b>{{ post.authorDoc?.displayName }}</b>
           <ng-container *ngIf="post.createdAt"> on
             {{ post.createdAt.toDate() | date: 'EEEE, MMMM d, yyyy' }}</ng-container>
           <ng-container *ngIf="post.updatedAt"> (last modified on
@@ -26,7 +26,7 @@
       <mat-card-actions align="end">
         <div class="flex-container">
           <div>
-            <button mat-icon-button [routerLink]="['/edit', post.id]">
+            <button mat-icon-button [routerLink]="['/edit', post.postID]">
               <mat-icon>edit</mat-icon>
             </button>
           </div>

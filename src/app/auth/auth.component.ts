@@ -1,5 +1,5 @@
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   FormGroup,
   FormBuilder,
@@ -9,20 +9,22 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { matchValidator } from 'src/app/shared/form-validators';
 import { NavService } from '../nav/nav.service';
-import { AuthService } from './auth.service';
+import { AuthService } from '../platform/firebase/auth.service';
+import { SeoService } from '../shared/seo/seo.service';
+
 
 @Component({
   selector: 'app-auth',
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.scss']
 })
-export class AuthComponent implements OnInit, OnDestroy {
+export class AuthComponent implements OnInit {
 
   userForm!: FormGroup;
 
-  passSub!: Subscription;
+  userSub!: Subscription;
 
-  type!: 'login' | 'register' | 'reset';
+  type!: 'login' | 'register' | 'reset' | 'verify';
   loading = false;
 
   passhide = true;
@@ -31,6 +33,9 @@ export class AuthComponent implements OnInit, OnDestroy {
   isLogin = false;
   isRegister = false;
   isReset = false;
+  isVerify = false;
+
+  title!: string;
 
   serverMessage!: string;
 
@@ -52,11 +57,13 @@ export class AuthComponent implements OnInit, OnDestroy {
   };
 
   constructor(
-    private auth: AuthService,
+    public auth: AuthService,
     private fb: FormBuilder,
     private route: ActivatedRoute,
-    private nav: NavService
+    private nav: NavService,
+    private seo: SeoService
   ) {
+
     // get type from route
     this.route.url.subscribe((r: any) => {
       this.type = r[0].path;
@@ -69,11 +76,21 @@ export class AuthComponent implements OnInit, OnDestroy {
     // define types
     if (this.type === 'login') {
       this.isLogin = true;
+      this.title = 'Login';
     } else if (this.type === 'register') {
       this.isRegister = true;
+      this.title = 'Register';
     } else if (this.type === 'reset') {
       this.isReset = true;
+      this.title = 'Forgot Password';
+    } else if (this.type === 'verify') {
+      this.isVerify = true;
+      this.title = 'Verify Email Address';
     }
+
+    this.seo.generateTags({
+      title: this.nav.title + ': ' + this.title
+    });
 
     // init form controls
     const passwordControl = this.fb.control('', [
@@ -84,15 +101,14 @@ export class AuthComponent implements OnInit, OnDestroy {
     ]);
 
     const confirmControl = this.fb.control('', [
-      Validators.required,
-      matchValidator('password')
+      Validators.required
     ]);
 
     this.userForm = this.fb.group({
       email: ['', [
         Validators.required,
         Validators.email
-      ]],
+      ]]
     });
 
     if (this.isLogin || this.isRegister) {
@@ -100,10 +116,11 @@ export class AuthComponent implements OnInit, OnDestroy {
     }
     if (this.isRegister) {
       this.userForm.addControl('confirmPassword', confirmControl);
-      
-      // check confirm password validity
-      this.passSub = this.userForm.controls.password.valueChanges.subscribe(
-        () => this.userForm.controls.confirmPassword.updateValueAndValidity()
+      this.getField('confirmPassword')?.addValidators(
+        matchValidator('password')
+      );
+      this.getField('password')?.addValidators(
+        matchValidator('confirmPassword', true)
       );
     }
   }
@@ -129,31 +146,28 @@ export class AuthComponent implements OnInit, OnDestroy {
 
     try {
       if (this.isLogin) {
-        await this.auth.emailLogin(this.userForm.value)
+        await this.auth.emailLogin(
+          this.getField('email')?.value,
+          this.getField('password')?.value
+        );
       }
       if (this.isRegister) {
-        await this.auth.emailSignUp(this.userForm.value)
+        await this.auth.emailSignUp(
+          this.getField('email')?.value,
+          this.getField('password')?.value
+        );
       }
       if (this.isReset) {
-        await this.auth.resetPassword(this.getField('email')?.value)
-          .then((r: any) => {
-            if (r.message) {
-              this.serverMessage = r.message;
-            }
-          });
+        const r = await this.auth.resetPassword(
+          this.getField('email')?.value
+        );
+        if (r.message) {
+          this.serverMessage = r.message;
+        }
       }
     } catch (e: any) {
       this.serverMessage = e;
     }
     this.loading = false;
   }
-
-  async googleLogin() {
-    await this.auth.oAuthLogin('google.com');
-  }
-
-  ngOnDestroy() {
-    this.passSub.unsubscribe();
-  }
-
 }

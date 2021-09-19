@@ -5,11 +5,23 @@
         <ng-container *ngIf="isRegister">Register</ng-container>
         <ng-container *ngIf="isLogin">Login</ng-container>
         <ng-container *ngIf="isReset">Reset Password</ng-container>
+        <ng-container *ngIf="isVerify">
+          <mat-icon class="ng-icon-text">warning</mat-icon>Email not verified
+        </ng-container>
       </mat-card-title>
     </mat-card-header>
     <mat-card-content>
+
+      <ng-container *ngIf="isVerify">
+        Please check your junk mail folder and log back in.
+        <div class="margin-spacer"></div>
+        <button mat-raised-button color="accent" (click)="auth.sendVerificationEmail()">
+          Resend verfication email
+        </button>
+      </ng-container>
+
       <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
-        <mat-form-field [color]="getField('email')?.valid && 'accent'" appearance="outline">
+        <mat-form-field [color]="getField('email')?.valid && 'accent'" appearance="outline" *ngIf="!isVerify">
           <mat-icon matPrefix color="primary" class="ng-form-icon">email</mat-icon>
           <input matInput formControlName="email" type="email" placeholder="Email" autocomplete="off" />
           <mat-error *ngIf="getField('email')?.invalid">
@@ -17,10 +29,11 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field [color]="getField('email')?.valid && 'accent'" *ngIf="!isReset" appearance="outline">
+        <mat-form-field [color]="getField('email')?.valid && 'accent'" *ngIf="!isReset && !isVerify"
+          appearance="outline">
           <mat-icon matPrefix color="primary" class="ng-form-icon">lock</mat-icon>
-          <mat-icon matSuffix color="primary" (click)="passhide = !passhide">{{passhide ? 'visibility_off' :
-            'visibility'}}</mat-icon>
+          <mat-icon matSuffix color="primary" (click)="passhide = !passhide">{{ passhide ? 'visibility_off' :
+            'visibility' }}</mat-icon>
           <input matInput formControlName="password" type="password" placeholder="Password" autocomplete="off"
             [type]="passhide ? 'password' : 'text'" />
           <mat-error *ngIf="getField('password')?.invalid">
@@ -31,8 +44,8 @@
         <mat-form-field [color]="getField('confirmPassword')?.valid && 'accent'" *ngIf="isRegister"
           appearance="outline">
           <mat-icon color="primary" matPrefix class="ng-form-icon">lock</mat-icon>
-          <mat-icon color="primary" matSuffix (click)="confirmhide = !confirmhide">{{confirmhide ? 'visibility_off' :
-            'visibility'}}
+          <mat-icon color="primary" matSuffix (click)="confirmhide = !confirmhide">{{ confirmhide ? 'visibility_off' :
+            'visibility' }}
           </mat-icon>
           <input matInput formControlName="confirmPassword" type="password" placeholder="Confirm password"
             autocomplete="off" [type]="confirmhide ? 'password' : 'text'" />
@@ -52,7 +65,7 @@
         </button>
       </form>
     </mat-card-content>
-    <mat-card-footer class="ng-card-footer">
+    <mat-card-footer class="ng-card-footer" *ngIf="!isVerify">
       <button mat-button color="primary" *ngIf="isLogin" routerLink="/reset">
         Forgot password?
       </button>
@@ -64,10 +77,11 @@
       </button>
       <mat-divider></mat-divider>
       <div class="margin-spacer"></div>
+      <div class="margin-spacer"></div>
       <div class="social-login or bold">OR</div>
       <div class="margin-spacer"></div>
       <div class="margin-spacer"></div>
-      <button class="g-button provider-button-login" mat-button (click)="googleLogin()">
+      <button class="g-button provider-button-login" mat-button (click)="auth.oAuthLogin('google.com')">
         Login with Google
       </button>
       <div class="margin-spacer"></div>

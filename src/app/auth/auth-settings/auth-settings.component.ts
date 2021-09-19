@@ -4,18 +4,20 @@ import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subscription } from 'rxjs';
 import { NavService } from 'src/app/nav/nav.service';
 import { DialogService } from 'src/app/shared/confirm-dialog/dialog.service';
-import { ImageUploadService } from 'src/app/shared/image-upload/image-upload.service';
+import { ImageUploadService } from 'src/app/platform/firebase/image-upload.service';
 import { SnackbarService } from 'src/app/shared/snack-bar/snack-bar.service';
-import { AuthService } from '../auth.service';
+
 import { matchValidator } from 'src/app/shared/form-validators';
-import { ReLoginComponent } from 'src/app/shared/re-login/re-login.component';
+import { ReLoginComponent } from 'src/app/auth/auth-settings/re-login/re-login.component';
+import { AuthService } from 'src/app/platform/firebase/auth.service';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-auth-settings',
   templateUrl: './auth-settings.component.html',
   styleUrls: ['./auth-settings.component.scss']
 })
-export class AuthSettingsComponent implements OnInit, OnDestroy {
+export class AuthSettingsComponent implements OnInit {
 
   @ViewChild(FormGroupDirective) private passFormDirective!: FormGroupDirective;
 
@@ -28,8 +30,7 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
 
   passSub!: Subscription;
 
-  // providers
-  providers: any;
+  providers!: any;
 
   messages: any = {
     deleteAccount: 'Are you sure you want to delete your account?',
@@ -75,17 +76,17 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
     // build forms
     this.buildAccountForm();
 
-    // check confirm password validity
-    this.passSub = this.accountForm.controls.password.valueChanges.subscribe(
-      () => this.accountForm.controls.confirmPassword.updateValueAndValidity()
-    );
     // get user info
-    const user = await this.auth.getUser();
-    this.providers = await this.auth.getProviders();
+    const user = await this.auth.user$.pipe(take(1)).toPromise();
+    this.providers = await this.auth.getProviders() as string[];
 
     // patch values
-    this.getField('displayName').setValue(user.displayName);
-    this.getField('email').setValue(user.email);
+    this.getField('displayName').setValue(user!.displayName);
+    this.getField('email').setValue(user!.email);
+  }
+
+  isProvider(p: string) {
+    return this.providers ? this.providers.includes(p) : false;
   }
 
   // get field
@@ -94,120 +95,122 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
   }
 
   // errors
-  getError(field: string) {
+  getError(field: string): string[] {
     const errors = this.validationMessages[field];
     for (const e of Object.keys(errors)) {
       if (this.accountForm.get(field)?.hasError(e)) {
         return errors[e];
       }
     }
+    return [];
   }
   /**
    * Builds the account form control
    */
   buildAccountForm(): void {
     this.accountForm = this.fb.group({
-      password: [
-        '',
-        [
-          Validators.required,
-          Validators.pattern('^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$'),
-          Validators.minLength(6),
-          Validators.maxLength(25)
-        ]
-      ],
-      confirmPassword: [
-        '',
-        [
-          Validators.required,
-          matchValidator('password')
-        ]
-      ],
+      password: ['', [
+        Validators.required,
+        Validators.pattern('^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$'),
+        Validators.minLength(6),
+        Validators.maxLength(25),
+        matchValidator('confirmPassword', true)
+      ]],
+      confirmPassword: ['', [
+        Validators.required,
+        matchValidator('password')
+      ]],
       email: ['', [Validators.required, Validators.email]],
       displayName: ['', [Validators.required]],
       photoURL: []
     });
   }
-  /**
-   * Updates the user profile name and photo URL
-   */
-  updateProfile() {
+
+  //
+  // Profile
+  //
+  async updateProfile() {
+
     // update displayName
-    this.auth
-      .updateProfile({ displayName: this.accountForm.value.displayName })
-      .catch((e: any) => this.sb.showError(e))
-      .then((r: any) => this.sb.showMsg(r.message));
+    try {
+      const r = await this.auth.updateProfile({
+        displayName: this.accountForm.value.displayName
+      });
+      this.sb.showMsg(r.message);
+    } catch (e: any) {
+      this.sb.showError(e);
+    }
+  }
+
+  async updateEmail() {
+
+    // update email
+    try {
+      const r = await this.auth.updateEmail(this.accountForm.value.email);
+      this.sb.showMsg(r.message);
+    } catch (e: any) {
+      if (e.code === 'auth/requires-recent-login') {
+        const ra = await this.reAuth();
+        // update code here
+        ra.afterClosed()
+          .subscribe((closed: any) => {
+            if (!closed) {
+              this.updateEmail();
+            }
+          });
+      } else {
+        this.sb.showError(e);
+      }
+    }
+  }
+  /**
+   * Updates the user's password
+   */
+  async updatePass() {
+    try {
+      const r = await this.auth.updatePass(this.accountForm.value.password);
+      this.sb.showMsg(r.message);
+      this.accountForm.reset();
+      this.passFormDirective.resetForm();
+    } catch (e: any) {
+      if (e.code === 'auth/requires-recent-login') {
+        const ra = await this.reAuth();
+        // update code here
+        ra.afterClosed()
+          .subscribe((closed: any) => {
+            if (!closed) {
+              this.updatePass();
+            }
+          });
+      } else {
+        this.sb.showError(e);
+      }
+    }
   }
   /**
    * Toggle's a user's provider
    * @param e element reference
    * @param p provider
    */
-  updateProvider(e: any, p: any) {
+  async updateProvider(e: any, p: any): Promise<void> {
     try {
       if (e.checked) {
-        this.auth.addProvider(p)
-          .then((r) => this.sb.showMsg(r.message));
+        const r = await this.auth.addProvider(p);
+        this.sb.showMsg(r.message);
       } else {
-        this.auth.removeProvider(p)
-          .then((r) => this.sb.showMsg(r.message));
+        const r = await this.auth.removeProvider(p);
+        this.sb.showMsg(r.message);
       }
     } catch (e: any) {
       this.sb.showError(e);
     }
   }
   /**
-   * Updates the user's email address
-   */
-  updateEmail() {
-    this.auth.updateEmail(this.accountForm.value.email)
-      .then((r: any) => this.sb.showMsg(r.message))
-      .catch(async (e: any) => {
-        if (e.code === 'auth/requires-recent-login') {
-          const ra = await this.reAuth();
-          // update code here
-          ra.afterClosed()
-            .subscribe((closed: any) => {
-              if (!closed) {
-                this.updateEmail();
-              }
-            });
-        } else {
-          this.sb.showError(e);
-        }
-      })
-  }
-  /**
-   * Updates the user's password
-   */
-  updatePass() {
-    this.auth.updatePass(this.accountForm.value.password)
-      .then((r: any) => {
-        this.sb.showMsg(r.message);
-        this.accountForm.reset();
-        this.passFormDirective.resetForm();
-      })
-      .catch(async (e: any) => {
-        if (e.code === 'auth/requires-recent-login') {
-          const ra = await this.reAuth();
-          // update code here
-          ra.afterClosed()
-            .subscribe((closed: any) => {
-              if (!closed) {
-                this.updatePass();
-              }
-            });
-        } else {
-          this.sb.showError(e);
-        }
-      });
-  }
-  /**
    * Delete the user's account
    */
-  deleteAccount(): void {
+  async deleteAccount(): Promise<void> {
     // display confirm dialog
-    let confirm = this.dialog.confirmDialog(this.messages.deleteAccount);
+    const confirm = this.dialog.confirmDialog(this.messages.deleteAccount);
     // delete when confirmed
     confirm.afterClosed()
       .subscribe((confirmed: any) => {
@@ -219,25 +222,25 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
   /**
    * Deletes the user info
    */
-  private deleteUser(): void {
+  private async deleteUser(): Promise<void> {
     // delete profile image
-    this.deleteImage().then(() =>
-      // delete user
-      this.auth.deleteUser()
-        .catch(async (e: any) => {
-          if (e.code === 'auth/requires-recent-login') {
-            const ra = await this.reAuth();
-            ra.afterClosed()
-              .subscribe((closed: any) => {
-                if (!closed) {
-                  this.updateEmail();
-                }
-              });
-          } else {
-            this.sb.showError(e);
-          }
-        })
-    ).then(() => this.auth.logout());
+    try {
+      await this.deleteImage();
+      await this.auth.deleteUser();
+    } catch (e: any) {
+      if (e.code === 'auth/requires-recent-login') {
+        const ra = await this.reAuth();
+        ra.afterClosed()
+          .subscribe((closed: any) => {
+            if (!closed) {
+              this.updateEmail();
+            }
+          });
+      } else {
+        this.sb.showError(e);
+      }
+      this.auth.logout();
+    }
   }
   /**
    * Reauthenticate the user with a dialog
@@ -272,14 +275,15 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
     const url = user?.photoURL || '';
 
     // delete the image from url
-    /*return this.is.deleteImage(url)
-      .catch((e: any) => {
-        // ignore invalid file type error
-        if (e.code === 'storage/invalid-argument') {
-          return;
-        }
-      })
-      .then(() => this.auth.updateProfile({ photoURL: null }));*/
+    try {
+      await this.is.deleteImage(url);
+    } catch (e: any) {
+      // when there is no previous image to delete
+      if (e.code === 'storage/invalid-argument') {
+        return;
+      }
+      await this.auth.updateProfile({ photoURL: null });
+    }
   }
   /**
    * Upload profile image
@@ -287,30 +291,30 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
    */
   async uploadImage(event: any) {
 
+    // get image file
     const event$: FileList = event.target?.files
       ? event.target.files
       : event;
     const file = event$.item(0);
 
-    const user = await this.auth.getUser();
-    const uid = user!.uid || '';
+    if (file) {
 
-    // delete current profile image
-    this.deleteImage()
-      .then(() =>
-        // upload new image and save it to profile image
-        this.is.uploadImage('profile_images', uid, file)
-          .catch((e: any) => {
-            if (e.code === 'image/file-type') {
-              this.sb.showError(this.messages.selectImage);
-            }
-          })
-          .then((image: string | void) => this.auth.updateProfile({ photoURL: image })))
-      .catch((e: any) => this.sb.showError(e));
+      // convert to jpeg
+      const image = this.is.blobToFile(file, file?.name);
+
+      const user = await this.auth.getUser();
+      const uid = user?.uid;
+
+      let imageURL;
+      try {
+        imageURL = await this.is.uploadImage('profile_images', image, uid);
+      } catch (e: any) {
+        if (e.code === 'image/file-type') {
+          this.sb.showError(this.messages.selectImage);
+        }
+      }
+      // upload new image and save it to photoURL in user db
+      await this.auth.updateProfile({ photoURL: imageURL });
+    }
   }
-
-  ngOnDestroy() {
-    this.passSub.unsubscribe();
-  }
-
 }
