@@ -15,7 +15,7 @@
       <ng-container *ngIf="isVerify">
         Please check your junk mail folder and log back in.
         <div class="margin-spacer"></div>
-        <button mat-raised-button color="accent" (click)="auth.sendVerificationEmail()">
+        <button mat-raised-button color="accent" (click)="sendEmail()">
           Resend verfication email
         </button>
       </ng-container>
@@ -54,10 +54,6 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-error *ngIf="serverMessage">
-          <p>{{ serverMessage }}</p>
-        </mat-error>
-
         <button mat-raised-button color="primary" type="submit" [disabled]="userForm.invalid || loading">
           <ng-container *ngIf="isReset">Send Reset Email</ng-container>
           <ng-container *ngIf="isLogin">Login</ng-container>
@@ -81,7 +77,7 @@
       <div class="social-login or bold">OR</div>
       <div class="margin-spacer"></div>
       <div class="margin-spacer"></div>
-      <button class="g-button provider-button-login" mat-button (click)="auth.oAuthLogin('google.com')">
+      <button class="g-button provider-button-login" mat-button (click)="googleLogin()">
         Login with Google
       </button>
       <div class="margin-spacer"></div>

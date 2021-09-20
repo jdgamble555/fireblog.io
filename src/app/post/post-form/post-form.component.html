@@ -51,7 +51,7 @@
             <markdown [data]="postForm.value.content"></markdown>
           </mat-card>
         </mat-tab>
-        <mat-tab label="Images" [disabled]="state !== 'synced'">
+        <mat-tab label="Images" [disabled]="!this.id">
           <mat-card>
             <button type="button" class="ng-button-space" mat-raised-button (click)="inlineInput.click()">Upload
               Image</button>
@@ -81,11 +81,14 @@
     <mat-card-actions>
       <div class="flex-container">
         <p>
-          <button type="button" matSuffix mat-raised-button (click)="onSubmit(true)" [disabled]="state !== 'synced'">
+          <button type="button" matSuffix mat-raised-button (click)="onSubmit(true)"
+            [disabled]="(state === 'loaded' || state !== 'synced')">
             <b>Publish</b>
           </button>
-          <button mat-button color="{{ state !== 'modified' ? 'warn' : 'accent'}}" [disabled]="state === 'synced'">
+          <button mat-button color="{{ state !== ('modified' && 'loaded') ? 'warn' : 'accent'}}"
+            [disabled]="state === 'synced'">
             <b *ngIf="state === 'synced'">Draft Saved</b>
+            <b *ngIf="state === 'loaded'">Form Loaded</b>
             <b *ngIf="state ==='modified'">Modifying...</b>
             <b *ngIf="state ==='error'">Form Not Ready</b>
             <b *ngIf="state === 'saving'">Saving Draft...</b>

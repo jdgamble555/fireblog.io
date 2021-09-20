@@ -14,7 +14,7 @@ export class AutoSaveDirective implements OnInit, OnDestroy {
   @Input() setData = async () => { };
 
   // Internal state
-  private _state!: 'loading' | 'synced' | 'modified' | 'saving' | 'error';
+  private _state!: 'loading' | 'synced' | 'modified' | 'saving' | 'error' | 'loaded';
 
   // Outputs
   @Output() stateChange = new EventEmitter<string>();
@@ -38,7 +38,7 @@ export class AutoSaveDirective implements OnInit, OnDestroy {
             if (data) {
               this.formGroup.patchValue(data);
               this.formGroup.markAsPristine();
-              this.state = 'synced';
+              this.state = 'loaded';
             }
           }),
           take(1)

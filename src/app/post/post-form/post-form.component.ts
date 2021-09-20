@@ -156,11 +156,11 @@ export class PostFormComponent implements OnInit {
 
   deleteImage(): void {
 
-    // delete image in db
-    this.db.deleteImage(this.id);
-
     // delete image file
     this.is.deleteImage(this.image);
+
+    // delete image in db
+    this.db.deleteImage(this.id);
 
   }
 
@@ -270,7 +270,23 @@ export class PostFormComponent implements OnInit {
     // delete when confirmed
     confirm.afterClosed()
       .subscribe((confirmed: any) => {
+
+        // delete files
         if (confirmed) {
+
+          // delete post image
+          this.deleteImage();
+
+          // get uploaded images
+          const files = this.imageUploads;
+
+          // delete uploaded images
+          if (files.length > 0) {
+            for (let f of files) {
+              this.deletePostImage(f);
+            }
+          }
+          // delete post
           this.db.deletePost(this.id);
           this.sb.showMsg(this.messages.deleted)
           this.ns.home();

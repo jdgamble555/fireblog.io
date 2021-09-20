@@ -1,16 +1,17 @@
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import {
   FormGroup,
   FormBuilder,
   Validators
 } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { matchValidator } from 'src/app/shared/form-validators';
 import { NavService } from '../nav/nav.service';
 import { AuthService } from '../platform/firebase/auth.service';
 import { SeoService } from '../shared/seo/seo.service';
+import { SnackbarService } from '../shared/snack-bar/snack-bar.service';
 
 
 @Component({
@@ -18,11 +19,11 @@ import { SeoService } from '../shared/seo/seo.service';
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.scss']
 })
-export class AuthComponent implements OnInit {
+export class AuthComponent implements OnInit, OnDestroy {
 
   userForm!: FormGroup;
 
-  userSub!: Subscription;
+  routeSub: Subscription;
 
   type!: 'login' | 'register' | 'reset' | 'verify';
   loading = false;
@@ -37,7 +38,9 @@ export class AuthComponent implements OnInit {
 
   title!: string;
 
-  serverMessage!: string;
+  messages: any = {
+    email_sent: 'Your confirmation email has been sent!'
+  };
 
   validationMessages: any = {
     email: {
@@ -57,15 +60,17 @@ export class AuthComponent implements OnInit {
   };
 
   constructor(
-    public auth: AuthService,
+    private auth: AuthService,
     private fb: FormBuilder,
     private route: ActivatedRoute,
+    private router: Router,
     private nav: NavService,
-    private seo: SeoService
+    private seo: SeoService,
+    private sb: SnackbarService
   ) {
 
     // get type from route
-    this.route.url.subscribe((r: any) => {
+    this.routeSub = this.route.url.subscribe((r: any) => {
       this.type = r[0].path;
     });
     this.nav.closeLeftNav();
@@ -89,7 +94,7 @@ export class AuthComponent implements OnInit {
     }
 
     this.seo.generateTags({
-      title: this.nav.title + ': ' + this.title
+      title: this.title + ' - ' + this.nav.title
     });
 
     // init form controls
@@ -149,25 +154,45 @@ export class AuthComponent implements OnInit {
         await this.auth.emailLogin(
           this.getField('email')?.value,
           this.getField('password')?.value
-        );
+        ).then(() => {
+          this.router.navigate(['/settings']);
+        });
       }
       if (this.isRegister) {
         await this.auth.emailSignUp(
           this.getField('email')?.value,
           this.getField('password')?.value
-        );
+        ).then(() => {
+          this.router.navigate(['/settings']);
+        });;
       }
       if (this.isReset) {
         const r = await this.auth.resetPassword(
           this.getField('email')?.value
         );
         if (r.message) {
-          this.serverMessage = r.message;
+          this.sb.showMsg(r.message);
         }
       }
     } catch (e: any) {
-      this.serverMessage = e;
+      this.sb.showError(e);
     }
     this.loading = false;
+  }
+
+  googleLogin() {
+    this.auth.oAuthLogin('google.com')
+      .then(() => {
+        this.router.navigate(['/settings']);
+      });
+  }
+
+  sendEmail() {
+    this.auth.sendVerificationEmail();
+    this.sb.showMsg(this.messages.email_sent);
+  }
+
+  ngOnDestroy(): void {
+    this.routeSub.unsubscribe();
   }
 }

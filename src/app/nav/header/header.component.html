@@ -10,11 +10,11 @@
         <span>Account Settings</span>
       </button>
       <mat-divider></mat-divider>
-      <button mat-menu-item routerLink="/bookmarks">
+      <!--<button mat-menu-item routerLink="/bookmarks">
         <mat-icon class="ng-menu-icon">bookmarks</mat-icon>
         <span>Bookmarks</span>
       </button>
-      <mat-divider></mat-divider>
+      <mat-divider></mat-divider>-->
       <ng-container *ngIf="isAdmin">
         <button mat-menu-item [routerLink]="['/user', user.uid]">
           <mat-icon class="ng-menu-icon">account_box</mat-icon>
@@ -27,7 +27,7 @@
         </button>
         <mat-divider></mat-divider>
       </ng-container>
-      <button mat-menu-item (click)="auth.logout()">
+      <button mat-menu-item (click)="logout()">
         <mat-icon class="ng-menu-icon">power_settings_new</mat-icon>
         <span>Logout</span>
       </button>

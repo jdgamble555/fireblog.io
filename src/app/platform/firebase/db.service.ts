@@ -19,7 +19,8 @@ import {
   SetOptions,
   writeBatch,
   increment,
-  getDocs
+  getDocs,
+  updateDoc
 } from '@angular/fire/firestore';
 import { switchMap } from 'rxjs/operators';
 import { User } from 'src/app/auth/user.model';
@@ -103,46 +104,39 @@ export class DbService {
 
     // create author doc ref
     if (data.authorId) {
-
-      data.authorDoc = doc(this.afs, 'users', data.authorId);
-
-      // get doc refs
-      const docRef = doc(this.afs, 'posts', id);
-      const draftRef = doc(this.afs, 'drafts', id);
-      const docSnap = await getDoc(docRef);
-      const docData = docSnap.data() as Post;
-
-      // remove tags from update
-      let { tags, ...tmp } = data;
-      data = tmp;
-
-      // get timestamp
-      if (docSnap.exists()) {
-        data.updatedAt = serverTimestamp();
-        data.createdAt = docData.createdAt;
-      } else {
-        if (publish) {
-          data.createdAt = serverTimestamp();
-        }
-      }
-
-      // save changes
-      await this.setWithCounter(
-        publish ? docRef : draftRef,
-        data,
-        { merge: true }
-      );
-
-      if (publish) {
-
-        // delete draft doc
-        await this.deleteWithCounter(draftRef);
-
-        // update tags
-        const beforeTags = docData.tags || [];
-        this.updateTags(id, beforeTags, tags);
-      }
+      data.authorDoc = doc(this.afs, 'users', data.authorId as string);
     }
+
+    // get doc refs
+    const docRef = doc(this.afs, 'posts', id);
+    const draftRef = doc(this.afs, 'drafts', id);
+    const docSnap = await getDoc(docRef);
+    const docData = docSnap.data() as Post;
+
+    // remove tags from update
+    let { tags, ...tmp } = data;
+
+    if (publish) {
+      data = tmp;
+    }
+
+    // save changes
+    await this.setWithCounter(
+      publish ? docRef : draftRef,
+      data,
+      { merge: true }
+    );
+
+    if (publish) {
+
+      // delete draft doc
+      await this.deleteWithCounter(draftRef);
+
+      // update tags
+      const beforeTags = docData ? docData.tags : [];
+      this.updateTags(id, beforeTags, tags);
+    }
+
     return id;
   }
   /**
@@ -150,28 +144,44 @@ export class DbService {
    * @param id
    */
   async deletePost(id: string): Promise<void> {
-
-    // TODO - Delete Images First...
-
     await this.deleteWithCounter(
       doc(this.afs, 'posts', id)
     );
   }
+  /*async setImage(postId: string, authorId: string, url: string) {
+    await this.setWithCounter(
+      doc(this.afs, 'images'),
+      {
+        postId,
+        authorId,
+        url
+      }
+    )
+  }*/
   /**
    * Delete's an image from post doc
    * @param id doc id
    * @returns
    */
   async deleteImage(id: string): Promise<void> {
-    await this.setPost({ image: deleteField() }, id);
+    await updateDoc(
+      doc(this.afs, 'posts', id),
+      { image: deleteField() }
+    );
   }
 
   async addPostImage(id: string, val: string): Promise<void> {
-    await this.setPost({ imageUploads: arrayUnion(val) }, id);
+    await updateDoc(
+      doc(this.afs, 'posts', id),
+      { imageUploads: arrayUnion(val) }
+    );
   }
 
   async deletePostImage(id: string, val: string): Promise<void> {
-    await this.setPost({ imageUploads: arrayRemove(val) }, id);
+    await updateDoc(
+      doc(this.afs, 'posts', id),
+      { imageUploads: arrayRemove(val) }
+    );
   }
 
   async updateTags(id: string, before: string[], after: string[]) {
@@ -242,7 +252,9 @@ export class DbService {
     data: {
       [x: string]: any;
     },
-    options: SetOptions): Promise<void> {
+    options?: SetOptions): Promise<void> {
+
+    options = options ? options : {};
 
     // counter collection
     const counterCol = '_counters';
@@ -254,11 +266,13 @@ export class DbService {
 
     // don't increase count if edit
     if (refSnap.exists()) {
+      data.updatedAt = serverTimestamp();
       await setDoc(ref, data, options);
 
       // increase count
     } else {
       const batch = writeBatch(this.afs);
+      data.createdAt = serverTimestamp();
       batch.set(ref, data, options);
 
       // if count exists
