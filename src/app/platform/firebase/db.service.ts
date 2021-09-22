@@ -134,7 +134,11 @@ export class DbService {
 
       // update tags
       const beforeTags = docData ? docData.tags : [];
-      this.updateTags(id, beforeTags, tags);
+      this.updateTags(
+        doc(this.afs, 'posts/' + id),
+        beforeTags,
+        tags
+      );
     }
 
     return id;
@@ -148,60 +152,78 @@ export class DbService {
       doc(this.afs, 'posts', id)
     );
   }
-  /*async setImage(postId: string, authorId: string, url: string) {
-    await this.setWithCounter(
-      doc(this.afs, 'images'),
-      {
-        postId,
-        authorId,
-        url
-      }
-    )
-  }*/
   /**
-   * Delete's an image from post doc
+   * Add image to post doc
+   * @param id
+   * @param val
+   * @param publish
+   */
+  async addPostImage(id: string, url: string): Promise<void> {
+    await updateDoc(
+      doc(this.afs, 'drafts', id),
+      { imageUploads: arrayUnion(url) }
+    );
+  }
+  /**
+   * Get cover image url
+   * @param id
+   * @returns url | null
+   */
+  async getCoverImage(id: string): Promise<string | null> {
+    const data: any = (await getDoc(
+      doc(this.afs, 'posts', id)
+    )).data();
+    return data.image || null;
+  }
+  /**
+   * Delete image from post doc
+   * @param id
+   * @param val
+   * @param publish
+   */
+  async deletePostImage(id: string, url: string): Promise<void> {
+    await updateDoc(
+      doc(this.afs, 'drafts', id),
+      { imageUploads: arrayRemove(url) }
+    );
+  }
+  /**
+   * Delete's a cover image from post doc
    * @param id doc id
    * @returns
    */
-  async deleteImage(id: string): Promise<void> {
+  async deleteCoverImage(id: string): Promise<void> {
     await updateDoc(
-      doc(this.afs, 'posts', id),
+      doc(this.afs, 'drafts', id),
       { image: deleteField() }
     );
   }
 
-  async addPostImage(id: string, val: string): Promise<void> {
-    await updateDoc(
-      doc(this.afs, 'posts', id),
-      { imageUploads: arrayUnion(val) }
-    );
-  }
+  //
+  // Tools
+  //
 
-  async deletePostImage(id: string, val: string): Promise<void> {
-    await updateDoc(
-      doc(this.afs, 'posts', id),
-      { imageUploads: arrayRemove(val) }
-    );
-  }
+  async updateTags(
+    docRef: DocumentReference,
+    before: string[],
+    after: string[],
+    tagsDoc = 'tags'
+  ) {
 
-  async updateTags(id: string, before: string[], after: string[]) {
-
-    const removed = before.length > 0
+    const removed = before && before.length > 0
       ? before.filter((x: string) => !after.includes(x))
       : [];
-    const added = after.length > 0
+    const added = after && after.length > 0
       ? after.filter((x: string) => !before.includes(x))
       : [];
 
     const batch = writeBatch(this.afs);
 
-    const postRef = doc(this.afs, 'posts/' + id);
-
     // added
     for (const t of added) {
 
       // + 1 count
-      const tagsRef = doc(this.afs, 'tags/' + t);
+      const tagsRef = doc(this.afs, tagsDoc + '/' + t);
       const tagsSnap = await getDoc(tagsRef);
 
       if (tagsSnap.exists()) {
@@ -215,7 +237,7 @@ export class DbService {
       }
 
       // add tag
-      batch.update(postRef, {
+      batch.update(docRef, {
         tags: arrayUnion(t)
       });
     }
@@ -224,7 +246,7 @@ export class DbService {
     for (const t of removed) {
 
       // -1 count
-      const tagsRef = doc(this.afs, 'tags/' + t);
+      const tagsRef = doc(this.afs, tagsDoc + '/' + t);
       const tagsSnap = await getDoc(tagsRef);
 
       if ((tagsSnap.data() as any).count == 1) {
@@ -236,16 +258,12 @@ export class DbService {
       }
 
       // remove tag
-      batch.update(postRef, {
+      batch.update(docRef, {
         tags: arrayRemove(t)
       });
     }
     batch.commit();
   }
-
-  //
-  // Tools
-  //
 
   async setWithCounter(
     ref: DocumentReference<DocumentData>,
@@ -316,10 +334,9 @@ export class DbService {
         docId: ref.id
       });
     }
-    /*
     if ((countSnap.data() as any).count == 1) {
       batch.delete(countRef);
-    }*/
+    }
     batch.commit();
   }
 

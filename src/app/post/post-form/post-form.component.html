@@ -7,10 +7,10 @@
       <button class="ng-button-space" type="button" mat-raised-button (click)="imageInput.click()">
         {{ image ? 'Change' : 'Upload' }} Image
       </button>
-      <button class="ng-button-space" *ngIf="image" type="button" mat-raised-button (click)="deleteImage()">Delete
+      <button class="ng-button-space" *ngIf="image" type="button" mat-raised-button (click)="deleteCoverImage()">Delete
         Image</button>
       <p></p>
-      <input hidden type="file" accept="image/*" #imageInput (change)="addImage($event)">
+      <input hidden type="file" accept="image/*" #imageInput (change)="addCoverImage($event)">
     </mat-card-content>
     <img *ngIf="image" mat-card-image [src]="image || '//:0'">
     <mat-card-content>
@@ -53,7 +53,8 @@
         </mat-tab>
         <mat-tab label="Images" [disabled]="!this.id">
           <mat-card>
-            <button type="button" class="ng-button-space" mat-raised-button (click)="inlineInput.click()">Upload
+            <button type="button" class="ng-button-space" mat-raised-button (click)="inlineInput.click()"
+              [disabled]="state === 'synced'">Upload
               Image</button>
             <p></p>
             <input hidden type="file" accept="image/*" #inlineInput (change)="addPostImage($event)" multiple>
@@ -88,9 +89,9 @@
           <button mat-button color="{{ state !== ('modified' && 'loaded') ? 'warn' : 'accent'}}"
             [disabled]="state === 'synced'">
             <b *ngIf="state === 'synced'">Draft Saved</b>
-            <b *ngIf="state === 'loaded'">Form Loaded</b>
+            <b *ngIf="state === 'loaded'">Post Loaded</b>
             <b *ngIf="state ==='modified'">Modifying...</b>
-            <b *ngIf="state ==='error'">Form Not Ready</b>
+            <b *ngIf="state ==='error'">Not Ready to Save</b>
             <b *ngIf="state === 'saving'">Saving Draft...</b>
           </button>
         </p>

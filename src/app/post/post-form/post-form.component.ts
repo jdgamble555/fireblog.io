@@ -50,7 +50,6 @@ export class PostFormComponent implements OnInit {
 
   image!: string;
   imageFile!: File;
-  oldImage!: string;
   imageUploads: string[] = [];
   imageLoading = false;
 
@@ -99,21 +98,21 @@ export class PostFormComponent implements OnInit {
         tap((post: Post) => {
           if (post) {
 
-            // add image
-            this.image = this.oldImage = post.image || '';
+            // add cover image
+            this.image = post.image || '';
+
+            // post image uploads
+            this.imageUploads = post.imageUploads || [];
 
             // add tags
             this.ts.addTags(post.tags, this.tagsField);
-
-            // image uploads
-            this.imageUploads = post.imageUploads || [];
 
           } else {
             // error, id does not exist in db
             this.router.navigate(['home']);
           }
         }),
-        map((r) => {
+        map((r: Post) => {
           const { tags, ...rest } = r;
           return rest;
         }));
@@ -154,27 +153,23 @@ export class PostFormComponent implements OnInit {
     return (wordCount / 100 + 1).toFixed(0);
   }
 
-  deleteImage(): void {
+  deleteCoverImage(): void {
 
-    // delete image file
-    this.is.deleteImage(this.image);
-
-    // delete image in db
-    this.db.deleteImage(this.id);
-
+    // delete cover image in db
+    this.db.deleteCoverImage(this.id);
   }
 
-  async addImage(event: Event): Promise<void> {
+  async addCoverImage(event: Event): Promise<void> {
 
-    // preview image
+    // get blob for upload
     const blob = await this.is.previewImage(event);
 
     if (blob) {
+      // get data to preview image
       this.image = await this.is.blobToData(blob);
       this.imageFile = this.is.blobToFile(blob, this.is.fileName);
+      this.postForm.updateValueAndValidity();
     }
-
-    this.postForm.updateValueAndValidity();
   }
 
   async addPostImage(event: Event): Promise<void> {
@@ -219,7 +214,6 @@ export class PostFormComponent implements OnInit {
 
     // show msg
     this.sb.showMsg('Image Removed!', 500);
-
   }
 
   async onSubmit(publish = false): Promise<void> {
@@ -228,12 +222,16 @@ export class PostFormComponent implements OnInit {
     const formValue = this.postForm.value;
     const slug = this.ts.slugify(formValue.title);
 
+    // todo: save this in draft doc
+    const oldImage = await this.db.getCoverImage(this.id);
+
     let data: Post = {
       authorId: (await this.auth.getUser())?.uid,
       tags: this.ts.getTags(this.tagsField),
       content: formValue.content,
       title: formValue.title,
       minutes: this.minutesToRead(formValue.content),
+      imageUploads: this.imageUploads,
       slug
     };
 
@@ -245,6 +243,11 @@ export class PostFormComponent implements OnInit {
       } catch (e: any) {
         console.error(e);
       }
+    }
+
+    if (publish && oldImage && data.image !== oldImage) {
+      // delete old cover image file
+      await this.is.deleteImage(oldImage);
     }
 
     // add post to db
@@ -274,8 +277,8 @@ export class PostFormComponent implements OnInit {
         // delete files
         if (confirmed) {
 
-          // delete post image
-          this.deleteImage();
+          // delete post cover image
+          this.deleteCoverImage();
 
           // get uploaded images
           const files = this.imageUploads;

@@ -105,7 +105,7 @@ export class ImageUploadService {
     const target = event.target as HTMLInputElement;
 
     if (target.files?.length) {
-      
+
       // view file before upload
       const file = target.files[0];
       this.fileName = file.name;
