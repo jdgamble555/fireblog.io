@@ -5,7 +5,6 @@ import {
   deleteDoc,
   Firestore,
   setDoc,
-  deleteField,
   arrayUnion,
   arrayRemove,
   serverTimestamp,
@@ -104,7 +103,7 @@ export class DbService {
 
     // create author doc ref
     if (data.authorId) {
-      data.authorDoc = doc(this.afs, 'users', data.authorId as string);
+      data.authorDoc = doc(this.afs, 'users', data.authorId);
     }
 
     // get doc refs
@@ -165,17 +164,6 @@ export class DbService {
     );
   }
   /**
-   * Get cover image url
-   * @param id
-   * @returns url | null
-   */
-  async getCoverImage(id: string): Promise<string | null> {
-    const data: any = (await getDoc(
-      doc(this.afs, 'posts', id)
-    )).data();
-    return data.image || null;
-  }
-  /**
    * Delete image from post doc
    * @param id
    * @param val
@@ -187,17 +175,6 @@ export class DbService {
       { imageUploads: arrayRemove(url) }
     );
   }
-  /**
-   * Delete's a cover image from post doc
-   * @param id doc id
-   * @returns
-   */
-  async deleteCoverImage(id: string): Promise<void> {
-    await updateDoc(
-      doc(this.afs, 'drafts', id),
-      { image: deleteField() }
-    );
-  }
 
   //
   // Tools
@@ -205,15 +182,15 @@ export class DbService {
 
   async updateTags(
     docRef: DocumentReference,
-    before: string[],
-    after: string[],
+    before: string[] = [],
+    after: string[] = [],
     tagsDoc = 'tags'
   ) {
 
-    const removed = before && before.length > 0
+    const removed = before.length > 0
       ? before.filter((x: string) => !after.includes(x))
       : [];
-    const added = after && after.length > 0
+    const added = after.length > 0
       ? after.filter((x: string) => !before.includes(x))
       : [];
 
@@ -264,6 +241,7 @@ export class DbService {
     }
     batch.commit();
   }
+
 
   async setWithCounter(
     ref: DocumentReference<DocumentData>,

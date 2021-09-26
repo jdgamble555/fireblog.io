@@ -37,7 +37,11 @@ export class ReadService {
 
     // get user doc if logged in
     this.userDoc = this.auth.user$.pipe(
-      switchMap((user: Auth | null) => user ? this.getUser(user.uid) : of(null))
+      switchMap((user: Auth | null) =>
+        user
+          ? this.getUser(user.uid)
+          : of(null)
+      )
     );
   }
   /**

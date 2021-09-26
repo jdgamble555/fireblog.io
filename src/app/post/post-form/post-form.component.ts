@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatChipList } from '@angular/material/chips';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -20,7 +20,7 @@ import { DialogService } from 'src/app/shared/confirm-dialog/dialog.service';
   templateUrl: './post-form.component.html',
   styleUrls: ['./post-form.component.scss']
 })
-export class PostFormComponent implements OnInit {
+export class PostFormComponent {
 
   @ViewChild('chipList') chipList!: MatChipList;
 
@@ -48,8 +48,12 @@ export class PostFormComponent implements OnInit {
   id!: string;
   uid!: string;
 
-  image!: string;
-  imageFile!: File;
+  private image!: string | null;
+  private imageFile!: File | undefined;
+  private imageTmp!: string | null;
+
+  imageView!: string | null;
+
   imageUploads: string[] = [];
   imageLoading = false;
 
@@ -76,15 +80,11 @@ export class PostFormComponent implements OnInit {
       content: ['', Validators.required],
       tags: this.fb.array([], [ts.tagValidatorMin(5), ts.tagValidatorRequired])
     });
-  }
-
-  async ngOnInit(): Promise<void> {
 
     const r = this.router.url;
 
     // edit post
     if (r.startsWith('/edit')) {
-
       this.isNewPage = false;
       this.id = this.route.snapshot.paramMap.get('id') as string;
 
@@ -99,7 +99,9 @@ export class PostFormComponent implements OnInit {
           if (post) {
 
             // add cover image
-            this.image = post.image || '';
+            this.image = post.image || null;
+            this.imageView = post.imageTmp || post.image || null;
+            this.imageTmp = post.imageTmp || null;
 
             // post image uploads
             this.imageUploads = post.imageUploads || [];
@@ -154,21 +156,27 @@ export class PostFormComponent implements OnInit {
   }
 
   deleteCoverImage(): void {
-
-    // delete cover image in db
-    this.db.deleteCoverImage(this.id);
+    this.imageView = null;
+    this.imageFile = undefined;
+    this.postForm.updateValueAndValidity();
   }
 
   async addCoverImage(event: Event): Promise<void> {
 
     // get blob for upload
-    const blob = await this.is.previewImage(event);
+    const p = await this.is.previewImage(event);
 
-    if (blob) {
+    if (p && p.blob) {
       // get data to preview image
-      this.image = await this.is.blobToData(blob);
-      this.imageFile = this.is.blobToFile(blob, this.is.fileName);
+      this.imageView = await this.is.blobToData(p.blob);
+      this.imageFile = this.is.blobToFile(p.blob, p.filename);
       this.postForm.updateValueAndValidity();
+
+      // delete tmp cover image
+      if (this.imageTmp) {
+        await this.is.deleteImage(this.imageTmp);
+        this.imageTmp = null;
+      }
     }
   }
 
@@ -182,9 +190,12 @@ export class PostFormComponent implements OnInit {
       // view file before upload
       const file = target.files[0];
 
+      // get user id
+      const uid = (await this.auth.getUser())?.uid;
+
       // upload image with spinner
       this.imageLoading = true;
-      const image = await this.is.uploadImage('posts', file);
+      const image = await this.is.uploadImage(`post_images/${uid}`, file);
       this.imageLoading = false;
 
       // save url to db
@@ -218,15 +229,16 @@ export class PostFormComponent implements OnInit {
 
   async onSubmit(publish = false): Promise<void> {
 
+    let error = false;
+
     // prepare variables for db
     const formValue = this.postForm.value;
     const slug = this.ts.slugify(formValue.title);
 
-    // todo: save this in draft doc
-    const oldImage = await this.db.getCoverImage(this.id);
+    const uid = (await this.auth.getUser())?.uid;
 
     let data: Post = {
-      authorId: (await this.auth.getUser())?.uid,
+      authorId: uid,
       tags: this.ts.getTags(this.tagsField),
       content: formValue.content,
       title: formValue.title,
@@ -235,19 +247,41 @@ export class PostFormComponent implements OnInit {
       slug
     };
 
-    // upload image
+    // if new image, upload it
     if (this.imageFile) {
       try {
-        const image = await this.is.uploadImage('posts', this.imageFile);
-        data = { ...data, image };
+        const image = await this.is.uploadImage(`cover_images/${uid}`, this.imageFile);
+        data = {
+          ...data,
+          imageTmp: image
+        };
+        this.imageFile = undefined;
+        this.imageTmp = image;
       } catch (e: any) {
         console.error(e);
+        error = true;
       }
     }
 
-    if (publish && oldImage && data.image !== oldImage) {
+    // if delete image or change image
+    if (publish && this.image !== this.imageView) {
       // delete old cover image file
-      await this.is.deleteImage(oldImage);
+      if (this.image) {
+        try {
+          await this.is.deleteImage(this.image);
+        } catch(e: any) {
+          console.error(e);
+          error = true;
+        }
+      }
+
+      // delete or change image
+      data = {
+        ...data,
+        image: this.imageView
+          ? this.imageTmp
+          : null
+      };
     }
 
     // add post to db
@@ -255,16 +289,13 @@ export class PostFormComponent implements OnInit {
       this.id = await this.db.setPost(data, this.id, publish);
     } catch (e: any) {
       console.error(e);
+      error = true;
     }
 
-    if (publish) {
+    if (publish && !error) {
       this.sb.showMsg(this.messages.published);
       this.router.navigate(['/post', this.id, slug]);
     }
-  }
-
-  updateState(e: any): void {
-    this.state = e;
   }
 
   deletePost(): void {
@@ -285,7 +316,7 @@ export class PostFormComponent implements OnInit {
 
           // delete uploaded images
           if (files.length > 0) {
-            for (let f of files) {
+            for (const f of files) {
               this.deletePostImage(f);
             }
           }
@@ -295,5 +326,9 @@ export class PostFormComponent implements OnInit {
           this.ns.home();
         }
       });
+  }
+
+  updateState(e: any): void {
+    this.state = e;
   }
 }

@@ -5,14 +5,15 @@
     <br />
     <mat-card-content>
       <button class="ng-button-space" type="button" mat-raised-button (click)="imageInput.click()">
-        {{ image ? 'Change' : 'Upload' }} Image
+        {{ imageView ? 'Change' : 'Upload' }} Image
       </button>
-      <button class="ng-button-space" *ngIf="image" type="button" mat-raised-button (click)="deleteCoverImage()">Delete
+      <button class="ng-button-space" *ngIf="imageView" type="button" mat-raised-button
+        (click)="deleteCoverImage()">Delete
         Image</button>
       <p></p>
       <input hidden type="file" accept="image/*" #imageInput (change)="addCoverImage($event)">
     </mat-card-content>
-    <img *ngIf="image" mat-card-image [src]="image || '//:0'">
+    <img mat-card-image *ngIf="imageView" [src]="imageView || '//:0'">
     <mat-card-content>
       <mat-form-field>
         <input matInput id="title" placeholder="Title" formControlName="title">
@@ -51,10 +52,9 @@
             <markdown [data]="postForm.value.content"></markdown>
           </mat-card>
         </mat-tab>
-        <mat-tab label="Images" [disabled]="!this.id">
+        <mat-tab label="Images" [disabled]="!this.id || this.state !== 'synced'">
           <mat-card>
-            <button type="button" class="ng-button-space" mat-raised-button (click)="inlineInput.click()"
-              [disabled]="state === 'synced'">Upload
+            <button type="button" class="ng-button-space" mat-raised-button (click)="inlineInput.click()">Upload
               Image</button>
             <p></p>
             <input hidden type="file" accept="image/*" #inlineInput (change)="addPostImage($event)" multiple>

@@ -5,8 +5,9 @@ export interface Post {
   title?: string;
   authorId?: string;
   content?: string;
-  image?: string | any;
-  imageUploads?: string[] | any;
+  image?: string | null;
+  imageTmp?: string;
+  imageUploads?: string[];
   createdAt?: Date | any;
   updatedAt?: Date | any;
   tags?: any;

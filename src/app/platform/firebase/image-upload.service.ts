@@ -7,10 +7,14 @@ import {
   uploadBytesResumable,
   percentage,
   getDownloadURL
+
 } from '@angular/fire/storage';
 import { Observable } from 'rxjs';
 
-
+interface Preview {
+  blob: Blob;
+  filename: string;
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -18,8 +22,6 @@ export class ImageUploadService {
 
   // image type
   type = 'image/jpeg';
-
-  fileName!: string;
 
   // use for progress bar
   uploadPercent: Observable<number> | any = null;
@@ -31,6 +33,25 @@ export class ImageUploadService {
     private storage: Storage,
     @Inject(DOCUMENT) private document: Document
   ) { }
+
+  /**
+   * Returns image url from google URL
+   * @param gs - google url
+   * @returns image url
+   */
+  async getURL(gs: string): Promise<string | undefined> {
+    try {
+      return await getDownloadURL(
+        ref(this.storage, gs)
+      );
+    } catch (e: any) {
+      // catch no image file
+      if (e.code === 'storage/unauthorized') {
+        return;
+      }
+    }
+    return;
+  }
 
   /**
    * Generate Random ID for Image Name
@@ -99,7 +120,7 @@ export class ImageUploadService {
  * @param event - file event
  * @returns - string blob of image
  */
-  async previewImage(event: Event): Promise<Blob | undefined> {
+  async previewImage(event: Event): Promise<Preview | undefined> {
 
     // add event to image service
     const target = event.target as HTMLInputElement;
@@ -108,13 +129,14 @@ export class ImageUploadService {
 
       // view file before upload
       const file = target.files[0];
-      this.fileName = file.name;
+      const filename = file.name;
 
       // get image preview
       const image = await this.blobToData(file);
 
       // return resized version
-      return await this.scaleImage(image, 800, 418);
+      const blob = await this.scaleImage(image, 800, 418);
+      return { filename, blob };
     }
     return;
   }
@@ -163,7 +185,6 @@ export class ImageUploadService {
         this.uploadingImage = true;
         await task;
         this.uploadingImage = false;
-
         return await getDownloadURL(storageRef);
       }
     } else {

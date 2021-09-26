@@ -1,0 +1,90 @@
+rules_version = '2';
+service cloud.firestore {
+
+  match /databases/{database}/documents {
+
+    function getRole(role) {
+      return role in get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles;
+    }
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isNotAdminOrEditor() {
+      return !request.resource.data.roles.hasAny(['admin', 'editor']);
+    }
+    function titleIsAvailable() {
+      return !exists(/databases/$(database)/documents/titles/$(request.resource.data.titleURL));
+    }
+    function isUser() {
+      return request.auth.uid == resource.id;
+    }
+    function isOwner() {
+      return request.auth.uid == resource.data.userId;
+    }
+    function isNewOwner() {
+      return request.auth.uid == request.resource.data.userId;
+    }
+
+    match /posts/{document} {
+      allow read;
+      allow update: if getRole('editor') && isOwner() && isNewOwner() || getRole('admin');
+      allow create: if getRole('editor') && titleIsAvailable() && isNewOwner() || getRole('admin');
+      allow delete: if getRole('admin');
+    }
+    match /categories/{document} {
+      allow read;
+      allow update: if getRole('editor');
+      allow create, delete: if getRole('admin');
+    }
+    match /users/{document} {
+      allow read;
+      allow create: if isSignedIn() && isNotAdminOrEditor();
+      allow update: if isSignedIn() && (getRole('admin') || isUser());
+    }
+    match /tags/{document} {
+      allow read;
+      allow write: if getRole('editor');
+    }
+    match /admin/{document} {
+      allow read;
+      allow update: if getRole('editor');
+      allow create, delete: if getRole('admin');
+    }
+    match /likes/{document} {
+      allow create, read;
+      allow update, delete: if request.auth.uid == resource.data.userId;
+    }
+    match /titles/{document} {
+      allow read;
+      allow update: if getRole('editor');
+      allow create, delete: if getRole('admin');
+    }
+    match /_counters/{document} {
+      allow read;
+      allow write: if false;
+    }
+    match /_events/{document} {
+      allow read, write: if false;
+    }
+    match /_uniques/{document=**} {
+      allow read;
+      allow write: if false;
+    }
+    match /_search/{document=**} {
+      allow read;
+      allow write: if false;
+    }
+    match /_trigrams/{document=**} {
+      allow read;
+      allow write: if false;
+    }
+  }
+}
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

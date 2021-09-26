@@ -38,7 +38,7 @@ export class PostComponent implements OnInit {
             // generate seo tags
             this.seo.generateTags({
               domain: this.ns.title,
-              image: r.image,
+              image: r.image || undefined,
               description: r.content,
               title: r.title + ' - ' + this.ns.title
             });
