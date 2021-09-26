@@ -315,6 +315,7 @@ export class AuthSettingsComponent implements OnInit {
         if (e.code === 'image/file-type') {
           this.sb.showError(this.messages.selectImage);
         }
+        console.error(e);
       }
       // upload new image and save it to photoURL in user db
       await this.auth.updateProfile({ photoURL: imageURL });

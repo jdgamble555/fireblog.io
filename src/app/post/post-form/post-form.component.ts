@@ -298,7 +298,9 @@ export class PostFormComponent {
     }
   }
 
-  deletePost(): void {
+  async deletePost(): Promise<void> {
+
+    const uid = (await this.auth.getUser())?.uid as string;
 
     const confirm = this.dialog.confirmDialog(this.messages.deleteConfirm);
     // delete when confirmed
@@ -321,7 +323,7 @@ export class PostFormComponent {
             }
           }
           // delete post
-          this.db.deletePost(this.id);
+          this.db.deletePost(this.id, uid);
           this.sb.showMsg(this.messages.deleted)
           this.ns.home();
         }
