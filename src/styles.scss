@@ -1,4 +1,4 @@
-@use '~@angular/material' as mat;
+@use "~@angular/material" as mat;
 @import "https://fonts.googleapis.com/icon?family=Material+Icons";
 // Custom Theming for Angular Material
 // For more information: https://material.angular.io/guide/theming
@@ -449,50 +449,9 @@ mat-form-field.mat-form-field {
 
 // Search
 
-.ng-search .mat-form-field-flex {
-  margin-top: 15px !important;
-  transform: scale(0.7);
-}
-
-.ng-search .mat-form-field-outline {
-  background: white;
-  border-radius: 5px;
-}
-
-// text color
-.ng-search.mat-form-field-appearance-outline {
-  color: black !important;
-  font-size: 18px !important;
-}
-
-// hover outline color
-.ng-search .mat-form-field-outline-thick {
-  color: grey;
-  border: 2px solid black;
-}
-
-// hover border
-.ng-search .mat-form-field-outline-start,
-.ng-search .mat-form-field-outline-end {
-  border: none !important;
-}
-
-// hover effect
-.ng-search .mat-form-field-flex:hover .mat-form-field-outline {
-  transition: none !important;
-}
-
-.ng-search {
-  margin-top: 10px;
-  width: 50% !important;
-  min-width: 400px;
-}
-
-@media (max-width: 767px) {
-  .ng-search {
-    display: none !important;
-    visibility: hidden;
-  }
+.ng-search-bar {
+  justify-content: center;
+  width: 90% !important;
 }
 
 // posts

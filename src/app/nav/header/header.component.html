@@ -1,47 +1,72 @@
-<mat-toolbar color="primary" class="ng-sticky-header flex-container">
-  <button mat-button (click)='ns.home();'>
-    <mat-icon class="ng-button-icon">home</mat-icon>
-    {{ ns.title }}
-  </button>
-  <div *ngIf="auth.user$ | async as user; else guest">
-    <mat-menu #appMenu="matMenu">
-      <button mat-menu-item routerLink="/settings">
-        <mat-icon class="ng-menu-icon">settings</mat-icon>
-        <span>Account Settings</span>
-      </button>
-      <mat-divider></mat-divider>
-      <!--<button mat-menu-item routerLink="/bookmarks">
-        <mat-icon class="ng-menu-icon">bookmarks</mat-icon>
-        <span>Bookmarks</span>
-      </button>
-      <mat-divider></mat-divider>-->
-      <ng-container *ngIf="isAdmin">
-        <button mat-menu-item [routerLink]="['/user', user.uid]">
-          <mat-icon class="ng-menu-icon">account_box</mat-icon>
-          <span>My Posts</span>
+<mat-toolbar color="{{ isActiveSearch ? 'basic' : 'primary' }}" class="ng-sticky-header">
+  <mat-toolbar-row *ngIf="isActiveSearch">
+    <div class="ng-search-bar">
+      <form>
+        <button mat-button class="ng-button-icon" (click)="this.isActiveSearch = !this.isActiveSearch">
+          <mat-icon>search</mat-icon>
+        </button>
+        <mat-form-field color="primary" floatLabel="never">
+          <input matInput placeholder="Search" [matAutocomplete]="auto">
+        </mat-form-field>
+        <button mat-button class="ng-button-icon" (click)="this.isActiveSearch = !this.isActiveSearch">
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption>
+          <mat-option style="white-space: pre" *ngFor="">
+          </mat-option>
+        </mat-autocomplete>
+      </form>
+    </div>
+  </mat-toolbar-row>
+  <mat-toolbar-row *ngIf="!isActiveSearch" class="flex-container">
+    <button mat-button (click)='ns.home();'>
+      <mat-icon class="ng-button-icon">dashboard</mat-icon>
+      {{ ns.title }}
+    </button>
+    <span class="ng-spacer"></span>
+    <button mat-button class="ng-button-icon" (click)="this.isActiveSearch = !this.isActiveSearch">
+      <mat-icon>search</mat-icon>
+    </button>
+    <div *ngIf="auth.user$ | async as user; else guest">
+      <mat-menu #appMenu="matMenu">
+        <button mat-menu-item routerLink="/settings">
+          <mat-icon class="ng-menu-icon">settings</mat-icon>
+          <span>Account Settings</span>
         </button>
         <mat-divider></mat-divider>
-        <button mat-menu-item routerLink="/new">
-          <mat-icon class="ng-menu-icon">post_add</mat-icon>
-          <span>New Post</span>
+        <!--<button mat-menu-item routerLink="/bookmarks">
+          <mat-icon class="ng-menu-icon">bookmarks</mat-icon>
+          <span>Bookmarks</span>
         </button>
-        <mat-divider></mat-divider>
-      </ng-container>
-      <button mat-menu-item (click)="logout()">
-        <mat-icon class="ng-menu-icon">power_settings_new</mat-icon>
-        <span>Logout</span>
-      </button>
-    </mat-menu>
-    <a mat-icon-button [matMenuTriggerFor]="appMenu">
-      <img class="avatar" *ngIf="user.photoURL" [src]="user?.photoURL" />
-      <mat-icon *ngIf="!user.photoURL" class="avatar avatar-account">account_circle</mat-icon>
-    </a>
-  </div>
-  <ng-template #guest>
-    <button mat-button routerLink="/login">Login</button>
-  </ng-template>
+        <mat-divider></mat-divider>-->
+        <ng-container *ngIf="isAdmin">
+          <button mat-menu-item [routerLink]="['/user', user.uid]">
+            <mat-icon class="ng-menu-icon">account_box</mat-icon>
+            <span>My Posts</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item routerLink="/new">
+            <mat-icon class="ng-menu-icon">post_add</mat-icon>
+            <span>New Post</span>
+          </button>
+          <mat-divider></mat-divider>
+        </ng-container>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon class="ng-menu-icon">power_settings_new</mat-icon>
+          <span>Logout</span>
+        </button>
+      </mat-menu>
+      <a mat-icon-button [matMenuTriggerFor]="appMenu">
+        <img class="avatar" *ngIf="user.photoURL" [src]="user?.photoURL" />
+        <mat-icon *ngIf="!user.photoURL" class="avatar avatar-account">account_circle</mat-icon>
+      </a>
+    </div>
+    <ng-template #guest>
+      <button mat-button routerLink="/login">Login</button>
+    </ng-template>
+  </mat-toolbar-row>
 </mat-toolbar>
-<mat-toolbar color="basic" class="ng-nav">
+<div class="ng-container" autosize>
   <ol class="arrows" itemscope itemtype="https://schema.org/BreadcrumbList">
     <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
       <a itemprop="item" mat-button routerLink="/">
@@ -57,4 +82,4 @@
       <meta itemprop="position" content="{{ i + 2 }}" />
     </li>
   </ol>
-</mat-toolbar>
+</div>

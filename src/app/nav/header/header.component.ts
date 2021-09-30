@@ -18,6 +18,8 @@ export class HeaderComponent implements OnInit {
 
   isAdmin = false;
 
+  isActiveSearch = false;
+
   constructor(
     public auth: AuthService,
     public ns: NavService,
