@@ -14,8 +14,9 @@ import {
   OrderByDirection
 } from '@angular/fire/firestore';
 import { combineLatest, Observable, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { debounceTime, map, switchMap, take } from 'rxjs/operators';
 import { User } from 'src/app/auth/user.model';
+import { NavService } from 'src/app/nav/nav.service';
 import { Post, Tag } from 'src/app/post/post.model';
 import { AuthService } from './auth.service';
 
@@ -32,7 +33,8 @@ export class ReadService {
 
   constructor(
     private afs: Firestore,
-    private auth: AuthService
+    private auth: AuthService,
+    private ns: NavService
   ) {
 
     // get user doc if logged in
@@ -75,6 +77,27 @@ export class ReadService {
   getUser(id: string): Observable<User> {
     return docData<User>(
       doc(this.afs, 'users', id) as DocumentReference<User>
+    );
+  }
+  /**
+  * Search posts by term
+  * @param term
+  * @returns
+  */
+  searchPost(term: string) {
+    term = term.split(' ')
+      .map(
+        (v: string) => this.ns.soundex(v)
+      ).join(' ');
+    return collectionData(
+      query(
+        collection(this.afs, '_search/posts/_all'),
+        orderBy('_term.' + term),
+      ),
+      { idField: 'id' }
+    ).pipe(
+      take(1),
+      debounceTime(100)
     );
   }
   /**

@@ -451,7 +451,7 @@ mat-form-field.mat-form-field {
 
 .ng-search-bar {
   justify-content: center;
-  width: 90% !important;
+  width: 100% !important;
 }
 
 // posts
@@ -563,4 +563,10 @@ body {
     display: block;
     visibility: visible;
   }
+}
+
+markdown img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
 }

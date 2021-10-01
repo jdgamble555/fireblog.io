@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Output, Input, OnInit } from '@angular/core';
+import { Observable, of } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
 import { Role, User } from 'src/app/auth/user.model';
 import { AuthService } from 'src/app/platform/firebase/auth.service';
@@ -19,6 +20,8 @@ export class HeaderComponent implements OnInit {
   isAdmin = false;
 
   isActiveSearch = false;
+
+  terms!: Observable<any[]>;
 
   constructor(
     public auth: AuthService,
@@ -43,5 +46,10 @@ export class HeaderComponent implements OnInit {
   logout() {
     this.auth.logout();
     this.ns.home();
+  }
+
+  search(event: Event) {
+    const term = (<HTMLInputElement>event.target).value;
+    this.terms = term ? this.read.searchPost(term) : of([]);
   }
 }

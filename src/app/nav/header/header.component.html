@@ -1,21 +1,21 @@
 <mat-toolbar color="{{ isActiveSearch ? 'basic' : 'primary' }}" class="ng-sticky-header">
   <mat-toolbar-row *ngIf="isActiveSearch">
-    <div class="ng-search-bar">
-      <form>
-        <button mat-button class="ng-button-icon" (click)="this.isActiveSearch = !this.isActiveSearch">
-          <mat-icon>search</mat-icon>
-        </button>
-        <mat-form-field color="primary" floatLabel="never">
-          <input matInput placeholder="Search" [matAutocomplete]="auto">
-        </mat-form-field>
-        <button mat-button class="ng-button-icon" (click)="this.isActiveSearch = !this.isActiveSearch">
-          <mat-icon>close</mat-icon>
-        </button>
-        <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption>
-          <mat-option style="white-space: pre" *ngFor="">
-          </mat-option>
-        </mat-autocomplete>
-      </form>
+    <div class="ng-search-bar flex-container">
+      <button mat-button class="ng-button-icon" (click)="this.isActiveSearch = !this.isActiveSearch">
+        <mat-icon>search</mat-icon>
+      </button>
+      <mat-form-field color="primary" floatLabel="never">
+        <input #term matInput placeholder="Search" [matAutocomplete]="auto" (keyup)="search($event)" autofocus>
+      </mat-form-field>
+      <button mat-button class="ng-button-icon" (click)="this.isActiveSearch = !this.isActiveSearch">
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption>
+        <mat-option style="white-space: pre" *ngFor="let term of terms | async"
+          [routerLink]="['/post', term.id, term.slug]" (click)="this.isActiveSearch = !this.isActiveSearch">
+          {{ term.title }}
+        </mat-option>
+      </mat-autocomplete>
     </div>
   </mat-toolbar-row>
   <mat-toolbar-row *ngIf="!isActiveSearch" class="flex-container">

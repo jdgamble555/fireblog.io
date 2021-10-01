@@ -13,6 +13,7 @@ import { SnackbarService } from 'src/app/shared/snack-bar/snack-bar.service';
 import { TagService } from 'src/app/shared/tag/tag.service';
 import { Post } from '../post.model';
 import { DialogService } from 'src/app/shared/confirm-dialog/dialog.service';
+import { MarkdownService } from 'ngx-markdown';
 
 
 @Component({
@@ -73,7 +74,8 @@ export class PostFormComponent {
     public sb: SnackbarService,
     private ns: NavService,
     private seo: SeoService,
-    private dialog: DialogService
+    private dialog: DialogService,
+    private markdownService: MarkdownService
   ) {
     this.postForm = this.fb.group({
       title: ['', Validators.required],
@@ -269,7 +271,7 @@ export class PostFormComponent {
       if (this.image) {
         try {
           await this.is.deleteImage(this.image);
-        } catch(e: any) {
+        } catch (e: any) {
           console.error(e);
           error = true;
         }
@@ -295,6 +297,10 @@ export class PostFormComponent {
     if (publish && !error) {
       this.sb.showMsg(this.messages.published);
       this.router.navigate(['/post', this.id, slug]);
+
+      // create search index
+      data.content = this.markdownService.compile(data.content as string);
+      await this.db.indexPost(this.id, data);
     }
   }
 

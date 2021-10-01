@@ -172,4 +172,16 @@ export class DbService {
       { imageUploads: arrayRemove(url) }
     );
   }
+  /**
+   * Create Post Index
+   * @param id
+   * @param data
+   */
+  async indexPost(id: string, data: any) {
+    await this.tools.searchIndex({
+      ref: doc(this.afs, 'posts', id),
+      after: data,
+      fields: ['content', 'title', 'tags']
+    });
+  }
 }

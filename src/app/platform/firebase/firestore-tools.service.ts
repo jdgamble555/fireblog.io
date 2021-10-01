@@ -1,12 +1,32 @@
 import { Injectable } from '@angular/core';
-import { arrayRemove, arrayUnion, collection, doc, DocumentData, DocumentReference, Firestore, getDoc, getDocs, increment, serverTimestamp, setDoc, SetOptions, writeBatch } from '@angular/fire/firestore';
+import {
+  arrayRemove,
+  arrayUnion,
+  collection,
+  deleteDoc,
+  doc,
+  DocumentData,
+  DocumentReference,
+  Firestore,
+  getDoc,
+  getDocs,
+  increment,
+  serverTimestamp,
+  setDoc,
+  SetOptions,
+  writeBatch
+} from '@angular/fire/firestore';
+import { NavService } from 'src/app/nav/nav.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FirestoreToolsService {
 
-  constructor(private afs: Firestore) { }
+  constructor(
+    private afs: Firestore,
+    private ns: NavService
+  ) { }
 
   /**
   * Generates an id for a new firestore doc
@@ -179,4 +199,109 @@ export class FirestoreToolsService {
     batch.commit();
   }
 
+  async searchIndex(opts: {
+    ref: DocumentReference<DocumentData>,
+    after: any,
+    fields: string[],
+    del?: boolean,
+    useSoundex?: boolean
+  }) {
+
+    opts.del = opts.del || false;
+    opts.useSoundex = opts.useSoundex || true;
+
+    const allCol = '_all';
+    const searchCol = '_search';
+    const termField = '_term';
+    const numWords = 6;
+
+    const colId = opts.ref.path.split('/').slice(0, -1).join('/');
+
+    // get collection
+    const searchRef = doc(
+      this.afs,
+      `${searchCol}/${colId}/${allCol}/${opts.ref.id}`
+    );
+
+    if (opts.del) {
+      await deleteDoc(searchRef);
+    } else {
+
+      let data: any = {};
+      let m: any = {};
+
+      // go through each field to index
+      for (const field of opts.fields) {
+
+        // new indexes
+        let fieldValue = opts.after[field];
+
+        // if array, turn into string
+        if (Array.isArray(fieldValue)) {
+          fieldValue = fieldValue.join(' ');
+        }
+        let index = this.createIndex(fieldValue, numWords);
+
+        // if filter function, run function on each word
+        if (opts.useSoundex) {
+          const temp = [];
+          for (const i of index) {
+            temp.push(i.split(' ').map(
+              (v: string) => this.ns.soundex(v)
+            ).join(' '));
+          }
+          index = temp;
+        }
+
+        for (const phrase of index) {
+          if (phrase) {
+            let v = '';
+            for (let i = 0; i < phrase.length; i++) {
+              v = phrase.slice(0, i + 1);
+              // increment for relevance
+              m[v] = m[v] ? m[v] + 1 : 1;
+            }
+          }
+        }
+      }
+      data[termField] = m;
+      data = { ...data, ...opts.after };
+
+      try {
+        await setDoc(searchRef, data)
+      } catch (e: any) {
+        console.error(e);
+      }
+    }
+  }
+
+  createIndex(html: string, n: number): string[] {
+    // create document after text stripped from html
+    function createDocs(text: string) {
+      const finalArray: string[] = [];
+      const wordArray = text
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}]+/gu, ' ')
+        .replace(/ +/g, ' ')
+        .trim()
+        .split(' ');
+      do {
+        finalArray.push(
+          wordArray.slice(0, n).join(' ')
+        );
+        wordArray.shift();
+      } while (wordArray.length !== 0);
+      return finalArray;
+    }
+    // strip text from html
+    function extractContent(html: string) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      return tmp.textContent || tmp.innerText || '';
+    }
+    // get rid of code first
+    return createDocs(
+      extractContent(html)
+    );
+  }
 }
