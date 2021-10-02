@@ -15,6 +15,9 @@ const routes: Routes = [
   { path: 'reset', component: AuthComponent, canActivate: [NotLoginGuard] },
   { path: 'verify', component: AuthComponent, canActivate: [LoginGuard] },
 
+  // backwards compatible with old app, will be removed later
+  { path: 'blog/post/:slug', component: PostComponent },
+
   // posts
   { path: 'post/:id', component: PostComponent },
   { path: 'post/:id/:slug', component: PostComponent },

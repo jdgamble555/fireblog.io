@@ -11,7 +11,8 @@ import {
   orderBy,
   query,
   where,
-  OrderByDirection
+  OrderByDirection,
+  limit
 } from '@angular/fire/firestore';
 import { combineLatest, Observable, of } from 'rxjs';
 import { debounceTime, map, switchMap, take } from 'rxjs/operators';
@@ -164,6 +165,24 @@ export class ReadService {
         map((p: Post) => p ? { ...p, id } : p)
       );
   }
+  /**
+   * Get post by slug, use is mainly for backwards compatibility
+   * @param slug
+   * @returns
+   */
+  getPostBySlug(slug: string): Observable<Post> {
+    return this.expandRefs<Post>(
+      collectionData<Post>(
+        query<Post>(
+          collection(this.afs, 'posts') as CollectionReference<Post>,
+          where('slug', '==', slug),
+          limit(1)
+        ), { idField: 'id' }
+      ), ['authorDoc']).pipe(
+        map((p: Post[]) => p[0])
+      );
+  }
+
   //
   // Tools
   //

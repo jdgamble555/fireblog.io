@@ -31,6 +31,20 @@ export class PostComponent implements OnDestroy {
     this.user$ = this.ns.isBrowser ? this.auth.user$ : of(null);
 
     this.sub = this.route.params.subscribe((p: any) => {
+
+      // backwards compatible, will be removed later
+      if (p.slug && !p.id) {
+        this.post = this.read.getPostBySlug(p.slug).pipe(
+          tap((r: Post) => {
+            if (r) {
+              this.router.navigate(['/post', r.id, r.slug]);
+            }
+          })
+        );
+        return;
+      }
+
+      // get post by router id
       this.post = this.read.getPostById(p.id).pipe(
         tap((r: Post) => {
           // if post from id
