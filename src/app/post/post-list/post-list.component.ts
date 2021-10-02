@@ -1,6 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { NavService } from 'src/app/nav/nav.service';
 import { AuthService } from 'src/app/platform/firebase/auth.service';
 import { ReadService } from 'src/app/platform/firebase/read.service';
@@ -17,14 +17,17 @@ export class PostListComponent implements OnDestroy {
 
   posts!: Observable<Post[]>;
   sub: Subscription;
+  user$: Observable<any>;
 
   constructor(
     public read: ReadService,
-    public auth: AuthService,
+    private auth: AuthService,
     private route: ActivatedRoute,
     private ns: NavService,
     private seo: SeoService
   ) {
+
+    this.user$ = this.ns.isBrowser ? this.auth.user$ : of(null);
 
     this.ns.openLeftNav();
 

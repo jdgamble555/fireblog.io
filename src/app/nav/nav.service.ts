@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { Router } from '@angular/router';
 
@@ -17,9 +18,15 @@ export class NavService {
   private leftNav!: MatSidenav;
   private rightNav!: MatSidenav;
 
+  isBrowser: Boolean;
+
   directories: Link[];
 
-  constructor(private router: Router) {
+  constructor(
+    @Inject(PLATFORM_ID) platformId: Object,
+    private router: Router
+  ) {
+    this.isBrowser = isPlatformBrowser(platformId);
     this.directories = [];
   }
 

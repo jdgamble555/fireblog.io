@@ -3,7 +3,7 @@ import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getStorage, provideStorage } from '@angular/fire/storage';
 import { getAuth, provideAuth } from '@angular/fire/auth';
-import { getAnalytics, provideAnalytics } from '@angular/fire/analytics';
+//import { getAnalytics, provideAnalytics } from '@angular/fire/analytics';
 import { environment } from 'src/environments/environment';
 
 @NgModule({
@@ -13,7 +13,7 @@ import { environment } from 'src/environments/environment';
     provideFirestore(() => getFirestore()),
     provideAuth(() => getAuth()),
     provideStorage(() => getStorage()),
-    provideAnalytics(() => getAnalytics())
+    //provideAnalytics(() => getAnalytics())
   ]
 })
 export class FirebaseModule {

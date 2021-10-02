@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { NavService } from '../nav/nav.service';
 import { AuthService } from '../platform/firebase/auth.service';
@@ -13,22 +13,24 @@ import { Post } from './post.model';
   templateUrl: './post.component.html',
   styleUrls: ['./post.component.scss']
 })
-export class PostComponent implements OnInit {
+export class PostComponent implements OnDestroy {
 
   post!: Observable<Post>;
+  sub: Subscription;
+  user$: Observable<any>;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private read: ReadService,
-    public auth: AuthService,
+    private auth: AuthService,
     private seo: SeoService,
     private ns: NavService
-  ) { }
+  ) {
 
-  ngOnInit(): void {
+    this.user$ = this.ns.isBrowser ? this.auth.user$ : of(null);
 
-    this.route.params.subscribe(async (p: any) => {
+    this.sub = this.route.params.subscribe((p: any) => {
       this.post = this.read.getPostById(p.id).pipe(
         tap((r: Post) => {
           // if post from id
@@ -52,5 +54,9 @@ export class PostComponent implements OnInit {
         })
       );
     });
+  }
+
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
   }
 }

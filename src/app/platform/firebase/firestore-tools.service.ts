@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable } from '@angular/core';
 import {
   arrayRemove,
   arrayUnion,
@@ -23,10 +24,15 @@ import { FirebaseModule } from './firebase.module';
 })
 export class FirestoreToolsService {
 
+  doc: Document;
+
   constructor(
+    @Inject(DOCUMENT) private document: Document,
     private afs: Firestore,
     private fm: FirebaseModule
-  ) { }
+  ) {
+    this.doc = this.document;
+  }
 
   /**
   * Generates an id for a new firestore doc
@@ -294,8 +300,8 @@ export class FirestoreToolsService {
       return finalArray;
     }
     // strip text from html
-    function extractContent(html: string) {
-      const tmp = document.createElement('div');
+    const extractContent = (html: string) => {
+      const tmp = this.doc.createElement('div');
       tmp.innerHTML = html;
       return tmp.textContent || tmp.innerText || '';
     }
