@@ -12,38 +12,135 @@ service cloud.firestore {
     function isNotAdminOrEditor() {
       return !request.resource.data.roles.hasAny(['admin', 'editor']);
     }
-    function titleIsAvailable() {
-      return !exists(/databases/$(database)/documents/titles/$(request.resource.data.titleURL));
-    }
+    //function titleIsAvailable() {
+      //return exists(/databases/$(database)/documents/titles/$(request.resource.data.titleURL));
+    //}
     function isUser() {
       return request.auth.uid == resource.id;
     }
-    function isOwner() {
-      return request.auth.uid == resource.data.userId;
+    //function isOwner() {
+    //  return request.auth.uid == resource.data.userId;
+    //}
+    //function isNewOwner() {
+    //  return request.auth.uid == request.resource.data.userId;
+    //}
+    //function noChange(field) {
+    //  return !(field in request.writeFields);
+    //}
+    //function getVal(field) {
+    //  return resource.data[field].removeAll(request.resource.data[field])[0];
+    //}
+    //function matchWrite(VAL1, VAL2, VAL3) {
+    //	return VAL1 in getAfter(/databases/$(database)/documents/$(VAL2)/$(getVal(VAL2))).data[VAL3];
+    //}
+    //function addCounter() {
+    //  let doc = request.path[3];
+    //  let col = '_counters';
+    //  let docPath = /databases/$(database)/documents/$(col)/$(doc);
+    //  let newCount = getAfter(docPath).data.count == get(docPath).data.count + 1;
+    //  let newId = getAfter(docPath).data.docId == request.path[4];
+    //  return newId && newCount;
+    //}
+    //function subCounter() {
+    //  let doc = request.path[3];
+    //  let col = '_counters';
+    //  let docPath = /databases/$(database)/documents/$(col)/$(doc);
+    //  let newCount = getAfter(docPath).data.count == get(docPath).data.count - 1;
+    //  let newId = getAfter(docPath).data.docId == request.path[4];
+    //  return newId && newCount;
+    //}
+    function counter() {
+      let docPath = /databases/$(database)/documents/_counters/$(request.path[3]);
+      let afterCount = getAfter(docPath).data.count;
+      let beforeCount = get(docPath).data.count;
+      let addCount = afterCount == beforeCount + 1;
+      let subCount = afterCount == beforeCount - 1;
+      let newId = getAfter(docPath).data.docId == request.path[4];
+      let deleteDoc = request.method == 'delete';
+      let createDoc = request.method == 'create';
+      return (newId && subCount && deleteDoc) || (newId && addCount && createDoc);
     }
-    function isNewOwner() {
-      return request.auth.uid == request.resource.data.userId;
+    function counterDoc() {
+      let afterCount = request.resource.data.count;
+      let beforeCount = resource.data.count;
+      let docPath = /databases/$(database)/documents/$(request.path[4])/$(request.resource.data.docId);
+      let createIdDoc = existsAfter(docPath) && !exists(docPath);
+      let deleteIdDoc = !existsAfter(docPath) && exists(docPath);
+      let addCount = afterCount == beforeCount + 1;
+      let subCount = afterCount == beforeCount - 1;
+      return (createIdDoc && addCount) || (deleteIdDoc && subCount);
     }
+    function userCount() {
+      let colId = request.path[3];
+      let docPath = /databases/$(database)/documents/users/$(request.auth.uid);
+      let beforeCount = get(docPath).data[colId + 'Count'];
+      let afterCount = getAfter(docPath).data[colId + 'Count'];
+      let addCount = afterCount == beforeCount + 1;
+      let subCount = beforeCount == beforeCount - 1;
+      return (addCount && request.method == 'create') || (subCount && request.method == 'delete');
+    }
+    function getAdded(map) {
+      return request.resource.data[map].keys().removeAll(resource.data[map].keys())[0];
+    }
+    function test() {
+      return getAdded('students') == 'fff2';
+    //return request.resource.__name__
+    //return request.path
+    //== path('/databases/(default)/documents/drafts/' + request.resource.id);
+    //== '/databases/(default)/documents/drafts/' + request.resource.id;
+    //return string(request.path) == '/databases/(default)/documents/drafts/6vCi00rT5MwYwvDRWWLi';
 
-    match /posts/{document} {
+    //'/databases/(default)/documents/drafts/' + request.resource.id;
+
+    // request.resource.id -- look for sub col path here...
+      //return true;
+      //return request.resource.id == 'butter';
+      //return resource.__name__ == path('/databases/(default)/documents/drafts/butter');
+      //return request.path == resource['__name__'];
+      // 4 = butter
+      // databases(0)/(default)(1)/documents(2)/drafts(3)/butter(4)
+    }
+    match /students/{studentID} {
       allow read;
-      allow update: if getRole('editor') && isOwner() && isNewOwner() || getRole('admin');
-      allow create: if getRole('editor') && titleIsAvailable() && isNewOwner() || getRole('admin');
-      allow delete: if getRole('admin');
+      allow write;
+      //allow write: if noChange('classes') || matchWrite(studentID, 'classes', 'students');
+      //allow delete: if noChange('classes') || matchDelete('classes', 'students');
+    }
+    match /classes/{classID} {
+      allow read;
+      allow update: if test();
+      //allow write: if noChange('students') || matchWrite(classID, 'students', 'classes');
+      //allow delete: if noChange('students') || matchDelete('students', 'classes');
+    }
+    match /posts/{document} {
+      allow read;//: if request.resource.data.keys.hasAny(["content"]);
+      allow update; // if getRole('editor') && isOwner() && isNewOwner() || getRole('admin');
+      allow create: if counter() && userCount();
+      allow delete: if counter() && userCount(); // if getRole('admin');
+    }
+    match /drafts/{document} {
+      allow read;
+      allow update;
+      allow create: if counter();
+      allow delete: if counter();
+    }
+    match /_counters/{document} {
+      allow read;
+      allow write: if counterDoc();
     }
     match /categories/{document} {
       allow read;
       allow update: if getRole('editor');
       allow create, delete: if getRole('admin');
     }
-    match /users/{document} {
+    match /users/{document=**} {
       allow read;
       allow create: if isSignedIn() && isNotAdminOrEditor();
       allow update: if isSignedIn() && (getRole('admin') || isUser());
     }
     match /tags/{document} {
       allow read;
-      allow write: if getRole('editor');
+      allow write;
     }
     match /admin/{document} {
       allow read;
@@ -59,10 +156,6 @@ service cloud.firestore {
       allow update: if getRole('editor');
       allow create, delete: if getRole('admin');
     }
-    match /_counters/{document} {
-      allow read;
-      allow write: if false;
-    }
     match /_events/{document} {
       allow read, write: if false;
     }
@@ -70,21 +163,32 @@ service cloud.firestore {
       allow read;
       allow write: if false;
     }
+    function searchIndex() {
+      let docPath = /databases/$(database)/documents/$(request.path[4])/$(request.path[6]);
+      return get(docPath).data.authorId == request.auth.uid;
+    }
     match /_search/{document=**} {
       allow read;
-      allow write: if false;
+      allow write: if searchIndex();
     }
     match /_trigrams/{document=**} {
       allow read;
       allow write: if false;
     }
-  }
-}
-
-service firebase.storage {
-  match /b/{bucket}/o {
-    match /{allPaths=**} {
-      allow read, write: if request.auth != null;
+    match /users/{document}/feed/{feedId} {
+      allow read;
+      allow write;
+ 			allow delete;
+    }
+    match /users/{document}/following/{followingId} {
+      allow read;
+      allow write;
+      allow delete;
+    }
+    match /images/{document} {
+      allow read;
+      allow write;
+      allow delete;
     }
   }
 }

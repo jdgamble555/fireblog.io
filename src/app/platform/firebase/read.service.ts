@@ -16,9 +16,9 @@ import {
 import { combineLatest, Observable, of } from 'rxjs';
 import { debounceTime, map, switchMap, take } from 'rxjs/operators';
 import { User } from 'src/app/auth/user.model';
-import { NavService } from 'src/app/nav/nav.service';
 import { Post, Tag } from 'src/app/post/post.model';
 import { AuthService } from './auth.service';
+import { FirebaseModule } from './firebase.module';
 
 //
 // Read Database Functions
@@ -34,7 +34,7 @@ export class ReadService {
   constructor(
     private afs: Firestore,
     private auth: AuthService,
-    private ns: NavService
+    private fm: FirebaseModule
   ) {
 
     // get user doc if logged in
@@ -82,12 +82,12 @@ export class ReadService {
   /**
   * Search posts by term
   * @param term
-  * @returns
+  * @returns Observable of search
   */
   searchPost(term: string) {
     term = term.split(' ')
       .map(
-        (v: string) => this.ns.soundex(v)
+        (v: string) => this.fm.soundex(v)
       ).join(' ');
     return collectionData(
       query(

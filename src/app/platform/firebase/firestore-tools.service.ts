@@ -16,7 +16,7 @@ import {
   SetOptions,
   writeBatch
 } from '@angular/fire/firestore';
-import { NavService } from 'src/app/nav/nav.service';
+import { FirebaseModule } from './firebase.module';
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +25,7 @@ export class FirestoreToolsService {
 
   constructor(
     private afs: Firestore,
-    private ns: NavService
+    private fm: FirebaseModule
   ) { }
 
   /**
@@ -247,7 +247,7 @@ export class FirestoreToolsService {
           const temp = [];
           for (const i of index) {
             temp.push(i.split(' ').map(
-              (v: string) => this.ns.soundex(v)
+              (v: string) => this.fm.soundex(v)
             ).join(' '));
           }
           index = temp;
