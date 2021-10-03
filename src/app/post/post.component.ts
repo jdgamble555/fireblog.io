@@ -1,7 +1,7 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, of, Subscription } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { take, tap } from 'rxjs/operators';
 import { NavService } from '../nav/nav.service';
 import { AuthService } from '../platform/firebase/auth.service';
 import { ReadService } from '../platform/firebase/read.service';
@@ -13,10 +13,9 @@ import { Post } from './post.model';
   templateUrl: './post.component.html',
   styleUrls: ['./post.component.scss']
 })
-export class PostComponent implements OnDestroy {
+export class PostComponent {
 
   post!: Observable<Post>;
-  sub: Subscription;
   user$: Observable<any>;
 
   constructor(
@@ -30,7 +29,7 @@ export class PostComponent implements OnDestroy {
 
     this.user$ = this.ns.isBrowser ? this.auth.user$ : of(null);
 
-    this.sub = this.route.params.subscribe((p: any) => {
+    this.route.params.pipe(take(1)).subscribe((p: any) => {
 
       // backwards compatible, will be removed later
       if (p.slug && !p.id) {
@@ -70,7 +69,4 @@ export class PostComponent implements OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
-  }
 }
