@@ -1,5 +1,5 @@
 @use "~@angular/material" as mat;
-@import '~@angular/material/theming';
+@import "~@angular/material/theming";
 @import "https://fonts.googleapis.com/icon?family=Material+Icons";
 
 // color reference - https://material.io/design/color/the-color-system.html#tools-for-picking-colors
@@ -62,7 +62,6 @@ $dark-theme: mat.define-dark-theme(
 // that you are using.
 //@include mat.core-theme($fireblog-theme);
 
-
 .dark-theme {
   //@include angular-material-theme($dark-theme);
   @include angular-material-color($dark-theme);
@@ -78,13 +77,15 @@ body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
-a, a:visited {
-  color:black;
+a,
+a:visited {
+  color: inherit;
   text-decoration: none;
 }
 
-.dark-theme a, a:visited {
-  color: white;
+.dark-theme a,
+a:visited {
+  color: inherit;
   text-decoration: none;
 }
 
