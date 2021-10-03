@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { Observable, of, Subscription } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
 import { NavService } from '../nav/nav.service';
 import { AuthService } from '../platform/firebase/auth.service';
@@ -17,6 +17,7 @@ export class PostComponent {
 
   post!: Observable<Post>;
   user$: Observable<any>;
+  sub!: Subscription;
 
   constructor(
     private route: ActivatedRoute,
@@ -29,22 +30,38 @@ export class PostComponent {
 
     this.user$ = this.ns.isBrowser ? this.auth.user$ : of(null);
 
-    this.route.params.pipe(take(1)).subscribe((p: any) => {
+    this.ns.openLeftNav();
 
-      // backwards compatible, will be removed later
-      if (p.slug && !p.id) {
-        this.post = this.read.getPostBySlug(p.slug).pipe(
-          tap((r: Post) => {
-            if (r) {
-              this.router.navigate(['/post', r.id, r.slug]);
-            }
-          })
-        );
-        return;
-      }
+    // parameters
+    let params = this.route.paramMap;
 
+    // only get 1 if server
+    if (!this.ns.isBrowser) {
+      params = params.pipe(take(1));
+    }
+
+    this.sub = params.subscribe((r: ParamMap) => this.loadPage(r));
+  }
+
+  loadPage(p: ParamMap) {
+    const slug = p.get('slug');
+    const id = p.get('id');
+
+    // backwards compatible, will be removed later
+    if (slug && !id) {
+      this.post = this.read.getPostBySlug(slug).pipe(
+        tap((r: Post) => {
+          if (r) {
+            this.router.navigate(['/post', r.id, r.slug]);
+          }
+        })
+      );
+      return;
+    }
+
+    if (id) {
       // get post by router id
-      this.post = this.read.getPostById(p.id).pipe(
+      this.post = this.read.getPostById(id).pipe(
         tap((r: Post) => {
           // if post from id
           if (r) {
@@ -58,15 +75,14 @@ export class PostComponent {
               title: r.title + ' - ' + this.ns.title
             });
             // check slug
-            if (r.slug !== p.slug) {
-              this.router.navigate(['/post', p.id, r.slug]);
+            if (r.slug !== slug) {
+              this.router.navigate(['/post', id, r.slug]);
             }
           } else {
             this.router.navigate(['/home']);
           }
         })
       );
-    });
+    }
   }
-
 }

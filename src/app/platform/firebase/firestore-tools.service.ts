@@ -199,9 +199,9 @@ export class FirestoreToolsService {
         docId: ref.id
       });
     }
-    if ((countSnap.data() as any).count == 1) {
+    /*if ((countSnap.data() as any).count == 1) {
       batch.delete(countRef);
-    }
+    }*/
     batch.commit();
   }
 
