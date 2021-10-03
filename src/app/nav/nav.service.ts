@@ -1,4 +1,5 @@
-import { isPlatformBrowser } from '@angular/common';
+import { OverlayContainer } from '@angular/cdk/overlay';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { Router } from '@angular/router';
@@ -15,19 +16,29 @@ export class NavService {
 
   title = 'Fireblog.io';
 
+  isDarkMode = false;
+
   private leftNav!: MatSidenav;
   private rightNav!: MatSidenav;
 
   isBrowser: Boolean;
+  doc: Document;
 
   directories: Link[];
 
   constructor(
     @Inject(PLATFORM_ID) platformId: Object,
-    private router: Router
+    @Inject(DOCUMENT) private document: Document,
+    private router: Router,
+    private overlay: OverlayContainer
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
+    this.doc = this.document;
     this.directories = [];
+
+    if (this.isBrowser && localStorage.getItem('fireblog-dark-mode')) {
+      this.toggleTheme();
+    }
   }
 
   // reset bread crumb
@@ -80,5 +91,25 @@ export class NavService {
   }
   home(): void {
     this.router.navigate(['/']);
+  }
+
+  toggleTheme() {
+
+    const darkClass = 'dark-theme';
+
+    if (this.isDarkMode) {
+      this.overlay.getContainerElement().classList.remove(darkClass);
+      this.document.body.classList.remove(darkClass);
+      if (this.isBrowser) {
+        localStorage.removeItem('fireblog-dark-mode');
+      }
+    } else {
+      this.overlay.getContainerElement().classList.add(darkClass);
+      this.document.body.classList.add(darkClass);
+      if (this.isBrowser) {
+        localStorage.setItem('fireblog-dark-mode', 'true');
+      }
+    }
+    this.isDarkMode = !this.isDarkMode;
   }
 }

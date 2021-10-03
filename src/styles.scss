@@ -1,12 +1,7 @@
 @use "~@angular/material" as mat;
 @import "https://fonts.googleapis.com/icon?family=Material+Icons";
-// Custom Theming for Angular Material
-// For more information: https://material.angular.io/guide/theming
-// Plus imports for other components in your app.
 
-// Include the common styles for Angular Material. We include this here so that you only
-// have to load a single css file for Angular Material in your app.
-// Be sure that you only ever include this mixin once!
+// color reference - https://material.io/design/color/the-color-system.html#tools-for-picking-colors
 
 $custom-typography: mat.define-typography-config(
   $font-family: '"Marr Sans",Helvetica,Arial,Roboto,sans-serif',
@@ -22,10 +17,8 @@ $custom-typography: mat.define-typography-config(
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
 $fireblog-primary: mat.define-palette(mat.$blue-palette, 600);
-$fireblog-accent: mat.define-palette(mat.$indigo-palette, 900);
-
-// The warn palette is optional (defaults to red).
-$fireblog-warn: mat.define-palette(mat.$red-palette);
+$fireblog-accent: mat.define-palette(mat.$gray-palette, 300);
+$fireblog-background: #fff;
 
 // Create the theme object. A theme consists of configurations for individual
 // theming systems such as "color" or "typography".
@@ -34,7 +27,28 @@ $fireblog-theme: mat.define-light-theme(
     color: (
       primary: $fireblog-primary,
       accent: $fireblog-accent,
-      warn: $fireblog-warn,
+      background: $fireblog-background,
+    ),
+  )
+);
+
+@include mat.all-component-themes($fireblog-theme);
+
+// fix background problem
+.mat-app-background {
+  background-color: white;
+}
+
+$dark-primary: mat.define-palette(mat.$light-blue-palette, 900);
+$dark-accent: mat.define-palette(mat.$blue-gray-palette, 100);
+$dark-theme-background: mat.define-palette(mat.$gray-palette, 600);
+$dark-theme: mat.define-dark-theme(
+  (
+    color: (
+      primary: $dark-primary,
+      accent: $dark-accent,
+      is-dark: true,
+      background: $dark-theme-background,
     ),
   )
 );
@@ -44,7 +58,12 @@ $fireblog-theme: mat.define-light-theme(
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
-@include mat.all-component-themes($fireblog-theme);
+//@include mat.core-theme($fireblog-theme);
+
+
+.dark-theme {
+  @include mat.all-component-themes($dark-theme);
+}
 
 /* You can add global styles to this file, and also import other style files */
 
@@ -53,7 +72,15 @@ body {
   height: 100%;
   min-height: 100%;
   margin: 0;
-  font-family: "Marr Sans", Helvetica, Arial, Roboto, sans-serif;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+a:visited {
+  color:black;
+}
+
+.dark-theme a:visited {
+  color: white;
 }
 
 // end material
@@ -166,7 +193,7 @@ h3 {
 }
 
 .ng-card {
-  margin: 15px;
+  margin: 0 15px 15px;
   text-align: left;
   font-size: 18px;
 }
@@ -206,6 +233,10 @@ h3 {
 
 .ng-sidenav {
   text-align: left;
+}
+
+.ng-transparent {
+  background-color: transparent !important;
 }
 
 .ng-title {
@@ -532,15 +563,6 @@ div.trim {
   overflow: hidden;
 }
 
-html,
-body {
-  height: 100%;
-}
-body {
-  margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-}
-
 // mobile
 
 @media (max-width: 767px) {
@@ -579,4 +601,14 @@ markdown img {
 
 mat-paginator .mat-form-field {
   width: 50px;
+}
+
+.dark-mode .ng-card-outline {
+  border: 1px solid hsla(0, 0%, 100%, 0.2);
+}
+
+.ng-card-outline {
+  border-style: solid;
+  border-width: thin;
+  border-color: rgba(0, 0, 0, 0.2);
 }

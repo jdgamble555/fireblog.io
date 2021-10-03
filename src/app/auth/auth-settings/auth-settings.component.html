@@ -1,6 +1,6 @@
 <div *ngIf="auth.user$ | async as user">
-  <form [formGroup]="accountForm">
-    <mat-card>
+  <mat-card class="ng-card-outline">
+    <form [formGroup]="accountForm">
       <h1>Settings</h1>
       <mat-accordion>
         <mat-expansion-panel>
@@ -35,7 +35,7 @@
               {{ getError('displayName') }}
             </mat-error>
           </mat-form-field>
-          <button class="login-button" type="submit" color="primary" mat-raised-button
+          <button class="login-button" type="submit" color="accent" mat-raised-button
             [disabled]="getField('displayName')?.invalid" (click)="updateProfile()">
             <mat-icon class="ng-button-icon">save</mat-icon>
             Save
@@ -54,7 +54,7 @@
               {{ getError('email') }}
             </mat-error>
           </mat-form-field>
-          <button class="login-button" type="submit" color="primary" mat-raised-button
+          <button class="login-button" type="submit" color="accent" mat-raised-button
             [disabled]="getField('email')?.invalid" (click)="updateEmail()">
             <mat-icon class="ng-button-icon">save</mat-icon>
             Save
@@ -86,7 +86,7 @@
               {{ getError('confirmPassword') }}
             </mat-error>
           </mat-form-field>
-          <button class="login-button" type="submit" color="primary" mat-raised-button
+          <button class="login-button" type="submit" color="accent" mat-raised-button
             [disabled]="getField('password')?.invalid || getField('confirmPassword')?.invalid" (click)="updatePass()">
             <mat-icon class="ng-button-icon">save</mat-icon>
             Save
@@ -119,6 +119,6 @@
           </button>
         </mat-expansion-panel>
       </mat-accordion>
-    </mat-card>
-  </form>
+    </form>
+  </mat-card>
 </div>

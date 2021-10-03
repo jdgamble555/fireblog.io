@@ -20,10 +20,13 @@
   </mat-toolbar-row>
   <mat-toolbar-row *ngIf="!isActiveSearch" class="flex-container">
     <button mat-button (click)='ns.home();'>
-      <mat-icon class="ng-button-icon">dashboard</mat-icon>
+      <mat-icon color="accent" class="ng-button-icon">dashboard</mat-icon>
       {{ ns.title }}
     </button>
     <span class="ng-spacer"></span>
+    <button mat-button class="ng-button-icon" (click)="toggle()">
+      <mat-icon>dark_mode</mat-icon>
+    </button>
     <button mat-button class="ng-button-icon" (click)="this.isActiveSearch = !this.isActiveSearch">
       <mat-icon>search</mat-icon>
     </button>
@@ -70,7 +73,7 @@
   <ol class="arrows" itemscope itemtype="https://schema.org/BreadcrumbList">
     <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
       <a itemprop="item" mat-button routerLink="/">
-        <mat-icon class="ng-button-icon">home</mat-icon><span itemprop="name">Home</span>
+        <mat-icon color="primary" class="ng-button-icon">home</mat-icon><span itemprop="name">Home</span>
       </a>
       <meta itemprop="position" content="1" />
     </li>

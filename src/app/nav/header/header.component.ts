@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Output, Input } from '@angular/core';
 import { User } from '@angular/fire/auth';
 import { Observable, of } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
@@ -44,6 +44,10 @@ export class HeaderComponent {
         }
       });
     }
+  }
+
+  toggle() {
+    this.ns.toggleTheme();
   }
 
   logout() {
