@@ -71,6 +71,18 @@ export class ReadService {
     );
   }
   /**
+   * Get tag count from tag doc
+   * @param t - tag
+   * @returns
+   */
+  getTagTotal(t: string) {
+    return docData<any>(
+      doc(this.afs, 'tags', t)
+    ).pipe(
+      map((r: any) => r.count)
+    );
+  }
+  /**
    * Get user document
    * @param id
    * @returns
@@ -102,22 +114,6 @@ export class ReadService {
     );
   }
   /**
-   * Get all posts from a certain uid
-   * @param uid
-   * @returns
-   */
-  getPostsByUser<Post>(uid: string): Observable<Post[]> {
-    return this.getPosts({ uid });
-  }
-  /**
-   * Get all posts with a certain tag
-   * @param tag
-   * @returns
-   */
-  getPostsByTag<Post>(tag: string): Observable<Post[]> {
-    return this.getPosts({ tag });
-  }
-  /**
    * Gets all posts
    * @returns posts joined by authorDoc
    */
@@ -125,11 +121,19 @@ export class ReadService {
     sortField?: string,
     sortDirection?: OrderByDirection,
     tag?: string,
-    uid?: string
+    uid?: string,
+    page?: number,
+    pageSize?: number
   }): Observable<Post[]> {
     opts = opts || {};
     opts.sortField = opts.sortField || 'createdAt';
     opts.sortDirection = opts.sortDirection || 'desc';
+    opts.pageSize = opts.pageSize || 5;
+    opts.page = opts.page || 1;
+
+    const _limit = opts.page * opts.pageSize;
+    const _offset = (opts.page - 1) * opts.pageSize;
+
     const filters = [
       orderBy(opts.sortField, opts.sortDirection)
     ];
@@ -143,13 +147,32 @@ export class ReadService {
         where('authorId', '==', opts.uid)
       );
     }
+    filters.push(
+      limit(_limit)
+    );
     return this.expandRefs<Post>(
       collectionData<Post>(
         query<Post>(
           collection(this.afs, 'posts') as CollectionReference<Post>,
           ...filters
         ), { idField: 'id' }
+      ).pipe(
+        // offset is only okay here because of caching
+        map((l: Post[]) => l.slice(_offset))
       ), ['authorDoc']);
+  }
+  /**
+   * Return total number of docs by a user
+   * @param uid - user id
+   * @param col - column
+   * @returns
+   */
+  getUserTotal(uid: string, col: string) {
+    return docData<any>(
+      doc(this.afs, 'users', uid)
+    ).pipe(
+      map((r: any) => r[col + 'Count'])
+    );
   }
   /**
    * Get Post by post id

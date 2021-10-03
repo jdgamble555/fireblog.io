@@ -570,3 +570,13 @@ markdown img {
   height: 100% !important;
   object-fit: cover !important;
 }
+
+// paginator
+
+.mat-paginator-page-size-label {
+  width: 135px;
+}
+
+mat-paginator .mat-form-field {
+  width: 50px;
+}

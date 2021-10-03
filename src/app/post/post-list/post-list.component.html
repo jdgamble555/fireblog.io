@@ -31,3 +31,6 @@
     </div>
   </mat-card-actions>
 </mat-card>
+<mat-paginator [length]="totalPosts | async" [pageSize]="5" [pageSizeOptions]="[5, 10, 20]" aria-label="Select page"
+  (page)="pageChange($event)">
+</mat-paginator>
