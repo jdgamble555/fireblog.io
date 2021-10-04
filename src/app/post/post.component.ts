@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { Observable, of, Subscription } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
@@ -13,7 +13,7 @@ import { Post } from './post.model';
   templateUrl: './post.component.html',
   styleUrls: ['./post.component.scss']
 })
-export class PostComponent {
+export class PostComponent implements OnInit {
 
   post!: Observable<Post>;
   user$: Observable<any>;
@@ -65,15 +65,7 @@ export class PostComponent {
         tap((r: Post) => {
           // if post from id
           if (r) {
-            // add bread crumbs
-            this.ns.setBC(r.title as string);
-            // generate seo tags
-            this.seo.generateTags({
-              domain: this.ns.title,
-              image: r.image || undefined,
-              description: r.content,
-              title: r.title + ' - ' + this.ns.title
-            });
+            this.meta(r);
             // check slug
             if (r.slug !== slug) {
               this.router.navigate(['/post', id, r.slug]);
@@ -83,6 +75,32 @@ export class PostComponent {
           }
         })
       );
+    }
+  }
+
+  meta(r: Post) {
+    // add bread crumbs
+    this.ns.setBC(r.title as string);
+    // generate seo tags
+    this.seo.generateTags({
+      domain: this.ns.title,
+      image: r.image || undefined,
+      description: r.content?.substring(0, 125).replace(/(\r\n|\n|\r)/gm, ""),
+      title: r.title + ' - ' + this.ns.title,
+      user: 'Jonathan Gamble'
+    });
+  }
+
+  async ngOnInit() {
+    if (!this.ns.isBrowser) {
+      // seo for ssr
+      const id = (await this.route.paramMap.pipe(take(1)).toPromise()).get('id') as string;
+      await this.read.getPostById(id).pipe(
+        tap((p) => {
+          this.meta(p);
+        }),
+        take(1)
+      ).toPromise();
     }
   }
 }

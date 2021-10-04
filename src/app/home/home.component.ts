@@ -16,7 +16,7 @@ export class HomeComponent {
 
     this.seo.generateTags({
       title: this.ns.title,
-      description: 'A blog about Firebase and Firestore!',
+      description: 'A blog about Firebase and Firestore! Search, Indexing, Rules, and more!',
       domain: 'fireblog.io',
       user: 'Jonathan Gamble'
     });
