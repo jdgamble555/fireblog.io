@@ -83,20 +83,20 @@ a:visited {
   text-decoration: none;
 }
 
-ng-container a,
-ng-container a:visited {
+mat-card a,
+mat-card a:visited {
   color: #1e88e5;
   text-decoration: none;
 }
 
 .dark-theme a,
-.dark-theme  a:visited {
+.dark-theme a:visited {
   color: inherit;
   text-decoration: none;
 }
 
-.dark-theme ng-container a,
-.dark-theme ng-container a:visited {
+.dark-theme mat-card a,
+.dark-theme mat-card a:visited {
   color: #0583e4;
   text-decoration: none;
 }
