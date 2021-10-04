@@ -1,7 +1,7 @@
 <mat-card class="ng-card" *ngIf="post | async as post">
   <img *ngIf="post.image" mat-card-image src="{{ post.image }}" alt="{{ post.title }}" />
   <h1>
-    <mat-icon color="accent" class="ng-icon-text">library_books</mat-icon>{{ post.title }}
+    <mat-icon color="primary" class="ng-icon-text">library_books</mat-icon>{{ post.title }}
   </h1>
   <h6><i>{{ post.minutes }} min read</i></h6>
   <div class="ng-author ng-link" [routerLink]="['/user', post.authorId]">

@@ -96,6 +96,7 @@ export class AuthComponent implements OnInit, OnDestroy {
     this.seo.generateTags({
       title: this.title + ' - ' + this.nav.title
     });
+    this.nav.setBC(this.title);
 
     // init form controls
     const passwordControl = this.fb.control('', [

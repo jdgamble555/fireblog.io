@@ -72,7 +72,7 @@ export class AuthSettingsComponent implements OnInit {
   ) {
     this.nav.closeLeftNav();
     this.seo.generateTags({ title: 'Settings - ' + this.nav.title });
-    this.nav.addBC('Settings')
+    this.nav.setBC('Settings');
   }
 
   async ngOnInit() {

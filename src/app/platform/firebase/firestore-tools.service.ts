@@ -262,16 +262,24 @@ export class FirestoreToolsService {
         for (const phrase of index) {
           if (phrase) {
             let v = '';
-            for (let i = 0; i < phrase.length; i++) {
-              v = phrase.slice(0, i + 1);
+            const t = phrase.split(' ');
+            while (t.length > 0) {
+              const r = t.shift();
+              v += v ? ' ' + r : r;
               // increment for relevance
               m[v] = m[v] ? m[v] + 1 : 1;
             }
           }
         }
       }
+
       data[termField] = m;
-      data = { ...data, ...opts.after };
+
+      data = {
+        ...data,
+        slug: opts.after.slug,
+        title: opts.after.title
+      };
 
       try {
         await setDoc(searchRef, data)
@@ -283,7 +291,11 @@ export class FirestoreToolsService {
 
   createIndex(html: string, n: number): string[] {
     // create document after text stripped from html
-    function createDocs(text: string) {
+    // get rid of pre code blocks
+    const beforeReplace = (text: any) => {
+      return text.replace(/&nbsp;/g, ' ').replace(/<pre[^>]*>([\s\S]*?)<\/pre>/g, '');
+    }
+    const createDocs = (text: string) => {
       const finalArray: string[] = [];
       const wordArray = text
         .toLowerCase()
@@ -307,7 +319,9 @@ export class FirestoreToolsService {
     }
     // get rid of code first
     return createDocs(
-      extractContent(html)
+      extractContent(
+        beforeReplace(html)
+      )
     );
   }
 }

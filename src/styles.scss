@@ -84,8 +84,8 @@ a:visited {
 }
 
 .dark-theme a,
-a:visited {
-  color: inherit;
+.dark-theme ng-container a:visited {
+  color: #0583e4;
   text-decoration: none;
 }
 
