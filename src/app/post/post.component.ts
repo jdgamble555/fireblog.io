@@ -1,21 +1,23 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { Observable, of, Subscription } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
+import { CoreModule } from '../core/core.module';
 import { NavService } from '../nav/nav.service';
 import { AuthService } from '../platform/firebase/auth.service';
 import { ReadService } from '../platform/firebase/read.service';
 import { SeoService } from '../shared/seo/seo.service';
 import { Post } from './post.model';
 
+
 @Component({
   selector: 'app-post',
   templateUrl: './post.component.html',
   styleUrls: ['./post.component.scss']
 })
-export class PostComponent implements OnInit {
+export class PostComponent implements OnDestroy {
 
-  post!: Observable<Post>;
+  post!: Observable<Post> | Promise<Post>;
   user$: Observable<any>;
   sub!: Subscription;
 
@@ -25,15 +27,19 @@ export class PostComponent implements OnInit {
     private read: ReadService,
     private auth: AuthService,
     private seo: SeoService,
-    private ns: NavService
+    private ns: NavService,
+    private cm: CoreModule
   ) {
 
     this.user$ = this.ns.isBrowser ? this.auth.user$ : of(null);
     this.ns.openLeftNav();
 
+    let params = this.route.paramMap;
+
     if (this.ns.isBrowser) {
-      this.sub = this.route.paramMap.subscribe((r: ParamMap) => this.loadPage(r));
+      params = params.pipe(take(1));
     }
+    this.sub = params.subscribe((r: ParamMap) => this.loadPage(r));
   }
 
   loadPage(p: ParamMap) {
@@ -54,7 +60,7 @@ export class PostComponent implements OnInit {
 
     if (id) {
       // get post by router id
-      this.post = this.read.getPostById(id).pipe(
+      const p = this.read.getPostById(id).pipe(
         tap((r: Post) => {
           // if post from id
           if (r) {
@@ -68,6 +74,12 @@ export class PostComponent implements OnInit {
           }
         })
       );
+      // ssr seo
+      if (!this.ns.isBrowser) {
+        const prom = p.pipe(take(1)).toPromise();
+        this.cm.waitFor(prom);
+      }
+      this.post = p;
     }
   }
 
@@ -82,16 +94,6 @@ export class PostComponent implements OnInit {
       title: r.title + ' - ' + this.ns.title,
       user: this.ns.author
     });
-  }
-
-  async ngOnInit() {
-    if (!this.ns.isBrowser) {
-      // seo for ssr
-      const id = (await this.route.paramMap.pipe(take(1)).toPromise()).get('id') as string;
-      await this.read.getPostById(id).pipe(
-        tap((p: any) => this.meta(p))
-      ).toPromise();
-    }
   }
 
   ngOnDestroy(): void {

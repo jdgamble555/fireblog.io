@@ -19,7 +19,7 @@ const components = [
   AuthComponent
 ];
 
-
+declare const Zone: any;
 @NgModule({
   imports: [
     ...modules
@@ -32,4 +32,18 @@ const components = [
     ...components
   ]
 })
-export class CoreModule { }
+export class CoreModule {
+
+  // https://github.com/BeSpunky/angular-zen/blob/master/libs/angular-zen/router-x/services/route-aware.service.ts
+
+  async waitFor(prom: Promise<any>): Promise<any> {
+    const macroTask = Zone.current
+      .scheduleMacroTask(
+        `WAITFOR-${Math.random()}`,
+        () => { },
+        {},
+        () => { }
+      );
+    return prom.then(() => macroTask.invoke());
+  }
+}

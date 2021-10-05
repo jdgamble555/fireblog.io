@@ -114,4 +114,5 @@ export class NavService {
     }
     this.isDarkMode = !this.isDarkMode;
   }
+
 }

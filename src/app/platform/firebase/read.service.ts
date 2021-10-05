@@ -12,7 +12,9 @@ import {
   query,
   where,
   OrderByDirection,
-  limit
+  limit,
+  getDoc,
+  DocumentSnapshot
 } from '@angular/fire/firestore';
 import { combineLatest, Observable, of } from 'rxjs';
 import { debounceTime, map, switchMap, take } from 'rxjs/operators';
@@ -187,6 +189,12 @@ export class ReadService {
         // add id field
         map((p: Post) => p ? { ...p, id } : p)
       );
+  }
+
+  async seoPostById(id: string): Promise<Post | undefined> {
+    return (await getDoc(
+      doc(this.afs, 'posts', id)
+    )).data() as Post;
   }
   /**
    * Get post by slug, use is mainly for backwards compatibility
