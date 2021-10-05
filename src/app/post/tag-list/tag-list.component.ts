@@ -17,5 +17,4 @@ export class TagListComponent {
   constructor(private read: ReadService) {
     this.tags = this.read.getTags();
   }
-
 }

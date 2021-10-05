@@ -29,18 +29,11 @@ export class PostComponent implements OnInit {
   ) {
 
     this.user$ = this.ns.isBrowser ? this.auth.user$ : of(null);
-
     this.ns.openLeftNav();
 
-    // parameters
-    let params = this.route.paramMap;
-
-    // only get 1 if server
-    if (!this.ns.isBrowser) {
-      params = params.pipe(take(1));
+    if (this.ns.isBrowser) {
+      this.sub = this.route.paramMap.subscribe((r: ParamMap) => this.loadPage(r));
     }
-
-    this.sub = params.subscribe((r: ParamMap) => this.loadPage(r));
   }
 
   loadPage(p: ParamMap) {
@@ -87,7 +80,7 @@ export class PostComponent implements OnInit {
       image: r.image || undefined,
       description: r.content?.substring(0, 125).replace(/(\r\n|\n|\r)/gm, ""),
       title: r.title + ' - ' + this.ns.title,
-      user: 'Jonathan Gamble'
+      user: this.ns.author
     });
   }
 
@@ -96,11 +89,14 @@ export class PostComponent implements OnInit {
       // seo for ssr
       const id = (await this.route.paramMap.pipe(take(1)).toPromise()).get('id') as string;
       await this.read.getPostById(id).pipe(
-        tap((p) => {
-          this.meta(p);
-        }),
-        take(1)
+        tap((p: any) => this.meta(p))
       ).toPromise();
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.ns.isBrowser) {
+      this.sub.unsubscribe();
     }
   }
 }

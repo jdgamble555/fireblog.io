@@ -16,6 +16,8 @@ export class NavService {
 
   title = 'Fireblog.io';
 
+  author = 'Jonathan Gamble';
+
   isDarkMode = false;
 
   private leftNav!: MatSidenav;

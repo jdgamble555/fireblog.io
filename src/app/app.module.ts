@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-
+//import { getAnalytics, provideAnalytics } from '@angular/fire/analytics';
 import { environment } from 'src/environments/environment';
 import { HomeComponent } from './home/home.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
@@ -38,6 +38,7 @@ import { NavModule } from './nav/nav.module';
     MarkdownModule.forRoot({
       sanitize: SecurityContext.NONE
     }),
+    //provideAnalytics(() => getAnalytics())
   ],
   providers: [],
   bootstrap: [AppComponent]
