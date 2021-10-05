@@ -60,7 +60,7 @@ export class PostComponent implements OnDestroy {
 
     if (id) {
       // get post by router id
-      const p = this.read.getPostById(id).pipe(
+      let p = this.read.getPostById(id).pipe(
         tap((r: Post) => {
           // if post from id
           if (r) {
@@ -74,12 +74,9 @@ export class PostComponent implements OnDestroy {
           }
         })
       );
-      // ssr seo
-      if (!this.ns.isBrowser) {
-        const prom = p.pipe(take(1)).toPromise();
-        this.cm.waitFor(prom);
-      }
-      this.post = p;
+      this.post = this.ns.isBrowser
+        ? p
+        : this.cm.waitFor(p);
     }
   }
 
