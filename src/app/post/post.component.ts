@@ -36,7 +36,7 @@ export class PostComponent implements OnDestroy {
 
     let params = this.route.paramMap;
 
-    if (this.ns.isBrowser) {
+    if (!this.ns.isBrowser) {
       params = params.pipe(take(1));
     }
     this.sub = params.subscribe((r: ParamMap) => this.loadPage(r));
@@ -74,9 +74,7 @@ export class PostComponent implements OnDestroy {
           }
         })
       );
-      this.post = this.ns.isBrowser
-        ? p
-        : this.cm.waitFor(p);
+      this.post = this.ns.isBrowser ? p : this.cm.waitFor(p);
     }
   }
 
