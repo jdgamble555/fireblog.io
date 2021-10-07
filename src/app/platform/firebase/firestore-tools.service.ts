@@ -257,22 +257,31 @@ export class FirestoreToolsService {
             ).join(' '));
           }
           index = temp;
-        }
-
-        for (const phrase of index) {
-          if (phrase) {
-            let v = '';
-            const t = phrase.split(' ');
-            while (t.length > 0) {
-              const r = t.shift();
-              v += v ? ' ' + r : r;
-              // increment for relevance
-              m[v] = m[v] ? m[v] + 1 : 1;
+          for (const phrase of index) {
+            if (phrase) {
+              let v = '';
+              const t = phrase.split(' ');
+              while (t.length > 0) {
+                const r = t.shift();
+                v += v ? ' ' + r : r;
+                // increment for relevance
+                m[v] = m[v] ? m[v] + 1 : 1;
+              }
+            }
+          }
+        } else {
+          for (const phrase of index) {
+            if (phrase) {
+              let v = '';
+              for (let i = 0; i < phrase.length; i++) {
+                v = phrase.slice(0, i + 1).trim();
+                // increment for relevance
+                m[v] = m[v] ? m[v] + 1 : 1;
+              }
             }
           }
         }
       }
-
       data[termField] = m;
 
       data = {

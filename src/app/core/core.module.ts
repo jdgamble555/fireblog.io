@@ -5,7 +5,7 @@ import { MaterialModule } from './material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthComponent } from '../auth/auth.component';
-import { Observable } from 'rxjs';
+import { isObservable, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 
@@ -36,11 +36,9 @@ declare const Zone: any;
 })
 export class CoreModule {
 
-  // https://github.com/BeSpunky/angular-zen/blob/master/libs/angular-zen/router-x/services/route-aware.service.ts
-
   async waitFor(prom: Promise<any> | Observable<any>): Promise<any> {
-    if (!(prom && 'then' in prom && typeof prom.then === 'function')) {
-      prom = (prom as Observable<any>).pipe(take(1)).toPromise();
+    if (isObservable(prom)) {
+      prom = prom.pipe(take(1)).toPromise();
     }
     const macroTask = Zone.current
       .scheduleMacroTask(
@@ -55,3 +53,4 @@ export class CoreModule {
     });
   }
 }
+
