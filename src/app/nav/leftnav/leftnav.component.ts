@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ReadService } from 'src/app/platform/firebase/read.service';
+import { ReadService } from 'src/app/platform/mock/read.service';
+
 
 @Component({
   selector: 'app-leftnav',

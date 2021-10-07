@@ -5,8 +5,8 @@ import {
 } from '@angular/router';
 
 import { take } from 'rxjs/operators';
-import { AuthService } from '../platform/firebase/auth.service';
-import { ReadService } from '../platform/firebase/read.service';
+import { AuthService } from '../platform/mock/auth.service';
+import { ReadService } from '../platform/mock/read.service';
 import { Role } from './user.model';
 
 @Injectable({

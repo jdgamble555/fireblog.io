@@ -3,8 +3,8 @@ import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getStorage, provideStorage } from '@angular/fire/storage';
 import { getAuth, provideAuth } from '@angular/fire/auth';
-//import { getAnalytics, provideAnalytics } from '@angular/fire/analytics';
 import { environment } from 'src/environments/environment';
+import { NavService } from 'src/app/nav/nav.service';
 
 @NgModule({
   declarations: [],
@@ -12,12 +12,18 @@ import { environment } from 'src/environments/environment';
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideFirestore(() => getFirestore()),
     provideAuth(() => getAuth()),
-    provideStorage(() => getStorage()),
-    //provideAnalytics(() => getAnalytics())
+    provideStorage(() => getStorage())
   ]
 })
 export class FirebaseModule {
-
+  // dynamically import Google Analytics
+  constructor(private ns: NavService) {
+    if (this.ns.isBrowser) {
+      import('@angular/fire/analytics').then(a => {
+        a.provideAnalytics(() => a.getAnalytics())
+      });
+    }
+  }
   // shared on read and write functions
   soundex(s: string) {
     const a = s.toLowerCase().split("");

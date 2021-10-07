@@ -4,8 +4,8 @@ import { Observable, of, Subscription } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
 import { CoreModule } from '../core/core.module';
 import { NavService } from '../nav/nav.service';
-import { AuthService } from '../platform/firebase/auth.service';
-import { ReadService } from '../platform/firebase/read.service';
+import { AuthService } from '../platform/mock/auth.service';
+import { ReadService } from '../platform/mock/read.service';
 import { SeoService } from '../shared/seo/seo.service';
 import { Post } from './post.model';
 

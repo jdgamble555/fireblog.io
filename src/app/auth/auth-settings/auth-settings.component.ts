@@ -1,17 +1,16 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormGroupDirective, AbstractControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subscription } from 'rxjs';
 import { NavService } from 'src/app/nav/nav.service';
 import { DialogService } from 'src/app/shared/confirm-dialog/dialog.service';
-import { ImageUploadService } from 'src/app/platform/firebase/image-upload.service';
 import { SnackbarService } from 'src/app/shared/snack-bar/snack-bar.service';
-
 import { matchValidator } from 'src/app/shared/form-validators';
 import { ReLoginComponent } from 'src/app/auth/auth-settings/re-login/re-login.component';
-import { AuthService } from 'src/app/platform/firebase/auth.service';
 import { take } from 'rxjs/operators';
 import { SeoService } from 'src/app/shared/seo/seo.service';
+import { ImageUploadService } from 'src/app/platform/mock/image-upload.service';
+import { AuthService } from 'src/app/platform/mock/auth.service';
 
 @Component({
   selector: 'app-auth-settings',

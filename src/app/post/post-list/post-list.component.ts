@@ -4,8 +4,8 @@ import { ActivatedRoute, ParamMap } from '@angular/router';
 import { Observable, of, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { NavService } from 'src/app/nav/nav.service';
-import { AuthService } from 'src/app/platform/firebase/auth.service';
-import { ReadService } from 'src/app/platform/firebase/read.service';
+import { AuthService } from 'src/app/platform/mock/auth.service';
+import { ReadService } from 'src/app/platform/mock/read.service';
 import { SeoService } from 'src/app/shared/seo/seo.service';
 import { Post } from '../post.model';
 

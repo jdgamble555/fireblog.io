@@ -13,7 +13,6 @@ import { PostComponent } from './post/post.component';
 import { PostListComponent } from './post/post-list/post-list.component';
 import { FirebaseModule } from './platform/firebase/firebase.module';
 import { NavModule } from './nav/nav.module';
-import { NavService } from './nav/nav.service';
 
 @NgModule({
   declarations: [
@@ -42,13 +41,4 @@ import { NavService } from './nav/nav.service';
   providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule {
-
-  constructor(private ns: NavService) {
-    if (this.ns.isBrowser) {
-      import('@angular/fire/analytics').then(a => {
-        a.provideAnalytics(() => a.getAnalytics())
-      });
-    }
-  }
-}
+export class AppModule { }

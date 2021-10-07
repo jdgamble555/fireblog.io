@@ -21,12 +21,13 @@ import {
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { Role } from 'src/app/auth/user.model';
-import { DbService } from './db.service';
+import { DbService } from '../mock/db.service';
+
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
+export class FbAuthService {
 
   user$: Observable<User | null>;
 
@@ -245,5 +246,4 @@ export class AuthService {
     const sFormat = (str: string, ...args: string[]) => str.replace(/{(\d+)}/g, (undefined, index) => args[index] || '');
     return sFormat(msg, v);
   }
-
 }

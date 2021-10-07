@@ -3,8 +3,8 @@ import { User } from '@angular/fire/auth';
 import { Observable, of } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
 import { Role, User as Profile } from 'src/app/auth/user.model';
-import { AuthService } from 'src/app/platform/firebase/auth.service';
-import { ReadService } from 'src/app/platform/firebase/read.service';
+import { AuthService } from 'src/app/platform/mock/auth.service';
+import { ReadService } from 'src/app/platform/mock/read.service';
 import { NavService } from '../nav.service';
 
 @Component({

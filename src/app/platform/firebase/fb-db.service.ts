@@ -18,13 +18,11 @@ import { User } from 'src/app/auth/user.model';
 import { Post } from 'src/app/post/post.model';
 import { FirestoreToolsService } from './firestore-tools.service';
 
-//
-// Update Database Functions
-//
 @Injectable({
   providedIn: 'root'
 })
-export class DbService {
+export class FbDbService {
+
 
   constructor(
     private afs: Firestore,

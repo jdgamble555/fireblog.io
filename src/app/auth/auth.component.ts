@@ -9,7 +9,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { matchValidator } from 'src/app/shared/form-validators';
 import { NavService } from '../nav/nav.service';
-import { AuthService } from '../platform/firebase/auth.service';
+import { AuthService } from '../platform/mock/auth.service';
 import { SeoService } from '../shared/seo/seo.service';
 import { SnackbarService } from '../shared/snack-bar/snack-bar.service';
 
