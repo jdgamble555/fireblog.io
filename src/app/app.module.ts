@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-//import { getAnalytics, provideAnalytics } from '@angular/fire/analytics';
 import { environment } from 'src/environments/environment';
 import { HomeComponent } from './home/home.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
@@ -14,6 +13,7 @@ import { PostComponent } from './post/post.component';
 import { PostListComponent } from './post/post-list/post-list.component';
 import { FirebaseModule } from './platform/firebase/firebase.module';
 import { NavModule } from './nav/nav.module';
+import { NavService } from './nav/nav.service';
 
 @NgModule({
   declarations: [
@@ -37,10 +37,18 @@ import { NavModule } from './nav/nav.module';
     CoreModule,
     MarkdownModule.forRoot({
       sanitize: SecurityContext.NONE
-    }),
-    //provideAnalytics(() => getAnalytics())
+    })
   ],
   providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+
+  constructor(private ns: NavService) {
+    if (this.ns.isBrowser) {
+      import('@angular/fire/analytics').then(a => {
+        a.provideAnalytics(() => a.getAnalytics())
+      });
+    }
+  }
+}
