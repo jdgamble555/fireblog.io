@@ -96,9 +96,14 @@ mat-card a:visited {
 }
 
 .dark-theme mat-card a,
-.dark-theme mat-card a:visited {
+.dark-theme mat-card a:visited,
+.dark-theme .mat-button.mat-primary {
   color: #0583e4;
   text-decoration: none;
+}
+
+.dark-theme .mat-button.mat-primary:hover {
+  text-decoration: underline;
 }
 
 // end material
@@ -552,7 +557,7 @@ markdown a:hover {
 }
 
 .g-button {
-  background-color: rgb(219, 14, 14);
+  background-color: rgb(219, 14, 14) !important;
   color: white;
   font-weight: bold;
 }
