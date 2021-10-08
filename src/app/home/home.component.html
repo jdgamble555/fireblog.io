@@ -3,4 +3,13 @@
     <mat-icon color="primary" class="ng-icon-text">comment</mat-icon>Welcome to {{ ns.title }}!
   </h2>
 </mat-card>
-<app-post-list></app-post-list>
+<mat-tab-group class="ng-card" animationDuration="0ms">
+  <mat-tab label="Latest">
+    <br>
+    <app-post-list></app-post-list>
+  </mat-tab>
+  <mat-tab label="Modified">
+    <br>
+    <app-post-list sort="updatedAt"></app-post-list>
+  </mat-tab>
+</mat-tab-group>

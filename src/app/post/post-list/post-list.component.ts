@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { Observable, of, Subscription } from 'rxjs';
@@ -21,6 +21,8 @@ export class PostListComponent implements OnInit, OnDestroy {
   user$: Observable<any>;
   sub!: Subscription;
 
+  @Input() sort!: string;
+
   totalPosts!: Observable<string>;
 
   tag!: string | null;
@@ -33,17 +35,17 @@ export class PostListComponent implements OnInit, OnDestroy {
     public ns: NavService,
     private seo: SeoService
   ) {
-
     this.user$ = this.ns.isBrowser ? this.auth.user$ : of(null);
     this.ns.openLeftNav();
+  }
+
+  async ngOnInit(): Promise<void> {
 
     // load browser page
     if (this.ns.isBrowser) {
       this.sub = this.route.paramMap.subscribe((r: ParamMap) => this.loadPage(r));
     }
-  }
 
-  async ngOnInit(): Promise<void> {
     // load server version for seo
     if (!this.ns.isBrowser) {
       await this.route.paramMap.pipe(take(1)).toPromise()
@@ -82,7 +84,7 @@ export class PostListComponent implements OnInit, OnDestroy {
       this.ns.resetBC();
       // all posts
       if (this.ns.isBrowser) {
-        this.posts = this.read.getPosts();
+        this.posts = this.read.getPosts({ sortField: this.sort });
         this.totalPosts = this.read.getTotal('posts');
       }
     }
