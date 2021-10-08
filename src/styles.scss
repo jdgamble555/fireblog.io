@@ -216,16 +216,11 @@ h3 {
   font-size: 18px;
 }
 
-.ng-height {
-  height: 600px;
-}
-
 .ng-card {
   margin: 0 15px 15px;
   text-align: left;
   font-size: 18px;
-  min-width: 120px;
-  //min-height: 175px;
+  min-width: 140px;
 }
 
 .ng-cat {
@@ -645,7 +640,6 @@ mat-paginator .mat-form-field {
 
 // skeleton loader
 .fb-item {
-  height: auto;
   margin: 10px auto;
   border: 1px solid #eaeaea;
   padding: 10px;
@@ -661,7 +655,6 @@ mat-paginator .mat-form-field {
 
 .first-section-wrapper,
 .second-section-wrapper {
-  height: auto;
   flex: 1;
 }
 
@@ -669,6 +662,6 @@ mat-paginator .mat-form-field {
   position: absolute;
 }
 
-.tag-height {
+.tag-bar {
   height: 200px;
 }
