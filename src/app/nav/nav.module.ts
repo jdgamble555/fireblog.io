@@ -7,6 +7,7 @@ import { RightnavComponent } from '../nav/rightnav/rightnav.component';
 import { NavComponent } from '../nav/nav.component';
 import { CoreModule } from '../core/core.module';
 import { TagListComponent } from '../post/tag-list/tag-list.component';
+import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 
 const components = [
   NavComponent,
@@ -18,7 +19,8 @@ const components = [
 ];
 
 const modules = [
-  CoreModule
+  CoreModule,
+  NgxSkeletonLoaderModule
 ];
 
 @NgModule({

@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
+import { NavService } from 'src/app/nav/nav.service';
 import { ReadService } from 'src/app/platform/mock/read.service';
 import { Tag } from '../post.model';
 
@@ -14,7 +15,10 @@ export class TagListComponent {
 
   tags: Observable<Tag[]>;
 
-  constructor(private read: ReadService) {
+  constructor(
+    private read: ReadService,
+    public ns: NavService
+  ) {
     this.tags = this.read.getTags();
   }
 }

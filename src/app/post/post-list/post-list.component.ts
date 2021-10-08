@@ -30,7 +30,7 @@ export class PostListComponent implements OnInit, OnDestroy {
     public read: ReadService,
     private auth: AuthService,
     private route: ActivatedRoute,
-    private ns: NavService,
+    public ns: NavService,
     private seo: SeoService
   ) {
 

@@ -1,36 +1,76 @@
-<mat-card class="ng-card" *ngFor="let post of posts | async">
-  <img *ngIf="post.image" mat-card-image src="{{ post.image }}" alt="{{ post.title }}"
-    [routerLink]="['/post', post.id, post.slug]" class="ng-link" />
-  <h1 [routerLink]="['/post', post.id, post.slug]" class="ng-post-title">
-    <mat-icon color="primary" class="ng-icon-text">library_books</mat-icon>{{ post.title }}
-  </h1>
-  <h6><i>{{ post.minutes }} min read</i></h6>
-  <div class="ng-author ng-link" [routerLink]="['/user', post.authorId]">
-    <img *ngIf="post.authorDoc?.photoURL" class="avatar" src="{{ post.authorDoc?.photoURL }}" />
-    <mat-icon *ngIf="!post.authorDoc?.photoURL" class="ng-photo-icon">account_circle</mat-icon>
-    <p><small><b>{{ post.authorDoc?.displayName }}</b>
-        <ng-container *ngIf="post.createdAt"> on
-          {{ post.createdAt.toDate() | date: 'EEEE, MMMM d, yyyy' }}</ng-container>
-        <ng-container *ngIf="post.updatedAt"> (last modified on
-          {{ post.updatedAt.toDate() | date: 'EEEE, MMMM d, yyyy' }})</ng-container>
-      </small></p>
-  </div>
-  <br />
-  <div class="mat-chip-area">
-    <mat-chip-list aria-label="Tags" *ngFor="let tag of post.tags" class="tags">
-      <mat-chip [routerLink]="['/t', tag]">{{ tag }}</mat-chip>
-    </mat-chip-list>
-  </div>
-  <mat-card-actions align="end" *ngIf="user$ | async as user">
-    <div class="flex-container">
-      <div *ngIf="post.authorId == user.uid">
-        <button mat-icon-button [routerLink]="['/edit', post.id]">
-          <mat-icon>edit</mat-icon>
-        </button>
-      </div>
+<ng-container *ngIf="posts | async as _posts; else nopost">
+  <mat-card class="ng-card ng-height" *ngFor="let post of _posts">
+    <img *ngIf="post.image" mat-card-image src="{{ post.image }}" alt="{{ post.title }}"
+      [routerLink]="['/post', post.id, post.slug]" class="ng-link" />
+    <h1 [routerLink]="['/post', post.id, post.slug]" class="ng-post-title">
+      <mat-icon color="primary" class="ng-icon-text">library_books</mat-icon>{{ post.title }}
+    </h1>
+    <h6><i>{{ post.minutes }} min read</i></h6>
+    <div class="ng-author ng-link" [routerLink]="['/user', post.authorId]">
+      <img *ngIf="post.authorDoc?.photoURL" class="avatar" src="{{ post.authorDoc?.photoURL }}" />
+      <mat-icon *ngIf="!post.authorDoc?.photoURL" class="ng-photo-icon">account_circle</mat-icon>
+      <p><small><b>{{ post.authorDoc?.displayName }}</b>
+          <ng-container *ngIf="post.createdAt"> on
+            {{ post.createdAt.toDate() | date: 'EEEE, MMMM d, yyyy' }}</ng-container>
+          <ng-container *ngIf="post.updatedAt"> (last modified on
+            {{ post.updatedAt.toDate() | date: 'EEEE, MMMM d, yyyy' }})</ng-container>
+        </small></p>
     </div>
-  </mat-card-actions>
-</mat-card>
-<mat-paginator class="ng-transparent" [length]="totalPosts | async" [pageSize]="5" [pageSizeOptions]="[5, 10, 20]" aria-label="Select page"
-  (page)="pageChange($event)">
-</mat-paginator>
+    <br />
+    <div class="mat-chip-area">
+      <mat-chip-list aria-label="Tags" *ngFor="let tag of post.tags" class="tags">
+        <mat-chip [routerLink]="['/t', tag]">{{ tag }}</mat-chip>
+      </mat-chip-list>
+    </div>
+    <mat-card-actions align="end" *ngIf="user$ | async as user">
+      <div class="flex-container">
+        <div *ngIf="post.authorId == user.uid">
+          <button mat-icon-button [routerLink]="['/edit', post.id]">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </div>
+      </div>
+    </mat-card-actions>
+  </mat-card>
+  <mat-paginator class="ng-transparent" [length]="totalPosts | async" [pageSize]="5" [pageSizeOptions]="[5, 10, 20]"
+    aria-label="Select page" (page)="pageChange($event)">
+  </mat-paginator>
+</ng-container>
+<ng-template #nopost>
+  <mat-card class="ng-card" *ngFor="let i of [].constructor(5)">
+    <mat-card-content>
+      <ngx-skeleton-loader animation="pulse" [theme]="{
+        height: '300px',
+        'background-color': ns.bgcolor
+      }">
+      </ngx-skeleton-loader>
+      <div class="first-section-wrapper">
+        <div class="gravatar">
+          <ngx-skeleton-loader animation="pulse" appearance="circle"
+            [theme]="{ width: '50px', height: '50px', 'background-color': ns.bgcolor }">
+          </ngx-skeleton-loader>
+        </div>
+        <div class="gravatar-title">
+          <div>
+            <ngx-skeleton-loader animation="pulse" [theme]="{
+          width: '200px',
+          'border-radius': '0',
+          height: '15px',
+          'margin-bottom': '10px',
+          'background-color': ns.bgcolor
+        }"></ngx-skeleton-loader>
+          </div>
+          <div>
+            <ngx-skeleton-loader animation="pulse" id="me" [theme]="{
+              width: '170px',
+              'border-radius': '0',
+               height: '15px',
+               'background-color': ns.bgcolor
+            }">
+            </ngx-skeleton-loader>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

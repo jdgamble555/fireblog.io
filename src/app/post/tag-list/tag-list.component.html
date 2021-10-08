@@ -1,10 +1,20 @@
-<mat-card class="ng-card  mat-elevation-z0 ng-card-outline">
+<mat-card class="ng-card mat-elevation-z0 ng-card-outline" *ngIf="tags | async as _tags; else loading">
   <mat-card-content>
     <ul class="tag_list">
       <li [ngClass]="{
         'tag-li-footer': display == 'footer'
-      }" *ngFor="let tag of tags | async" [routerLink]="['t', tag.name]"># {{ tag.name }}
+      }" *ngFor="let tag of _tags" [routerLink]="['t', tag.name]"># {{ tag.name }}
         ({{ tag.count }})</li>
     </ul>
   </mat-card-content>
 </mat-card>
+<ng-template #loading>
+  <mat-card class="ng-card mat-elevation-z0 ng-card-outline tag-height">
+    <mat-card-content class="ng-down">
+      <ngx-skeleton-loader animation="pulse" count="5" [theme]="{
+      width: '125px',
+      'background-color': ns.bgcolor
+    }"></ngx-skeleton-loader>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

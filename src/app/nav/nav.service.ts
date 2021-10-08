@@ -19,6 +19,7 @@ export class NavService {
   author = 'Jonathan Gamble';
 
   isDarkMode = false;
+  bgcolor = '';
 
   private leftNav!: MatSidenav;
   private rightNav!: MatSidenav;
@@ -113,6 +114,6 @@ export class NavService {
       }
     }
     this.isDarkMode = !this.isDarkMode;
+    this.bgcolor = this.isDarkMode ? '#303030' : '';
   }
-
 }

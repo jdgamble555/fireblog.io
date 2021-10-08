@@ -110,7 +110,7 @@ h3 {
 }
 
 .ng-login-container {
-  width: 50%;
+  max-width: 500px;
   margin: 0 auto;
   padding: 15px;
 }
@@ -210,10 +210,22 @@ h3 {
   justify-content: space-between;
 }
 
+.ng-welcome {
+  margin: 0 15px 15px;
+  text-align: left;
+  font-size: 18px;
+}
+
+.ng-height {
+  height: 600px;
+}
+
 .ng-card {
   margin: 0 15px 15px;
   text-align: left;
   font-size: 18px;
+  min-width: 120px;
+  //min-height: 175px;
 }
 
 .ng-cat {
@@ -629,4 +641,34 @@ mat-paginator .mat-form-field {
   border-style: solid;
   border-width: thin;
   border-color: rgba(0, 0, 0, 0.2);
+}
+
+// skeleton loader
+.fb-item {
+  height: auto;
+  margin: 10px auto;
+  border: 1px solid #eaeaea;
+  padding: 10px;
+}
+
+.gravatar {
+  height: 90px;
+}
+.gravatar-title {
+  padding: 10px;
+  height: 80px;
+}
+
+.first-section-wrapper,
+.second-section-wrapper {
+  height: auto;
+  flex: 1;
+}
+
+.ng-down {
+  position: absolute;
+}
+
+.tag-height {
+  height: 200px;
 }

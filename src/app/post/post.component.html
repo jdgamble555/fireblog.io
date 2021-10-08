@@ -1,4 +1,4 @@
-<mat-card class="ng-card" *ngIf="post | async as post">
+<mat-card class="ng-card" *ngIf="post | async as post; else nopost">
   <img *ngIf="post.image" mat-card-image src="{{ post.image }}" alt="{{ post.title }}" />
   <h1>
     <mat-icon color="primary" class="ng-icon-text">library_books</mat-icon>{{ post.title }}
@@ -32,3 +32,41 @@
     </div>
   </mat-card-actions>
 </mat-card>
+<ng-template #nopost>
+  <mat-card class="ng-card">
+    <mat-card-content>
+      <ngx-skeleton-loader class="bl" animation="pulse" [theme]="{
+        height: '300px',
+        'background-color': ns.bgcolor
+      }">
+      </ngx-skeleton-loader>
+      <div class="first-section-wrapper">
+        <div class="gravatar">
+          <ngx-skeleton-loader animation="pulse" appearance="circle"
+            [theme]="{ width: '50px', height: '50px', 'background-color': ns.bgcolor }">
+          </ngx-skeleton-loader>
+        </div>
+        <div class="gravatar-title">
+          <div>
+            <ngx-skeleton-loader animation="pulse" [theme]="{
+          width: '200px',
+          'border-radius': '0',
+          height: '15px',
+          'margin-bottom': '10px',
+          'background-color': ns.bgcolor
+        }"></ngx-skeleton-loader>
+          </div>
+          <div>
+            <ngx-skeleton-loader animation="pulse" id="me" [theme]="{
+              width: '170px',
+              'border-radius': '0',
+               height: '15px',
+               'background-color': ns.bgcolor
+            }">
+            </ngx-skeleton-loader>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

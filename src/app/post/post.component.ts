@@ -27,7 +27,7 @@ export class PostComponent implements OnDestroy {
     private read: ReadService,
     private auth: AuthService,
     private seo: SeoService,
-    private ns: NavService,
+    public ns: NavService,
     private cm: CoreModule
   ) {
 
