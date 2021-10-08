@@ -32,10 +32,10 @@
       </div>
     </mat-card-actions>
   </mat-card>
-  <mat-paginator class="ng-transparent" [length]="totalPosts | async" [pageSize]="5" [pageSizeOptions]="[5, 10, 20]"
-    aria-label="Select page" (page)="pageChange($event)">
-  </mat-paginator>
 </ng-container>
+<mat-paginator class="ng-transparent" [length]="totalPosts | async" [pageSize]="5"
+  [pageSizeOptions]="[5, 10, 20]" aria-label="Select page" (page)="pageChange($event)">
+</mat-paginator>
 <ng-template #nopost>
   <mat-card class="ng-card" *ngFor="let i of [].constructor(5)">
     <mat-card-content>

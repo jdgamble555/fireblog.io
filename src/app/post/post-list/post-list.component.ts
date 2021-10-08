@@ -1,5 +1,5 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { PageEvent } from '@angular/material/paginator';
+import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { Observable, of, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
