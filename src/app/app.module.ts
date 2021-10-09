@@ -14,6 +14,8 @@ import { PostListComponent } from './post/post-list/post-list.component';
 import { FirebaseModule } from './platform/firebase/firebase.module';
 import { NavModule } from './nav/nav.module';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+
 
 @NgModule({
   declarations: [
@@ -24,6 +26,7 @@ import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'serverApp' }),
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
     AppRoutingModule,
     FirebaseModule,
     NgxSkeletonLoaderModule,
