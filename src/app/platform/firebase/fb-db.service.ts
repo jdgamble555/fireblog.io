@@ -12,7 +12,10 @@ import {
   docSnapshots,
   DocumentSnapshot,
   updateDoc,
-  collection
+  collection,
+  DocumentReference,
+  writeBatch,
+  increment
 } from '@angular/fire/firestore';
 import { switchMap } from 'rxjs/operators';
 import { User } from 'src/app/auth/user.model';
@@ -20,8 +23,7 @@ import { Post } from 'src/app/post/post.model';
 import {
   deleteWithCounter,
   searchIndex,
-  setWithCounter,
-  updateTags
+  setWithCounter
 } from './fb-tools';
 
 @Injectable({
@@ -90,58 +92,63 @@ export class FbDbService {
    */
   async setPost(data: Post, id = this.getId(), publish = false): Promise<string> {
 
+    const authorId = data.authorId;
+
     // create author doc ref
-    if (data.authorId) {
-      data.authorDoc = doc(this.afs, 'users', data.authorId);
-    }
-    // get doc refs
-    const docRef = doc(this.afs, 'posts', id);
-    const draftRef = doc(this.afs, 'drafts', id);
-    const docSnap = await getDoc(docRef);
-    const docData = docSnap.data() as Post;
+    if (authorId) {
 
-    // remove counters from update
-    let { heartsCount, bookmarksCount, _tmpDoc, ...d } = data;
-    data = d;
+      data.authorDoc = doc(this.afs, 'users', authorId);
 
-    // remove tags from update
-    let { tags, ...tmp } = data;
+      // get doc refs
+      const docRef = doc(this.afs, 'posts', id);
+      const draftRef = doc(this.afs, 'drafts', id);
+      const docSnap = await getDoc(docRef);
+      const docData = docSnap.data() as Post;
 
-    if (publish) {
-      data = tmp;
-    }
-    if (publish && data.authorId) {
+      // remove counters from update
+      let {
+        heartsCount,
+        draftsCount,
+        bookmarksCount,
+        _tmpDoc,
+        ...d
+      } = data;
+      data = d;
 
-      // save changes
-      await setWithCounter(
-        docRef,
-        data,
-        { merge: true },
-        { users: data.authorId }
-      );
+      if (publish) {
 
-      // delete draft doc
-      await deleteWithCounter(
-        draftRef,
-        { users: data.authorId }
-      );
+        // remove tags
+        let { tags, ...tmp } = data;
+        data = tmp;
 
-      // update tags
-      const beforeTags = docData ? docData.tags : [];
-      await updateTags(
-        doc(this.afs, 'posts/' + id),
-        beforeTags,
-        tags
-      );
-    } else {
+        // save changes
+        await setWithCounter(
+          docRef,
+          data,
+          { merge: true },
+          { users: authorId }
+        );
 
-      if (data.authorId) {
+        // delete draft doc
+        await deleteWithCounter(
+          draftRef,
+          { users: authorId }
+        );
+
+        // update tags
+        await this.updateTags(
+          doc(this.afs, 'posts/' + id),
+          docData.tags,
+          tags
+        );
+      } else {
+
         // save draft
         await setWithCounter(
           draftRef,
           data,
           { merge: true },
-          { users: data.authorId }
+          { users: authorId }
         );
       }
     }
@@ -211,5 +218,55 @@ export class FbDbService {
       after: data,
       fields: ['content', 'title', 'tags']
     });
+  }
+
+  async updateTags(
+    docRef: DocumentReference,
+    before: string[] = [],
+    after: string[] = [],
+    tagsDoc = 'tags'
+  ) {
+
+    const removed = before.length > 0
+      ? before.filter((x: string) => !after.includes(x))
+      : [];
+    const added = after.length > 0
+      ? after.filter((x: string) => !before.includes(x))
+      : [];
+
+    const batch = writeBatch(docRef.firestore);
+
+    // added
+    for (const t of added) {
+
+      // + 1 count
+      const tagsRef = doc(docRef.firestore, tagsDoc + '/' + t);
+
+      batch.set(tagsRef, {
+        count: increment(1)
+      }, { merge: true });
+
+      // add tag
+      batch.update(docRef, {
+        tags: arrayUnion(t)
+      });
+    }
+
+    // removed
+    for (const t of removed) {
+
+      // -1 count
+      const tagsRef = doc(docRef.firestore, tagsDoc + '/' + t);
+
+      batch.update(tagsRef, {
+        count: increment(-1)
+      });
+
+      // remove tag
+      batch.update(docRef, {
+        tags: arrayRemove(t)
+      });
+    }
+    batch.commit();
   }
 }

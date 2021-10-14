@@ -1,6 +1,4 @@
 import {
-  arrayRemove,
-  arrayUnion,
   deleteDoc,
   doc,
   docData,
@@ -87,7 +85,6 @@ export async function deleteWithCounter(
   const counterCol = '_counters';
   const col = ref.path.split('/').slice(0, -1).join('/');
   const countRef = doc(ref.firestore, counterCol, col);
-  const countSnap = await getDoc(countRef);
   const batch = writeBatch(ref.firestore);
   const _tmpDoc = ref;
 
@@ -101,14 +98,12 @@ export async function deleteWithCounter(
       );
     });
   }
-  // if count exists
+  // delete doc
   batch.delete(ref);
-  if (countSnap.exists()) {
-    batch.set(countRef, {
-      count: increment(-1),
-      _tmpDoc
-    }, { merge: true });
-  }
+  batch.set(countRef, {
+    count: increment(-1),
+    _tmpDoc
+  }, { merge: true });
   // edit counts
   return batch.commit();
 }
@@ -159,71 +154,6 @@ export function expandRefs<T>(obs: Observable<T[]>, fields: any[] = []): Observa
     )
   );
 }
-
-// remove later?
-
-export async function updateTags(
-  docRef: DocumentReference,
-  before: string[] = [],
-  after: string[] = [],
-  tagsDoc = 'tags'
-) {
-
-  const removed = before.length > 0
-    ? before.filter((x: string) => !after.includes(x))
-    : [];
-  const added = after.length > 0
-    ? after.filter((x: string) => !before.includes(x))
-    : [];
-
-  const batch = writeBatch(docRef.firestore);
-
-  // added
-  for (const t of added) {
-
-    // + 1 count
-    const tagsRef = doc(docRef.firestore, tagsDoc + '/' + t);
-    const tagsSnap = await getDoc(tagsRef);
-
-    if (tagsSnap.exists()) {
-      batch.update(tagsRef, {
-        count: increment(1)
-      });
-    } else {
-      batch.set(tagsRef, {
-        count: 1
-      });
-    }
-
-    // add tag
-    batch.update(docRef, {
-      tags: arrayUnion(t)
-    });
-  }
-
-  // removed
-  for (const t of removed) {
-
-    // -1 count
-    const tagsRef = doc(docRef.firestore, tagsDoc + '/' + t);
-    const tagsSnap = await getDoc(tagsRef);
-
-    if ((tagsSnap.data() as any).count == 1) {
-      batch.delete(tagsRef);
-    } else {
-      batch.update(tagsRef, {
-        count: increment(-1)
-      });
-    }
-
-    // remove tag
-    batch.update(docRef, {
-      tags: arrayRemove(t)
-    });
-  }
-  batch.commit();
-}
-
 
 export async function searchIndex(docObj: Document, opts: {
   ref: DocumentReference<DocumentData>,

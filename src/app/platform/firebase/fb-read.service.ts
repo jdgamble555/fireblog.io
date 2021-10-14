@@ -21,7 +21,13 @@ import { debounceTime, map, switchMap, take } from 'rxjs/operators';
 import { User } from 'src/app/auth/user.model';
 import { Post, Tag } from 'src/app/post/post.model';
 import { AuthService } from '../mock/auth.service';
-import { deleteWithCounter, expandRef, expandRefs, setWithCounter, soundex } from './fb-tools';
+import {
+  deleteWithCounter,
+  expandRef,
+  expandRefs,
+  setWithCounter,
+  soundex
+} from './fb-tools';
 
 @Injectable({
   providedIn: 'root'

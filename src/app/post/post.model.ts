@@ -17,6 +17,7 @@ export interface Post {
   published?: boolean;
   heartsCount?: number;
   bookmarksCount?: number;
+  draftsCount?: number;
   _tmpDoc?: any;
 }
 
