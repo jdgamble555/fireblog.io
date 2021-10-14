@@ -28,9 +28,11 @@ export class PostFormComponent {
   validationMessages: any = {
     title: {
       required: 'Title is required.',
+      minlength: 'Title must be at least 2 characters long.'
     },
     content: {
       required: 'Content is required.',
+      minlength: 'Content must be at least 3 characters long.'
     },
     tags: {
       required: 'At least one tag is required.',
@@ -78,8 +80,8 @@ export class PostFormComponent {
     private markdownService: MarkdownService
   ) {
     this.postForm = this.fb.group({
-      title: ['', Validators.required],
-      content: ['', Validators.required],
+      title: ['', [Validators.required, Validators.minLength(2)]],
+      content: ['', [Validators.required, Validators.minLength(3)]],
       tags: this.fb.array([], [ts.tagValidatorMin(5), ts.tagValidatorRequired])
     });
 

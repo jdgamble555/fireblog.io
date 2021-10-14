@@ -41,7 +41,7 @@ $app-theme: mat.define-light-theme(
   background-color: white;
 }
 
-$dark-primary: mat.define-palette(mat.$light-blue-palette, 900);
+$dark-primary: mat.define-palette(mat.$light-blue-palette, 700);
 $dark-accent: mat.define-palette(mat.$blue-gray-palette, 100);
 $dark-theme-background: mat.define-palette(mat.$gray-palette, 600);
 $dark-theme: mat.define-dark-theme(
@@ -384,10 +384,6 @@ mat-form-field.mat-form-field {
   cursor: pointer;
 }
 
-.ng-button-space {
-  margin-right: 20px !important;
-}
-
 .ng-card-small {
   margin: 15px;
   min-height: 150px;
@@ -441,7 +437,7 @@ mat-form-field.mat-form-field {
   outline: 0 !important;
 }
 
-.ng-like {
+.ng-heart {
   color: darkred;
 }
 
@@ -663,10 +659,36 @@ mat-paginator .mat-form-field {
   flex: 1;
 }
 
-.ng-down {
+.ng-absolute {
   position: absolute;
 }
 
 .tag-bar {
   height: 200px;
+}
+
+.heart-count {
+  margin-left: 3px;
+  font-size: 16px;
+  vertical-align: -3px;
+}
+
+.ng-left {
+  margin-left: 10px;
+}
+
+.ng-button-space {
+  margin-right: 40px !important;
+}
+
+.ng-content {
+  min-height: 500px;
+}
+
+.ng-heart-button {
+  color: black !important;
+}
+
+.dark-theme .ng-heart-button {
+  color: white !important;
 }

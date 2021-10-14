@@ -1,6 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
+import { User } from '@angular/fire/auth';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
-import { Observable, of, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
 import { CoreModule } from '../core/core.module';
 import { NavService } from '../nav/nav.service';
@@ -18,20 +19,23 @@ import { Post } from './post.model';
 export class PostComponent implements OnDestroy {
 
   post!: Observable<Post> | Promise<Post>;
-  user$: Observable<any>;
+  user$!: User | null;
   sub!: Subscription;
+
+  isHeart!: boolean;
+  isBookmark!: boolean;
+  postId!: string;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private read: ReadService,
+    public read: ReadService,
     private auth: AuthService,
     private seo: SeoService,
     public ns: NavService,
     private cm: CoreModule
   ) {
 
-    this.user$ = this.ns.isBrowser ? this.auth.user$ : of(null);
     this.ns.openLeftNav();
 
     let params = this.route.paramMap;
@@ -59,15 +63,24 @@ export class PostComponent implements OnDestroy {
     }
 
     if (id) {
+      this.postId = id;
       // get post by router id
       let p = this.read.getPostById(id).pipe(
-        tap((r: Post) => {
+        tap(async (r: Post) => {
           // if post from id
           if (r) {
             this.meta(r);
             // check slug
             if (r.slug !== slug) {
               this.router.navigate(['/post', id, r.slug]);
+            }
+            // get user and heart
+            if (this.ns.isBrowser) {
+              this.user$ = await this.auth.getUser();
+              if (this.user$) {
+                this.isHeart = await this.read.getAction(id, this.user$.uid, 'hearts');
+                this.isBookmark = await this.read.getAction(id, this.user$.uid, 'bookmarks');
+              }
             }
           } else {
             this.router.navigate(['/home']);
@@ -89,6 +102,19 @@ export class PostComponent implements OnDestroy {
       title: r.title + ' - ' + this.ns.title,
       user: this.ns.author
     });
+  }
+
+  toggleAction(action: string) {
+    const isAction = action === 'hearts'
+      ? this.isHeart
+      : this.isBookmark;
+    if (this.user$) {
+      isAction
+        ? this.read.unActionPost(this.postId, this.user$.uid, action)
+        : this.read.actionPost(this.postId, this.user$.uid, action);
+    } else {
+      this.router.navigate(['login']);
+    }
   }
 
   ngOnDestroy(): void {

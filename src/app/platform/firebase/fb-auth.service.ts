@@ -74,7 +74,7 @@ export class FbAuthService {
 
       const userData = {
         email,
-        role: Role.User
+        role: Role.Author
       };
 
       // create user in db
@@ -103,7 +103,7 @@ export class FbAuthService {
         email: credential.user.email,
         phoneNumber: credential.user.phoneNumber,
         photoURL: credential.user.photoURL,
-        role: Role.User
+        role: Role.Author
       };
       await this.db.createUser(userData, credential.user.uid);
     }

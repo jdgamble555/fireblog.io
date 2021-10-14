@@ -1,7 +1,7 @@
 export enum Role {
   Admin = "admin",
   Editor = "editor",
-  User = "user",
+  Author = "author",
   Subscriber = "subscriber"
 };
 

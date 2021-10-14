@@ -1,7 +1,8 @@
-import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { ActivatedRoute, ParamMap } from '@angular/router';
-import { Observable, of, Subscription } from 'rxjs';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { User } from '@angular/fire/auth';
+import { PageEvent } from '@angular/material/paginator';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { Observable, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { NavService } from 'src/app/nav/nav.service';
 import { AuthService } from 'src/app/platform/mock/auth.service';
@@ -18,7 +19,7 @@ import { Post } from '../post.model';
 export class PostListComponent implements OnInit, OnDestroy {
 
   posts!: Observable<Post[]>;
-  user$: Observable<any>;
+  user$!: User | null;
   sub!: Subscription;
 
   @Input() sort!: string;
@@ -28,14 +29,16 @@ export class PostListComponent implements OnInit, OnDestroy {
   tag!: string | null;
   uid!: string | null;
 
+  isBookmark!: boolean;
+
   constructor(
     public read: ReadService,
     private auth: AuthService,
     private route: ActivatedRoute,
+    private router: Router,
     public ns: NavService,
     private seo: SeoService
   ) {
-    this.user$ = this.ns.isBrowser ? this.auth.user$ : of(null);
     this.ns.openLeftNav();
   }
 
@@ -49,13 +52,17 @@ export class PostListComponent implements OnInit, OnDestroy {
     // load server version for seo
     if (!this.ns.isBrowser) {
       await this.route.paramMap.pipe(take(1)).toPromise()
-        .then((r: ParamMap) => this.loadPage(r));
+        .then(async (r: ParamMap) => this.loadPage(r));
     }
   }
 
-  loadPage(r: ParamMap): void {
+  async loadPage(r: ParamMap): Promise<void> {
     const tag = this.tag = r.get('tag');
     const uid = this.uid = r.get('uid');
+
+    if (this.ns.isBrowser) {
+      this.user$ = await this.auth.getUser();
+    }
 
     if (tag) {
       // meta
@@ -111,6 +118,24 @@ export class PostListComponent implements OnInit, OnDestroy {
       })
     } else {
       this.posts = this.read.getPosts(paging);
+    }
+  }
+
+  async toggleAction(action: string, id: string) {
+    if (this.user$) {
+      try {
+        await this.read.actionPost(id, this.user$.uid, action);
+      } catch(e: any) {
+        if (e.code === 'permission-denied') {
+          // already clicked
+        }
+      }
+      this.isBookmark = true;
+      setTimeout(() => {
+        this.isBookmark = false;
+      }, 500);
+    } else {
+      this.router.navigate(['login']);
     }
   }
 

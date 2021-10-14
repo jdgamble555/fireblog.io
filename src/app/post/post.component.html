@@ -22,13 +22,24 @@
       <mat-chip [routerLink]="['/t', tag]">{{ tag }}</mat-chip>
     </mat-chip-list>
   </div>
-  <mat-card-actions align="end" *ngIf="user$ | async as user">
+  <br />
+  <mat-divider inset></mat-divider>
+  <mat-card-actions>
     <div class="flex-container">
-      <div *ngIf="post.authorId == user.uid">
+      <div>
+        <button mat-flat-button (click)="toggleAction('bookmarks')">
+          <mat-icon color="primary">{{ isBookmark ? 'bookmark' : 'bookmark_border' }}</mat-icon>
+        </button>
+        <button mat-flat-button (click)="toggleAction('hearts')">
+          <mat-icon class="ng-heart">{{ isHeart ? 'favorite' : 'favorite_border' }}</mat-icon>
+          <span class="ng-left">{{ post.heartsCount || '0' }}</span>
+        </button>
+      </div>
+      <ng-container *ngIf="user$ && post.authorId == user$.uid">
         <button mat-icon-button [routerLink]="['/edit', post.id]">
           <mat-icon>edit</mat-icon>
         </button>
-      </div>
+      </ng-container>
     </div>
   </mat-card-actions>
 </mat-card>

@@ -1,4 +1,8 @@
 {
+  "projects": {
+    "default": "fireblog-io",
+    "dev": "fireblog-io-dev"
+  },
   "targets": {
     "fireblog-io": {
       "hosting": {
@@ -7,8 +11,5 @@
         ]
       }
     }
-  },
-  "projects": {
-    "default": "fireblog-io"
   }
 }

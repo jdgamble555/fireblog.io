@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable } from '@angular/core';
 import {
   doc,
   deleteDoc,
@@ -11,12 +11,18 @@ import {
   docData,
   docSnapshots,
   DocumentSnapshot,
-  updateDoc
+  updateDoc,
+  collection
 } from '@angular/fire/firestore';
 import { switchMap } from 'rxjs/operators';
 import { User } from 'src/app/auth/user.model';
 import { Post } from 'src/app/post/post.model';
-import { FirestoreToolsService } from './firestore-tools.service';
+import {
+  deleteWithCounter,
+  searchIndex,
+  setWithCounter,
+  updateTags
+} from './fb-tools';
 
 @Injectable({
   providedIn: 'root'
@@ -26,9 +32,8 @@ export class FbDbService {
 
   constructor(
     private afs: Firestore,
-    private tools: FirestoreToolsService
+    @Inject(DOCUMENT) private document: Document
   ) { }
-
   //
   // User
   //
@@ -53,7 +58,6 @@ export class FbDbService {
       doc(this.afs, 'users', id)
     );
   }
-
   //
   // Posts
   //
@@ -84,18 +88,21 @@ export class FbDbService {
    * @param data doc data
    * @returns void
    */
-  async setPost(data: Post, id = this.tools.getId(), publish = false): Promise<string> {
+  async setPost(data: Post, id = this.getId(), publish = false): Promise<string> {
 
     // create author doc ref
     if (data.authorId) {
       data.authorDoc = doc(this.afs, 'users', data.authorId);
     }
-
     // get doc refs
     const docRef = doc(this.afs, 'posts', id);
     const draftRef = doc(this.afs, 'drafts', id);
     const docSnap = await getDoc(docRef);
     const docData = docSnap.data() as Post;
+
+    // remove counters from update
+    let { heartsCount, bookmarksCount, _tmpDoc, ...d } = data;
+    data = d;
 
     // remove tags from update
     let { tags, ...tmp } = data;
@@ -103,37 +110,41 @@ export class FbDbService {
     if (publish) {
       data = tmp;
     }
-
-    if (publish) {
+    if (publish && data.authorId) {
 
       // save changes
-      await this.tools.setWithCounter(
+      await setWithCounter(
         docRef,
         data,
         { merge: true },
-        data.authorId
+        { users: data.authorId }
       );
 
       // delete draft doc
-      await this.tools.deleteWithCounter(draftRef);
+      await deleteWithCounter(
+        draftRef,
+        { users: data.authorId }
+      );
 
       // update tags
       const beforeTags = docData ? docData.tags : [];
-      this.tools.updateTags(
+      await updateTags(
         doc(this.afs, 'posts/' + id),
         beforeTags,
         tags
       );
     } else {
 
-      // save draft
-      await this.tools.setWithCounter(
-        draftRef,
-        data,
-        { merge: true }
-      );
+      if (data.authorId) {
+        // save draft
+        await setWithCounter(
+          draftRef,
+          data,
+          { merge: true },
+          { users: data.authorId }
+        );
+      }
     }
-
     return id;
   }
   /**
@@ -141,11 +152,15 @@ export class FbDbService {
    * @param id
    */
   async deletePost(id: string, uid: string): Promise<void> {
-    await this.tools.deleteWithCounter(
+    await deleteWithCounter(
       doc(this.afs, 'posts', id),
-      uid
+      { users: uid }
     );
   }
+  //
+  // Images
+  //
+
   /**
    * Add image to post doc
    * @param id
@@ -170,13 +185,28 @@ export class FbDbService {
       { imageUploads: arrayRemove(url) }
     );
   }
+
+  /**
+  * Generates an id for a new firestore doc
+  * @returns
+  */
+  getId() {
+    return doc(
+      collection(this.afs, 'id')
+    ).id;
+  }
+
+  //
+  // Search Index
+  //
+
   /**
    * Create Post Index
    * @param id
    * @param data
    */
   async indexPost(id: string, data: any) {
-    await this.tools.searchIndex({
+    await searchIndex(this.document, {
       ref: doc(this.afs, 'posts', id),
       after: data,
       fields: ['content', 'title', 'tags']

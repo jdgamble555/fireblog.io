@@ -13,14 +13,15 @@ import {
   where,
   OrderByDirection,
   limit,
-  getDoc
+  getDoc,
+  DocumentSnapshot
 } from '@angular/fire/firestore';
-import { combineLatest, Observable, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { debounceTime, map, switchMap, take } from 'rxjs/operators';
 import { User } from 'src/app/auth/user.model';
 import { Post, Tag } from 'src/app/post/post.model';
 import { AuthService } from '../mock/auth.service';
-import { FirebaseModule } from './firebase.module';
+import { deleteWithCounter, expandRef, expandRefs, setWithCounter, soundex } from './fb-tools';
 
 @Injectable({
   providedIn: 'root'
@@ -31,8 +32,7 @@ export class FbReadService {
 
   constructor(
     private afs: Firestore,
-    private auth: AuthService,
-    private fm: FirebaseModule
+    private auth: AuthService
   ) {
 
     // get user doc if logged in
@@ -79,6 +79,10 @@ export class FbReadService {
       map((r: any) => r.count)
     );
   }
+  //
+  // User
+  //
+
   /**
    * Get user document
    * @param id
@@ -90,6 +94,58 @@ export class FbReadService {
     );
   }
   /**
+ * Return total number of docs by a user
+ * @param uid - user id
+ * @param col - column
+ * @returns
+ */
+  getUserTotal(uid: string, col: string) {
+    return docData<any>(
+      doc(this.afs, 'users', uid)
+    ).pipe(
+      map((r: any) => r[col + 'Count'])
+    );
+  }
+  //
+  // Hearts and Bookmarks
+  //
+
+  async actionPost(postId: string, userId: string, action: string): Promise<void> {
+    await setWithCounter(
+      doc(this.afs, action, `${postId}_${userId}`),
+      {
+        postDoc: doc(this.afs, 'posts', postId),
+        userDoc: doc(this.afs, 'users', userId)
+      },
+      { merge: true },
+      {
+        posts: postId,
+        users: userId
+      },
+      false
+    );
+  }
+
+  async unActionPost(postId: string, userId: string, action: string): Promise<void> {
+    await deleteWithCounter(
+      doc(this.afs, action, `${postId}_${userId}`),
+      {
+        posts: postId,
+        users: userId
+      }
+    );
+  }
+
+  async getAction(id: string, uid: string, action: string): Promise<boolean> {
+    return getDoc(
+      doc(this.afs, action, `${id}_${uid}`)
+    ).then((snap: DocumentSnapshot<any>) => snap.exists());
+  }
+  //
+  // Posts
+  //
+
+  /**
   * Search posts by term
   * @param term
   * @returns Observable of search
@@ -97,7 +153,7 @@ export class FbReadService {
   searchPost(term: string) {
     term = term.split(' ')
       .map(
-        (v: string) => this.fm.soundex(v)
+        (v: string) => soundex(v)
       ).join(' ');
     return collectionData(
       query(
@@ -147,7 +203,7 @@ export class FbReadService {
     filters.push(
       limit(_limit)
     );
-    return this.expandRefs<Post>(
+    return expandRefs<Post>(
       collectionData<Post>(
         query<Post>(
           collection(this.afs, 'posts') as CollectionReference<Post>,
@@ -159,25 +215,12 @@ export class FbReadService {
       ), ['authorDoc']);
   }
   /**
-   * Return total number of docs by a user
-   * @param uid - user id
-   * @param col - column
-   * @returns
-   */
-  getUserTotal(uid: string, col: string) {
-    return docData<any>(
-      doc(this.afs, 'users', uid)
-    ).pipe(
-      map((r: any) => r[col + 'Count'])
-    );
-  }
-  /**
    * Get Post by post id
    * @param id post id
    * @returns post observable joined by author doc
    */
   getPostById(id: string): Observable<Post> {
-    return this.expandRef<Post>(
+    return expandRef<Post>(
       docData<Post>(
         doc(this.afs, 'posts', id)
       ), ['authorDoc']).pipe(
@@ -185,7 +228,11 @@ export class FbReadService {
         map((p: Post) => p ? { ...p, id } : p)
       );
   }
-
+  /**
+   * SEO by Post ID
+   * @param id
+   * @returns
+   */
   async seoPostById(id: string): Promise<Post | undefined> {
     return (await getDoc(
       doc(this.afs, 'posts', id)
@@ -197,7 +244,7 @@ export class FbReadService {
    * @returns
    */
   getPostBySlug(slug: string): Observable<Post> {
-    return this.expandRefs<Post>(
+    return expandRefs<Post>(
       collectionData<Post>(
         query<Post>(
           collection(this.afs, 'posts') as CollectionReference<Post>,
@@ -207,56 +254,5 @@ export class FbReadService {
       ), ['authorDoc']).pipe(
         map((p: Post[]) => p[0])
       );
-  }
-
-  //
-  // Tools
-  //
-
-  expandRef<T>(obs: Observable<T>, fields: any[] = []): Observable<T> {
-    return obs.pipe(
-      switchMap((doc: any) => doc ? combineLatest(
-        (fields.length === 0 ? Object.keys(doc).filter(
-          (k: any) => {
-            const p = doc[k] instanceof DocumentReference;
-            if (p) fields.push(k);
-            return p;
-          }
-        ) : fields).map((f: any) => docData<any>(doc[f]))
-      ).pipe(
-        map((r: any) => fields.reduce(
-          (prev: any, curr: any) =>
-            ({ ...prev, [curr]: r.shift() })
-          , doc)
-        )
-      ) : of(doc))
-    );
-  }
-
-  expandRefs<T>(obs: Observable<T[]>, fields: any[] = []): Observable<T[]> {
-    return obs.pipe(
-      switchMap((col: any[]) =>
-        col.length !== 0 ? combineLatest(col.map((doc: any) =>
-          (fields.length === 0 ? Object.keys(doc).filter(
-            (k: any) => {
-              const p = doc[k] instanceof DocumentReference;
-              if (p) fields.push(k);
-              return p;
-            }
-          ) : fields).map((f: any) => docData<any>(doc[f]))
-        ).reduce((acc: any, val: any) => [].concat(acc, val)))
-          .pipe(
-            map((h: any) =>
-              col.map((doc2: any) =>
-                fields.reduce(
-                  (prev: any, curr: any) =>
-                    ({ ...prev, [curr]: h.shift() })
-                  , doc2
-                )
-              )
-            )
-          ) : of(col)
-      )
-    );
   }
 }

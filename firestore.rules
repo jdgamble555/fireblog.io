@@ -1,189 +1,213 @@
 rules_version = '2';
+
 service cloud.firestore {
 
   match /databases/{database}/documents {
-
-    function getRole(role) {
-      return role in get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles;
+    //
+    // Search Index
+    //
+    function searchIndex() {
+      let docPath = /databases/$(database)/documents/$(request.path[4])/$(request.path[6]);
+      return get(docPath).data.authorId == request.auth.uid;
     }
-    function isSignedIn() {
-      return request.auth != null;
+    //
+    // Counter functions
+    //
+    function createDoc(path) {
+      // new doc
+    	return existsAfter(path) && !exists(path);
     }
-    function isNotAdminOrEditor() {
-      return !request.resource.data.roles.hasAny(['admin', 'editor']);
+    function deleteDoc(path) {
+      // remove doc
+    	return exists(path) && !existsAfter(path);
     }
-    //function titleIsAvailable() {
-      //return exists(/databases/$(database)/documents/titles/$(request.resource.data.titleURL));
-    //}
-    function isUser() {
-      return request.auth.uid == resource.id;
+    function addCount(path, field) {
+      // count++
+      return getAfter(path).data[field] == get(path).data[field] + 1;
     }
-    //function isOwner() {
-    //  return request.auth.uid == resource.data.userId;
-    //}
-    //function isNewOwner() {
-    //  return request.auth.uid == request.resource.data.userId;
-    //}
-    //function noChange(field) {
-    //  return !(field in request.writeFields);
-    //}
-    //function getVal(field) {
-    //  return resource.data[field].removeAll(request.resource.data[field])[0];
-    //}
-    //function matchWrite(VAL1, VAL2, VAL3) {
-    //	return VAL1 in getAfter(/databases/$(database)/documents/$(VAL2)/$(getVal(VAL2))).data[VAL3];
-    //}
-    //function addCounter() {
-    //  let doc = request.path[3];
-    //  let col = '_counters';
-    //  let docPath = /databases/$(database)/documents/$(col)/$(doc);
-    //  let newCount = getAfter(docPath).data.count == get(docPath).data.count + 1;
-    //  let newId = getAfter(docPath).data.docId == request.path[4];
-    //  return newId && newCount;
-    //}
-    //function subCounter() {
-    //  let doc = request.path[3];
-    //  let col = '_counters';
-    //  let docPath = /databases/$(database)/documents/$(col)/$(doc);
-    //  let newCount = getAfter(docPath).data.count == get(docPath).data.count - 1;
-    //  let newId = getAfter(docPath).data.docId == request.path[4];
-    //  return newId && newCount;
-    //}
+    function subCount(path, field) {
+      // count--
+      return getAfter(path).data[field] == get(path).data[field] - 1;
+    }
+    function validSub(path, field) {
+      // count-- or remove field
+      return subCount(path, field)
+        || (deleteField(path, field) && get(path).data[field] == 1);
+    }
+    function validAdd(path, field) {
+      // count++ or add field
+    	return addCount(path, field)
+        || (createField(path, field) && getAfter(path).data[field] == 1);
+    }
+    function createField(path, field) {
+      // new field
+      return !(field in get(path).data) && (field in getAfter(path).data);
+    }
+    function deleteField(path, field) {
+      // remove field
+      return (field in get(path).data) && !(field in getAfter(path).data);
+    }
     function counter() {
-      let docPath = /databases/$(database)/documents/_counters/$(request.path[3]);
-      let afterCount = getAfter(docPath).data.count;
-      let beforeCount = get(docPath).data.count;
-      let addCount = afterCount == beforeCount + 1;
-      let subCount = afterCount == beforeCount - 1;
-      let newId = getAfter(docPath).data.docId == request.path[4];
-      let deleteDoc = request.method == 'delete';
-      let createDoc = request.method == 'create';
-      return (newId && subCount && deleteDoc) || (newId && addCount && createDoc);
+      // function: Counter Function
+      // usage: create, delete of your editing doc
+      let docRef = /databases/$(database)/documents/_counters/$(request.path[3]);
+      let field = 'count';
+      let validAddCount = validAdd(docRef, field) && createDoc(request.path);
+      let validSubCount = validSub(docRef, field) && deleteDoc(request.path);
+      return validAddCount || validSubCount;
     }
     function counterDoc() {
-      let afterCount = request.resource.data.count;
-      let beforeCount = resource.data.count;
-      let docPath = /databases/$(database)/documents/$(request.path[4])/$(request.resource.data.docId);
-      let createIdDoc = existsAfter(docPath) && !exists(docPath);
-      let deleteIdDoc = !existsAfter(docPath) && exists(docPath);
-      let addCount = afterCount == beforeCount + 1;
-      let subCount = afterCount == beforeCount - 1;
-      return (createIdDoc && addCount) || (deleteIdDoc && subCount);
+      // function: Counter Document Function
+      // usage: write of your _counter doc
+      let docRef = getAfter(request.path).data['_tmpDoc'];
+      let field = 'count';
+			let validFields = request.resource.data.diff(resource.data)
+        .affectedKeys().hasOnly(['_tmpDoc', field]);
+      let validAddCount = validAdd(request.path, field) && createDoc(docRef);
+      let validSubCount = validSub(request.path, field) && deleteDoc(docRef);
+      return (validAddCount || validSubCount) && validFields;
     }
-    function userCount() {
-      let colId = request.path[3];
-      let docPath = /databases/$(database)/documents/users/$(request.auth.uid);
-      let beforeCount = get(docPath).data[colId + 'Count'];
-      let afterCount = getAfter(docPath).data[colId + 'Count'];
-      let addCount = afterCount == beforeCount + 1;
-      let subCount = beforeCount == beforeCount - 1;
-      return (addCount && request.method == 'create') || (subCount && request.method == 'delete');
+    function aCounter(docField) {
+      // function: Aggregate Counter Function
+      // usage: create, delete of your editing doc
+      // @params: doc ref field name to aggregate count
+      let docRef = getLatestData(request.path)[docField];
+      let field = request.path[3] + 'Count';
+      let validAddCount = validAdd(docRef, field) && createDoc(request.path);
+      let validSubCount = validSub(docRef, field) && deleteDoc(request.path);
+      return validAddCount || validSubCount;
     }
-    function getAdded(map) {
-      return request.resource.data[map].keys().removeAll(resource.data[map].keys())[0];
+    function aCounterDoc() {
+      // function: Aggregate Counter Document Function
+      // usage: write of your aggregate document
+      let docRef = getAfter(request.path).data['_tmpDoc'];
+      let field = docRef[3] + 'Count';
+      let validFields = request.resource.data.diff(resource.data)
+        .affectedKeys().hasOnly(['_tmpDoc', field]);
+      let validAddCount = validAdd(request.path, field) && createDoc(docRef);
+      let validSubCount = validSub(request.path, field) && deleteDoc(docRef);
+      return (validAddCount || validSubCount) && validFields;
     }
-    function test() {
-      return getAdded('students') == 'fff2';
-    //return request.resource.__name__
-    //return request.path
-    //== path('/databases/(default)/documents/drafts/' + request.resource.id);
-    //== '/databases/(default)/documents/drafts/' + request.resource.id;
-    //return string(request.path) == '/databases/(default)/documents/drafts/6vCi00rT5MwYwvDRWWLi';
-
-    //'/databases/(default)/documents/drafts/' + request.resource.id;
-
-    // request.resource.id -- look for sub col path here...
-      //return true;
-      //return request.resource.id == 'butter';
-      //return resource.__name__ == path('/databases/(default)/documents/drafts/butter');
-      //return request.path == resource['__name__'];
-      // 4 = butter
-      // databases(0)/(default)(1)/documents(2)/drafts(3)/butter(4)
+    //
+    // Other helper functions
+    //
+    function hasTime() {
+      return request.time == request.resource.data[request.method + 'dAt']
+        || request.method == 'delete';
     }
-    match /students/{studentID} {
-      allow read;
-      allow write;
-      //allow write: if noChange('classes') || matchWrite(studentID, 'classes', 'students');
-      //allow delete: if noChange('classes') || matchDelete('classes', 'students');
+    function getLatestData(path) {
+    	return request.method == 'delete'
+        ? get(path).data
+        : getAfter(path).data;
     }
-    match /classes/{classID} {
-      allow read;
-      allow update: if test();
-      //allow write: if noChange('students') || matchWrite(classID, 'students', 'classes');
-      //allow delete: if noChange('students') || matchDelete('students', 'classes');
+    function getLatestId() {
+      return request.method == 'delete'
+        ? resource.id
+        : request.resource.id;
     }
+    function isOwner(field) {
+      return request.method == 'create'
+        ? request.resource.data[field] == request.auth.uid
+        : resource.data[field] == request.auth.uid;
+    }
+    function getRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    function canWrite(field) {
+      return getRole() == 'admin'
+        || getRole() == 'editor'
+        || (getRole() == 'author' && isOwner(field));
+    }
+    //
+    // Collections canWrite
+    //
+    function canWriteAction() {
+      // heart and bookmark doc
+      let latestId = getLatestId().split('_');
+      let latestData = getLatestData(request.path);
+      let userId = latestData['userDoc'][4];
+      let postId = latestData['postDoc'][4];
+      return request.auth.uid == userId && (
+      	(
+        	latestId[1] == request.auth.uid
+        	&& latestId[0] == postId
+        	&& latestId.size() == 2
+        	&& request.resource.data.keys().hasOnly(['postDoc', 'userDoc'])
+      	) || deleteDoc(request.path)
+      );
+    }
+    function canWritePost() {
+      // post doc
+      return canWrite('authorId') && (
+      	(
+        	hasTime()
+        	&& request.resource.data.keys().hasAll(
+          	['authorDoc', 'authorId', 'content', 'minutes', 'slug', 'title']
+        	)
+          && request.resource.data.content is string
+          && request.resource.data.content.size() > 2
+          && request.resource.data.title is string
+          && request.resource.data.title.size() > 1
+          && request.resource.data.slug is string
+          && request.resource.data.slug == request.resource.data.title.replace('\\s', '-').lower()
+        ) || deleteDoc(request.path)
+      );
+    }
+    function canWriteUser() {
+      // user doc
+    	return request.auth.uid == getLatestId();
+    }
+    //
+    // Match Rules
+    //
     match /posts/{document} {
-      allow read;//: if request.resource.data.keys.hasAny(["content"]);
-      allow update; // if getRole('editor') && isOwner() && isNewOwner() || getRole('admin');
-      allow create: if counter() && userCount();
-      allow delete: if counter() && userCount(); // if getRole('admin');
+      allow read;
+      allow update: if aCounterDoc()
+        || canWritePost();
+      allow create, delete: if counter()
+        && aCounter('authorDoc')
+        && canWritePost();
     }
     match /drafts/{document} {
       allow read;
-      allow update;
-      allow create: if counter();
-      allow delete: if counter();
+      allow update: if canWritePost();
+      allow create, delete: if counter()
+        && canWritePost();
+    }
+    match /hearts/{document} {
+    	allow read;
+      allow update: if false;
+      allow create, delete: if counter()
+        && aCounter('userDoc')
+        && aCounter('postDoc')
+        && canWriteAction();
+    }
+    match /bookmarks/{document} {
+      allow read;
+      allow update: if false;
+      allow create, delete: if counter()
+        && aCounter('userDoc')
+        && aCounter('postDoc')
+        && canWriteAction();
     }
     match /_counters/{document} {
       allow read;
       allow write: if counterDoc();
     }
-    match /categories/{document} {
+    match /users/{document} {
       allow read;
-      allow update: if getRole('editor');
-      allow create, delete: if getRole('admin');
-    }
-    match /users/{document=**} {
-      allow read;
-      allow create: if isSignedIn() && isNotAdminOrEditor();
-      allow update: if isSignedIn() && (getRole('admin') || isUser());
+      allow update: if aCounterDoc()
+        || canWriteUser();
+      allow create, delete: if counter()
+        && canWriteUser();
     }
     match /tags/{document} {
       allow read;
       allow write;
     }
-    match /admin/{document} {
-      allow read;
-      allow update: if getRole('editor');
-      allow create, delete: if getRole('admin');
-    }
-    match /likes/{document} {
-      allow create, read;
-      allow update, delete: if request.auth.uid == resource.data.userId;
-    }
-    match /titles/{document} {
-      allow read;
-      allow update: if getRole('editor');
-      allow create, delete: if getRole('admin');
-    }
-    match /_events/{document} {
-      allow read, write: if false;
-    }
-    match /_uniques/{document=**} {
-      allow read;
-      allow write: if false;
-    }
-    function searchIndex() {
-      let docPath = /databases/$(database)/documents/$(request.path[4])/$(request.path[6]);
-      return get(docPath).data.authorId == request.auth.uid;
-    }
     match /_search/{document=**} {
       allow read;
       allow write: if searchIndex();
-    }
-    match /_trigrams/{document=**} {
-      allow read;
-      allow write: if false;
-    }
-    match /users/{document}/feed/{feedId} {
-      allow read;
-      allow write;
- 			allow delete;
-    }
-    match /users/{document}/following/{followingId} {
-      allow read;
-      allow write;
-      allow delete;
     }
     match /images/{document} {
       allow read;

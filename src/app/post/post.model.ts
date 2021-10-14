@@ -15,6 +15,9 @@ export interface Post {
   minutes?: string;
   authorDoc?: User | any;
   published?: boolean;
+  heartsCount?: number;
+  bookmarksCount?: number;
+  _tmpDoc?: any;
 }
 
 export interface Tag {
