@@ -103,7 +103,7 @@ export class FbDbService {
       const docRef = doc(this.afs, 'posts', id);
       const draftRef = doc(this.afs, 'drafts', id);
       const docSnap = await getDoc(docRef);
-      const docData = docSnap.data() as Post;
+      const docData = docSnap.data() as Post || [];
 
       // remove counters from update
       let {
@@ -126,13 +126,13 @@ export class FbDbService {
           docRef,
           data,
           { merge: true },
-          { users: authorId }
+          { paths: { users: authorId } }
         );
 
         // delete draft doc
         await deleteWithCounter(
           draftRef,
-          { users: authorId }
+          { paths: { users: authorId } }
         );
 
         // update tags
@@ -148,7 +148,7 @@ export class FbDbService {
           draftRef,
           data,
           { merge: true },
-          { users: authorId }
+          { paths: { users: authorId } }
         );
       }
     }
@@ -161,7 +161,7 @@ export class FbDbService {
   async deletePost(id: string, uid: string): Promise<void> {
     await deleteWithCounter(
       doc(this.afs, 'posts', id),
-      { users: uid }
+      { paths: { users: uid } }
     );
   }
   //
@@ -219,7 +219,13 @@ export class FbDbService {
       fields: ['content', 'title', 'tags']
     });
   }
-
+  /**
+   * Update Tags Doc
+   * @param docRef
+   * @param before
+   * @param after
+   * @param tagsDoc
+   */
   async updateTags(
     docRef: DocumentReference,
     before: string[] = [],
@@ -236,20 +242,20 @@ export class FbDbService {
 
     const batch = writeBatch(docRef.firestore);
 
+    batch.update(
+      docRef,
+      { tags: after }
+    );
+
     // added
     for (const t of added) {
 
       // + 1 count
-      const tagsRef = doc(docRef.firestore, tagsDoc + '/' + t);
-
-      batch.set(tagsRef, {
-        count: increment(1)
-      }, { merge: true });
-
-      // add tag
-      batch.update(docRef, {
-        tags: arrayUnion(t)
-      });
+      batch.set(
+        doc(docRef.firestore, tagsDoc + '/' + t),
+        { count: increment(1), _tmpDoc: docRef },
+        { merge: true }
+      );
     }
 
     // removed
@@ -257,15 +263,16 @@ export class FbDbService {
 
       // -1 count
       const tagsRef = doc(docRef.firestore, tagsDoc + '/' + t);
+      const tagsSnap = await getDoc(tagsRef);
 
-      batch.update(tagsRef, {
-        count: increment(-1)
-      });
-
-      // remove tag
-      batch.update(docRef, {
-        tags: arrayRemove(t)
-      });
+      if ((tagsSnap.data() as any).count == 1) {
+        batch.delete(tagsRef);
+      } else {
+        batch.update(
+          tagsRef,
+          { count: increment(-1), _tmpDoc: docRef }
+        );
+      }
     }
     batch.commit();
   }

@@ -26,35 +26,43 @@ export async function setWithCounter(
   data: {
     [x: string]: any;
   },
-  options?: SetOptions,
-  paths?: { [col: string]: string },
-  dates = true
+  setOptions?: SetOptions,
+  opts?: {
+    paths?: { [col: string]: string },
+    dates?: boolean,
+  }
 ): Promise<void> {
 
-  options = options ? options : {};
+  setOptions = setOptions ? setOptions : {};
+  opts = opts ? opts : {};
+  opts.dates = opts.dates === undefined
+    ? true
+    : opts.dates;
+
+  const paths = opts.paths;
 
   // counter collection
   const counterCol = '_counters';
   const col = ref.path.split('/').slice(0, -1).join('/');
   const countRef = doc(ref.firestore, counterCol, col);
   const refSnap = await getDoc(ref);
-  const _tmpDoc = ref;
 
   // don't increase count if edit
   if (refSnap.exists()) {
-    if (dates) {
+    if (opts.dates) {
       data.updatedAt = serverTimestamp();
     }
-    await setDoc(ref, data, options);
+    await setDoc(ref, data, setOptions);
 
     // increase count
   } else {
     // set doc
     const batch = writeBatch(ref.firestore);
-    if (dates) {
+
+    if (opts.dates) {
       data.createdAt = serverTimestamp();
     }
-    batch.set(ref, data, options);
+    batch.set(ref, data, setOptions);
 
     // if other counts
     if (paths) {
@@ -62,14 +70,17 @@ export async function setWithCounter(
       keys.map((k: string) => {
         batch.update(
           doc(ref.firestore, `${k}/${paths[k]}`),
-          { [col + 'Count']: increment(1), _tmpDoc }
+          {
+            [col + 'Count']: increment(1),
+            ['_' + col + 'Doc']: ref
+          }
         );
       });
     }
     // _counter doc
     batch.set(countRef, {
       count: increment(1),
-      _tmpDoc
+      _tmpDoc: ref
     }, { merge: true });
     // create counts
     return batch.commit();
@@ -78,15 +89,19 @@ export async function setWithCounter(
 
 export async function deleteWithCounter(
   ref: DocumentReference<DocumentData>,
-  paths?: { [col: string]: string }
+  opts?: {
+    paths?: { [col: string]: string }
+  }
 ): Promise<void> {
+
+  opts = opts ? opts : {};
+  const paths = opts.paths;
 
   // counter collection
   const counterCol = '_counters';
   const col = ref.path.split('/').slice(0, -1).join('/');
   const countRef = doc(ref.firestore, counterCol, col);
   const batch = writeBatch(ref.firestore);
-  const _tmpDoc = ref;
 
   // if other counts
   if (paths) {
@@ -94,7 +109,10 @@ export async function deleteWithCounter(
     keys.map((k: string) => {
       batch.update(
         doc(ref.firestore, `${k}/${paths[k]}`),
-        { [col + 'Count']: increment(-1), _tmpDoc }
+        {
+          [col + 'Count']: increment(-1),
+          ['_' + col + 'Doc']: ref
+        }
       );
     });
   }
@@ -102,7 +120,7 @@ export async function deleteWithCounter(
   batch.delete(ref);
   batch.set(countRef, {
     count: increment(-1),
-    _tmpDoc
+    _tmpDoc: ref
   }, { merge: true });
   // edit counts
   return batch.commit();

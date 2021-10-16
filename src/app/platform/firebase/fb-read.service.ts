@@ -14,7 +14,8 @@ import {
   OrderByDirection,
   limit,
   getDoc,
-  DocumentSnapshot
+  DocumentSnapshot,
+  documentId
 } from '@angular/fire/firestore';
 import { Observable, of } from 'rxjs';
 import { debounceTime, map, switchMap, take } from 'rxjs/operators';
@@ -69,7 +70,7 @@ export class FbReadService {
   getTags(): Observable<Tag[]> {
     return collectionData<Tag>(
       query<Tag>(
-        collection(this.afs, 'tags'),
+        collection(this.afs, 'tags')
       ), { idField: 'name' }
     );
   }
@@ -125,20 +126,16 @@ export class FbReadService {
       },
       { merge: true },
       {
-        posts: postId,
-        users: userId
-      },
-      false
+        paths: { posts: postId, users: userId },
+        dates: false
+      }
     );
   }
 
   async unActionPost(postId: string, userId: string, action: string): Promise<void> {
     await deleteWithCounter(
       doc(this.afs, action, `${postId}_${userId}`),
-      {
-        posts: postId,
-        users: userId
-      }
+      { paths: { posts: postId, users: userId } }
     );
   }
 
