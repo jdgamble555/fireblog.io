@@ -15,6 +15,8 @@ import { FirebaseModule } from './platform/firebase/firebase.module';
 import { NavModule } from './nav/nav.module';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { AngularFireAnalyticsModule } from '@angular/fire/compat/analytics';
+import { AngularFireModule } from '@angular/fire/compat';
 
 
 @NgModule({
@@ -27,6 +29,8 @@ import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
   imports: [
     BrowserModule.withServerTransition({ appId: 'serverApp' }),
     provideFirebaseApp(() => initializeApp(environment.firebase)),
+    AngularFireModule.initializeApp(environment.firebase),
+    AngularFireAnalyticsModule,
     AppRoutingModule,
     FirebaseModule,
     NgxSkeletonLoaderModule,
