@@ -209,6 +209,8 @@ export class FbReadService {
     filters.push(
       limit(_limit)
     );
+
+    // if posts by hearts or bookmarks
     if (opts.hearts || opts.bookmarks) {
       const uid = opts.hearts || opts.bookmarks as string;
       const field = opts.hearts ? 'hearts' : 'bookmarks';
@@ -227,6 +229,8 @@ export class FbReadService {
             map((l: Post[]) => l.slice(_offset))
           ), ['authorDoc']);
     }
+
+    // otherwise just posts
     return expandRefs<Post>(
       collectionData<Post>(
         query<Post>(

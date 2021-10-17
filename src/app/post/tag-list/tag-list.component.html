@@ -3,7 +3,7 @@
     <ul class="tag_list">
       <li [ngClass]="{
         'tag-li-footer': display == 'footer'
-      }" *ngFor="let tag of _tags" [routerLink]="['t', tag.name]"># {{ tag.name }}
+      }" *ngFor="let tag of _tags" [routerLink]="['t', tag.name]"><i># </i><strong>{{ tag.name }}</strong>
         ({{ tag.count }})</li>
     </ul>
   </mat-card-content>

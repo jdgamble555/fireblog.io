@@ -58,7 +58,7 @@ export class TagService {
    * @param control
    */
   addTag(tag: string, control: FormArray): void {
-    control.push(this.fb.control(this.tagFormat(tag)));
+    control.push(this.fb.control(tag));
   }
 
   /**
@@ -77,7 +77,10 @@ export class TagService {
 
       // Add tag to new form group
       if (value.trim()) {
-        this.addTag(this.slugify(value), control);
+        const newVal = this.tagFormat(value);
+        if (newVal) {
+          this.addTag(newVal, control);
+        }
       }
     }
 
@@ -133,8 +136,9 @@ export class TagService {
    * @param tag
    * @returns
    */
-  private tagFormat(tag: string): string {
-    return tag.toLowerCase().replace(/-+/g, ' ').replace(/[^\w ]+/g, '');
+  tagFormat(tag: string): string {
+    // can't begin with number or contain only number, no dashes
+    return this.slugify(tag).replace(/-*/g, '').replace(/^\d+/, '');
   }
 
   /**

@@ -677,6 +677,10 @@ mat-paginator .mat-form-field {
   margin-left: 10px;
 }
 
+.ng-right {
+  margin-right: 40px;
+}
+
 .ng-button-space {
   margin-right: 40px !important;
 }
@@ -685,8 +689,13 @@ mat-paginator .mat-form-field {
   min-height: 500px;
 }
 
-.ng-heart-button {
-  color: black !important;
+.ng-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.ng-heart-container {
+  margin-top: 8.5px;
 }
 
 .dark-theme .ng-heart-button {
