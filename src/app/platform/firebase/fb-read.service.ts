@@ -14,8 +14,7 @@ import {
   OrderByDirection,
   limit,
   getDoc,
-  DocumentSnapshot,
-  documentId
+  DocumentSnapshot
 } from '@angular/fire/firestore';
 import { Observable, of } from 'rxjs';
 import { debounceTime, map, switchMap, take } from 'rxjs/operators';
