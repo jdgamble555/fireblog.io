@@ -213,18 +213,19 @@ export class FbReadService {
       const uid = opts.hearts || opts.bookmarks as string;
       const field = opts.hearts ? 'hearts' : 'bookmarks';
       return expandRefs<Post>(
-        collectionData<Post>(
-          query<Post>(
-            collection(this.afs, field) as any,
-            where('userDoc', '==', doc(this.afs, 'users', uid)),
-            orderBy(documentId()),
-            limit(_limit)
-          ), { idField: 'id' }
-        ), ['postDoc']).pipe(
-          map((p: any) => p.map((s: any) => s.postDoc)),
-          // offset is only okay here because of caching
-          map((l: Post[]) => l.slice(_offset))
-        );
+        expandRefs<Post>(
+          collectionData<Post>(
+            query<Post>(
+              collection(this.afs, field) as any,
+              where('userDoc', '==', doc(this.afs, 'users', uid)),
+              orderBy(documentId()),
+              limit(_limit)
+            ), { idField: 'id' }
+          ), ['postDoc']).pipe(
+            map((p: any) => p.map((s: any) => s.postDoc)),
+            // offset is only okay here because of caching
+            map((l: Post[]) => l.slice(_offset))
+          ), ['authorDoc']);
     }
     return expandRefs<Post>(
       collectionData<Post>(

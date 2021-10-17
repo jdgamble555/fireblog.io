@@ -64,6 +64,8 @@ export class PostListComponent implements OnInit, OnDestroy {
       this.user$ = await this.auth.getUser();
     }
     if (this.router.url === '/bookmarks') {
+      this.ns.setBC('Bookmarks');
+      this.seo.generateTags({ title: 'Bookmarks - ' + this.ns.title });
       const uid = this.uid = this.user$?.uid as string;
       this.posts = this.read.getPosts({ bookmarks: uid });
       this.totalPosts = this.read.getUserTotal(uid, 'bookmarks');
