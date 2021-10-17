@@ -238,6 +238,7 @@ export class PostFormComponent {
     // prepare variables for db
     const formValue = this.postForm.value;
     const slug = this.ts.slugify(formValue.title);
+    console.log(slug)
 
     const uid = (await this.auth.getUser())?.uid;
 

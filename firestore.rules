@@ -11,7 +11,7 @@ service cloud.firestore {
       return get(docPath).data.authorId == request.auth.uid;
     }
     //
-    // Counter functions
+    // Counter helper functions
     //
     function createDoc(path) {
       // new doc
@@ -41,12 +41,17 @@ service cloud.firestore {
     }
     function createField(path, field) {
       // new field
-      return !(field in get(path).data) && (field in getAfter(path).data);
+      return (!(field in get(path).data) && (field in getAfter(path).data))
+        || createDoc(path);
     }
     function deleteField(path, field) {
       // remove field
-      return (field in get(path).data) && !(field in getAfter(path).data);
+      return ((field in get(path).data) && !(field in getAfter(path).data))
+        || deleteDoc(path);
     }
+    //
+    // Counter Functions
+    //
     function counter() {
       // function: Counter Function
       // usage: create, delete of your editing doc
@@ -61,8 +66,7 @@ service cloud.firestore {
       // usage: write of your _counter doc
       let docRef = getAfter(request.path).data['_tmpDoc'];
       let field = 'count';
-			let validFields = request.resource.data.diff(resource.data)
-        .affectedKeys().hasOnly(['_tmpDoc', field]);
+			let validFields = request.resource.data.keys().hasOnly(['_tmpDoc', field]);
       let validAddCount = validAdd(request.path, field) && createDoc(docRef);
       let validSubCount = validSub(request.path, field) && deleteDoc(docRef);
       return (validAddCount || validSubCount) && validFields;
@@ -77,13 +81,13 @@ service cloud.firestore {
       let validSubCount = validSub(docRef, field) && deleteDoc(request.path);
       return validAddCount || validSubCount;
     }
-    function aCounterDoc() {
+    function aCounterDoc(docField) {
       // function: Aggregate Counter Document Function
       // usage: write of your aggregate document
-      let docRef = getAfter(request.path).data['_tmpDoc'];
+      let tmpField = '_' + docField + 'Doc';
+      let docRef = getAfter(request.path).data[tmpField];
       let field = docRef[3] + 'Count';
-      let validFields = request.resource.data.diff(resource.data)
-        .affectedKeys().hasOnly(['_tmpDoc', field]);
+      let validFields = hasOnly([tmpField, field]);
       let validAddCount = validAdd(request.path, field) && createDoc(docRef);
       let validSubCount = validSub(request.path, field) && deleteDoc(docRef);
       return (validAddCount || validSubCount) && validFields;
@@ -91,6 +95,20 @@ service cloud.firestore {
     //
     // Other helper functions
     //
+    //function getAdded(field) {
+    //  return request.resource.data[field].removeAll(resource.data[field]);
+    //}
+    //function getRemoved(field) {
+    //	return resource.data[field].removeAll(request.resource.data[field]);
+    //}
+    //function validTag(field) {
+    //  let ref = /databases/$(database)/documents/tags/$(field);
+    //  return (field in getAdded('tags') && validAdd(ref, 'count'))
+    //    || (field in getRemoved('tags') && validSub(ref, 'count'));
+    //}
+    function hasOnly(fields) {
+    	return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
+    }
     function hasTime() {
       return request.time == request.resource.data[request.method + 'dAt']
         || request.method == 'delete';
@@ -148,8 +166,11 @@ service cloud.firestore {
           && request.resource.data.content.size() > 2
           && request.resource.data.title is string
           && request.resource.data.title.size() > 1
+          && request.resource.data.tags.size() > 0
           && request.resource.data.slug is string
-          && request.resource.data.slug == request.resource.data.title.replace('\\s', '-').lower()
+          // simple slug version, should be updated for utf8 characters
+          && request.resource.data.slug == request.resource.data.title
+            .lower().replace('[^a-z0-9]+', '-').replace('^-|-$','')
         ) || deleteDoc(request.path)
       );
     }
@@ -162,16 +183,20 @@ service cloud.firestore {
     //
     match /posts/{document} {
       allow read;
-      allow update: if aCounterDoc()
-        || canWritePost();
+      allow update: if aCounterDoc('hearts')
+        || aCounterDoc('bookmarks')
+        || canWritePost()
+        || hasOnly(['tags']);
       allow create, delete: if counter()
         && aCounter('authorDoc')
         && canWritePost();
     }
     match /drafts/{document} {
       allow read;
-      allow update: if canWritePost();
+      allow update: if canWritePost()
+        || hasOnly(['imageUploads']);
       allow create, delete: if counter()
+        && aCounter('authorDoc')
         && canWritePost();
     }
     match /hearts/{document} {
@@ -196,7 +221,8 @@ service cloud.firestore {
     }
     match /users/{document} {
       allow read;
-      allow update: if aCounterDoc()
+      allow update: if aCounterDoc('hearts')
+        || aCounterDoc('bookmarks')
         || canWriteUser();
       allow create, delete: if counter()
         && canWriteUser();
@@ -208,11 +234,6 @@ service cloud.firestore {
     match /_search/{document=**} {
       allow read;
       allow write: if searchIndex();
-    }
-    match /images/{document} {
-      allow read;
-      allow write;
-      allow delete;
     }
   }
 }

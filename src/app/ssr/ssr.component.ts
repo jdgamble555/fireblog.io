@@ -45,6 +45,16 @@ export class SsrComponent {
       title = 'Forgot Password';
     } else if (root === 'verify') {
       title = 'Verify Email Address';
+    } else if (root === 'new') {
+      title = 'New Post';
+    } else if (root === 'edit') {
+      title = 'Edit Post';
+    } else if (root === 'settings') {
+      title = 'Settings';
+    } else if (root === 'bookmarks') {
+      title = 'Bookmarks';
+    } else if (root === 'blog') {
+      title = 'Post';
     } else if (root === 'post') {
       const p = await this.waitFor(
         getDoc(
