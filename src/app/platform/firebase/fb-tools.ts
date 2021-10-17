@@ -135,7 +135,7 @@ export function expandRef<T>(obs: Observable<T>, fields: any[] = []): Observable
           if (p) fields.push(k);
           return p;
         }
-      ) : fields).map((f: any) => docData<any>(doc[f]))
+      ) : fields).map((f: any) => docData<any>(doc[f], { idField: 'id' }))
     ).pipe(
       map((r: any) => fields.reduce(
         (prev: any, curr: any) =>
@@ -156,7 +156,7 @@ export function expandRefs<T>(obs: Observable<T[]>, fields: any[] = []): Observa
             if (p) fields.push(k);
             return p;
           }
-        ) : fields).map((f: any) => docData<any>(doc[f]))
+        ) : fields).map((f: any) => docData<any>(doc[f], { idField: 'id' }))
       ).reduce((acc: any, val: any) => [].concat(acc, val)))
         .pipe(
           map((h: any) =>

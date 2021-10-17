@@ -7,6 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "gc-deploy": "gcloud builds submit --tag gcr.io/fireblog.io/fireblog",
     "dev:ssr": "ng run fireblog:serve-ssr",
     "serve:ssr": "node dist/fireblog/server/main.js",
     "build:ssr": "ng build && ng run fireblog:server",

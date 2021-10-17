@@ -63,8 +63,11 @@ export class PostListComponent implements OnInit, OnDestroy {
     if (this.ns.isBrowser) {
       this.user$ = await this.auth.getUser();
     }
-
-    if (tag) {
+    if (this.router.url === '/bookmarks') {
+      const uid = this.uid = this.user$?.uid as string;
+      this.posts = this.read.getPosts({ bookmarks: uid });
+      this.totalPosts = this.read.getUserTotal(uid, 'bookmarks');
+    } else if (tag) {
       // meta
       const uTag = tag.charAt(0).toUpperCase() + tag.slice(1);
       this.ns.setBC('# ' + uTag);
@@ -106,7 +109,13 @@ export class PostListComponent implements OnInit, OnDestroy {
     };
 
     // which route
-    if (this.tag) {
+    if (this.router.url === '/bookmarks') {
+      console.log(this.uid)
+      this.posts = this.read.getPosts({
+        bookmarks: this.uid as string,
+        ...paging
+      });
+    } else if (this.tag) {
       this.posts = this.read.getPosts({
         tag: this.tag,
         ...paging
@@ -125,7 +134,7 @@ export class PostListComponent implements OnInit, OnDestroy {
     if (this.user$) {
       try {
         await this.read.actionPost(id, this.user$.uid, action);
-      } catch(e: any) {
+      } catch (e: any) {
         if (e.code === 'permission-denied') {
           // already clicked
         }

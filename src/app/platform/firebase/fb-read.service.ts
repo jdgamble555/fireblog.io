@@ -14,7 +14,8 @@ import {
   OrderByDirection,
   limit,
   getDoc,
-  DocumentSnapshot
+  DocumentSnapshot,
+  documentId
 } from '@angular/fire/firestore';
 import { Observable, of } from 'rxjs';
 import { debounceTime, map, switchMap, take } from 'rxjs/operators';
@@ -100,11 +101,11 @@ export class FbReadService {
     );
   }
   /**
- * Return total number of docs by a user
- * @param uid - user id
- * @param col - column
- * @returns
- */
+   * Return total number of docs by a user
+   * @param uid - user id
+   * @param col - column
+   * @returns
+   */
   getUserTotal(uid: string, col: string) {
     return docData<any>(
       doc(this.afs, 'users', uid)
@@ -112,6 +113,7 @@ export class FbReadService {
       map((r: any) => r[col + 'Count'])
     );
   }
+
   //
   // Hearts and Bookmarks
   //
@@ -177,6 +179,8 @@ export class FbReadService {
     sortDirection?: OrderByDirection,
     tag?: string,
     uid?: string,
+    hearts?: string,
+    bookmarks?: string,
     page?: number,
     pageSize?: number
   }): Observable<Post[]> {
@@ -205,6 +209,23 @@ export class FbReadService {
     filters.push(
       limit(_limit)
     );
+    if (opts.hearts || opts.bookmarks) {
+      const uid = opts.hearts || opts.bookmarks as string;
+      const field = opts.hearts ? 'hearts' : 'bookmarks';
+      return expandRefs<Post>(
+        collectionData<Post>(
+          query<Post>(
+            collection(this.afs, field) as any,
+            where('userDoc', '==', doc(this.afs, 'users', uid)),
+            orderBy(documentId()),
+            limit(_limit)
+          ), { idField: 'id' }
+        ), ['postDoc']).pipe(
+          map((p: any) => p.map((s: any) => s.postDoc)),
+          // offset is only okay here because of caching
+          map((l: Post[]) => l.slice(_offset))
+        );
+    }
     return expandRefs<Post>(
       collectionData<Post>(
         query<Post>(

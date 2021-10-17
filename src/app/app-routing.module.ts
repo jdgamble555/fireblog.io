@@ -23,6 +23,7 @@ const routes: Routes = [
   { path: 'post/:id/:slug', component: PostComponent },
   { path: 't/:tag', component: PostListComponent },
   { path: 'user/:uid', component: PostListComponent },
+  { path: 'bookmarks', component: PostListComponent, canActivate: [LoginGuard] },
 
   // logged in
   { path: 'new', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [EmailGuard, LoginGuard] },

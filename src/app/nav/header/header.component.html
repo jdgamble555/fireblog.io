@@ -37,11 +37,11 @@
           <span>Account Settings</span>
         </button>
         <mat-divider></mat-divider>
-        <!--<button mat-menu-item routerLink="/bookmarks">
+        <button mat-menu-item routerLink="/bookmarks">
           <mat-icon class="ng-menu-icon">bookmarks</mat-icon>
           <span>Bookmarks</span>
         </button>
-        <mat-divider></mat-divider>-->
+        <mat-divider></mat-divider>
         <ng-container *ngIf="isAdmin">
           <button mat-menu-item [routerLink]="['/user', user.uid]">
             <mat-icon class="ng-menu-icon">account_box</mat-icon>

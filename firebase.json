@@ -20,7 +20,10 @@
       "rewrites": [
         {
           "source": "**",
-          "function": "ssr"
+          "run": {
+            "serviceId": "fireblog",
+            "region": "us-central1"
+          }
         }
       ]
     }
