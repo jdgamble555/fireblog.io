@@ -17,6 +17,7 @@ import {
   writeBatch,
   increment
 } from '@angular/fire/firestore';
+import { MarkdownService } from 'ngx-markdown';
 import { switchMap } from 'rxjs/operators';
 import { User } from 'src/app/auth/user.model';
 import { Post } from 'src/app/post/post.model';
@@ -34,6 +35,7 @@ export class FbDbService {
 
   constructor(
     private afs: Firestore,
+    private markdownService: MarkdownService,
     @Inject(DOCUMENT) private document: Document
   ) { }
   //
@@ -141,6 +143,12 @@ export class FbDbService {
           docData.tags,
           tags
         );
+
+        // index post, run in background, don't wait
+        data.content = this.markdownService.compile(data.content as string);
+        data.tags = tags;
+        this.indexPost(id, data);
+
       } else {
 
         // save draft

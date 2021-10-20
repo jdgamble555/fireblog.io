@@ -3,6 +3,7 @@ import { Inject, Injectable } from '@angular/core';
 
 // Firestore imports
 import { Firestore } from '@angular/fire/firestore';
+import { MarkdownService } from 'ngx-markdown';
 import { FbDbService } from '../firebase/fb-db.service';
 
 @Injectable({
@@ -11,8 +12,9 @@ import { FbDbService } from '../firebase/fb-db.service';
 export class DbService extends FbDbService {
   constructor(
     afs: Firestore,
+    markdown: MarkdownService,
     @Inject(DOCUMENT) document: Document
   ) {
-    super(afs, document);
+    super(afs, markdown, document);
   }
 }

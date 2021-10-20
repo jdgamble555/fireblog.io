@@ -1,15 +1,13 @@
 import { Component, OnDestroy } from '@angular/core';
 import { User } from '@angular/fire/auth';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
-import { take, tap } from 'rxjs/operators';
-import { CoreModule } from '../core/core.module';
+import { combineLatest, Observable, of, Subscription } from 'rxjs';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { NavService } from '../nav/nav.service';
 import { AuthService } from '../platform/mock/auth.service';
 import { ReadService } from '../platform/mock/read.service';
 import { SeoService } from '../shared/seo/seo.service';
 import { Post } from './post.model';
-
 
 @Component({
   selector: 'app-post',
@@ -21,9 +19,6 @@ export class PostComponent implements OnDestroy {
   post!: Observable<Post> | Promise<Post>;
   user$!: User | null;
   sub!: Subscription;
-
-  isHeart!: boolean;
-  isBookmark!: boolean;
   postId!: string;
 
   constructor(
@@ -33,24 +28,16 @@ export class PostComponent implements OnDestroy {
     private auth: AuthService,
     private seo: SeoService,
     public ns: NavService,
-    private cm: CoreModule
   ) {
-
     this.ns.openLeftNav();
-
-    let params = this.route.paramMap;
-
-    if (!this.ns.isBrowser) {
-      params = params.pipe(take(1));
-    }
-    this.sub = params.subscribe((r: ParamMap) => this.loadPage(r));
+    this.sub = this.route.paramMap.subscribe((r: ParamMap) => this.loadPage(r));
   }
 
   loadPage(p: ParamMap) {
     const slug = p.get('slug');
     const id = p.get('id');
 
-    // backwards compatible, will be removed later
+    // backwards compatible for 'blog', will be removed later
     if (slug && !id) {
       this.post = this.read.getPostBySlug(slug).pipe(
         tap((r: Post) => {
@@ -64,9 +51,10 @@ export class PostComponent implements OnDestroy {
 
     if (id) {
       this.postId = id;
+      let post: Post;
       // get post by router id
-      let p = this.read.getPostById(id).pipe(
-        tap(async (r: Post) => {
+      this.post = this.read.getPostById(id).pipe(
+        switchMap((r: Post) => {
           // if post from id
           if (r) {
             this.meta(r);
@@ -74,20 +62,31 @@ export class PostComponent implements OnDestroy {
             if (r.slug !== slug) {
               this.router.navigate(['/post', id, r.slug]);
             }
-            // get user and heart
-            if (this.ns.isBrowser) {
-              this.user$ = await this.auth.getUser();
-              if (this.user$) {
-                this.isHeart = await this.read.getAction(id, this.user$.uid, 'hearts');
-                this.isBookmark = await this.read.getAction(id, this.user$.uid, 'bookmarks');
-              }
-            }
           } else {
             this.router.navigate(['/home']);
           }
+          post = r;
+          return this.auth.user$;
+        }),
+        switchMap((user: User | null) => {
+          // get user and heart
+          if (user) {
+            this.user$ = user;
+            return combineLatest([
+              this.read.getAction(id, user.uid, 'hearts'),
+              this.read.getAction(id, user.uid, 'bookmarks')
+            ]);
+          }
+          return of(null);
+        }),
+        map((p: [boolean, boolean] | null) => {
+          if (p) {
+            // save liked and saved
+            [post.liked, post.saved] = p;
+          }
+          return post;
         })
       );
-      this.post = this.ns.isBrowser ? p : this.cm.waitFor(p);
     }
   }
 
@@ -104,12 +103,9 @@ export class PostComponent implements OnDestroy {
     });
   }
 
-  toggleAction(action: string) {
-    const isAction = action === 'hearts'
-      ? this.isHeart
-      : this.isBookmark;
-    if (this.user$) {
-      isAction
+  toggleAction(action: string, toggle?: boolean) {
+    if (this.user$ && toggle !== undefined) {
+      toggle
         ? this.read.unActionPost(this.postId, this.user$.uid, action)
         : this.read.actionPost(this.postId, this.user$.uid, action);
     } else {
@@ -118,8 +114,6 @@ export class PostComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.ns.isBrowser) {
-      this.sub.unsubscribe();
-    }
+    this.sub.unsubscribe();
   }
 }

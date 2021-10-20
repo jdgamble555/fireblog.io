@@ -27,12 +27,15 @@
   <mat-card-actions>
     <div class="flex-container">
       <div>
-        <button mat-flat-button (click)="toggleAction('bookmarks')">
-          <mat-icon color="primary">{{ isBookmark ? 'bookmark' : 'bookmark_border' }}</mat-icon>
+        <button mat-flat-button (click)="toggleAction('bookmarks', post.saved)">
+          <mat-icon color="primary">{{ post.saved ? 'bookmark' : 'bookmark_border' }}</mat-icon>
+          <span class="ng-left">Save</span>
         </button>
-        <button mat-flat-button (click)="toggleAction('hearts')">
-          <mat-icon class="ng-heart">{{ isHeart ? 'favorite' : 'favorite_border' }}</mat-icon>
-          <span class="ng-left">{{ post.heartsCount || '0' }}</span>
+        <button mat-flat-button (click)="toggleAction('hearts', post.liked)">
+          <mat-icon class="ng-heart">{{ post.liked ? 'favorite' : 'favorite_border' }}</mat-icon>
+          <span class="ng-left">
+            {{ post.heartsCount || '0' }} like{{ post.heartsCount === 1 ? '' : 's' }}
+          </span>
         </button>
       </div>
       <ng-container *ngIf="user$ && post.authorId == user$.uid">

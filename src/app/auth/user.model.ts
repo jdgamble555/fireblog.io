@@ -10,5 +10,6 @@ export interface User {
   email?: string | null;
   phoneNumber?: string | null;
   photoURL?: string | null;
-  role: Role
+  role?: Role;
+  uid?: string;
 };

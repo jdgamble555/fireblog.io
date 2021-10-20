@@ -15,7 +15,7 @@ import {
   limit,
   getDoc,
   DocumentSnapshot,
-  documentId
+  docSnapshots
 } from '@angular/fire/firestore';
 import { Observable, of } from 'rxjs';
 import { debounceTime, map, switchMap, take } from 'rxjs/operators';
@@ -79,7 +79,7 @@ export class FbReadService {
    * @param t - tag
    * @returns
    */
-  getTagTotal(t: string) {
+  getTagTotal(t: string): Observable<string> {
     return docData<any>(
       doc(this.afs, 'tags', t)
     ).pipe(
@@ -97,7 +97,8 @@ export class FbReadService {
    */
   getUser(id: string): Observable<User> {
     return docData<User>(
-      doc(this.afs, 'users', id) as DocumentReference<User>
+      doc(this.afs, 'users', id) as DocumentReference<User>,
+      { idField: 'uid' }
     );
   }
   /**
@@ -106,7 +107,7 @@ export class FbReadService {
    * @param col - column
    * @returns
    */
-  getUserTotal(uid: string, col: string) {
+  getUserTotal(uid: string, col: string): Observable<string> {
     return docData<any>(
       doc(this.afs, 'users', uid)
     ).pipe(
@@ -126,10 +127,7 @@ export class FbReadService {
         userDoc: doc(this.afs, 'users', userId)
       },
       { merge: true },
-      {
-        paths: { posts: postId, users: userId },
-        dates: false
-      }
+      { paths: { posts: postId, users: userId } }
     );
   }
 
@@ -140,10 +138,12 @@ export class FbReadService {
     );
   }
 
-  async getAction(id: string, uid: string, action: string): Promise<boolean> {
-    return getDoc(
+  getAction(id: string, uid: string, action: string): Observable<boolean> {
+    return docSnapshots(
       doc(this.afs, action, `${id}_${uid}`)
-    ).then((snap: DocumentSnapshot<any>) => snap.exists());
+    ).pipe(
+      map((snap: DocumentSnapshot<any>) => snap.exists())
+    );
   }
   //
   // Posts
@@ -154,7 +154,7 @@ export class FbReadService {
   * @param term
   * @returns Observable of search
   */
-  searchPost(term: string) {
+  searchPost(term: string): Observable<Post[]> {
     term = term.split(' ')
       .map(
         (v: string) => soundex(v)
@@ -179,8 +179,7 @@ export class FbReadService {
     sortDirection?: OrderByDirection,
     tag?: string,
     uid?: string,
-    hearts?: string,
-    bookmarks?: string,
+    field?: string,
     page?: number,
     pageSize?: number
   }): Observable<Post[]> {
@@ -201,9 +200,14 @@ export class FbReadService {
         where('tags', 'array-contains', opts.tag)
       );
     }
-    if (opts.uid) {
+    if (opts.uid && !opts.field) {
       filters.push(
         where('authorId', '==', opts.uid)
+      );
+    }
+    if (opts.uid && opts.field) {
+      filters.push(
+        where('userDoc', '==', doc(this.afs, 'users', opts.uid))
       );
     }
     filters.push(
@@ -211,17 +215,14 @@ export class FbReadService {
     );
 
     // if posts by hearts or bookmarks
-    if (opts.hearts || opts.bookmarks) {
-      const uid = opts.hearts || opts.bookmarks as string;
-      const field = opts.hearts ? 'hearts' : 'bookmarks';
+    if (opts.field) {
+      const field = opts.field;
       return expandRefs<Post>(
         expandRefs<Post>(
-          collectionData<Post>(
-            query<Post>(
-              collection(this.afs, field) as any,
-              where('userDoc', '==', doc(this.afs, 'users', uid)),
-              orderBy(documentId()),
-              limit(_limit)
+          collectionData<any>(
+            query(
+              collection(this.afs, field),
+              ...filters
             ), { idField: 'id' }
           ), ['postDoc']).pipe(
             map((p: any) => p.map((s: any) => s.postDoc)),

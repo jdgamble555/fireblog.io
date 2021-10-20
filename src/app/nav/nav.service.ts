@@ -15,6 +15,7 @@ interface Link {
 export class NavService {
 
   title = 'Fireblog.io';
+  storage = 'fireblog';
 
   author = 'Jonathan Gamble';
 
@@ -39,7 +40,7 @@ export class NavService {
     this.doc = this.document;
     this.directories = [];
 
-    if (this.isBrowser && localStorage.getItem('fireblog-dark-mode')) {
+    if (this.isBrowser && localStorage.getItem(this.storage + '-dark-mode')) {
       this.toggleTheme();
     }
   }
@@ -104,13 +105,13 @@ export class NavService {
       this.overlay.getContainerElement().classList.remove(darkClass);
       this.document.body.classList.remove(darkClass);
       if (this.isBrowser) {
-        localStorage.removeItem('fireblog-dark-mode');
+        localStorage.removeItem(this.storage + '-dark-mode');
       }
     } else {
       this.overlay.getContainerElement().classList.add(darkClass);
       this.document.body.classList.add(darkClass);
       if (this.isBrowser) {
-        localStorage.setItem('fireblog-dark-mode', 'true');
+        localStorage.setItem(this.storage + '-dark-mode', 'true');
       }
     }
     this.isDarkMode = !this.isDarkMode;

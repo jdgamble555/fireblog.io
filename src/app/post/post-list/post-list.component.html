@@ -26,18 +26,17 @@
     <mat-divider inset></mat-divider>
     <mat-card-actions>
       <div class="flex-container">
-        <div class="flex-container">
-          <button mat-flat-button (click)="post.id && toggleAction('bookmarks', post.id)">
-            <mat-icon color="primary">{{ isBookmark ? 'bookmark_added' : 'bookmark_add' }}</mat-icon>
+        <div>
+          <button mat-flat-button (click)="post.id && toggleAction(post.id, 'bookmarks', post.saved)">
+            <mat-icon color="primary">{{ post.saved ? 'bookmark' : 'bookmark_border' }}</mat-icon>
             <span class="ng-left">Save</span>
           </button>
-          <div mat-flat-button class="flex-container ng-heart-container">
-            <mat-icon class="ng-heart">favorite</mat-icon>
-            <span class="ng-left ng-text">
-              {{ post.heartsCount || '0' }} like{{ post.heartsCount === 1
-              ? '' : 's' }}
+          <button mat-flat-button (click)="post.id && toggleAction(post.id, 'hearts', post.liked)">
+            <mat-icon class="ng-heart">{{ post.liked ? 'favorite' : 'favorite_border' }}</mat-icon>
+            <span class="ng-left">
+              {{ post.heartsCount || '0' }} like{{ post.heartsCount === 1 ? '' : 's' }}
             </span>
-          </div>
+          </button>
         </div>
         <ng-container *ngIf="user$ && post.authorId == user$.uid">
           <button mat-icon-button [routerLink]="['/edit', post.id]">

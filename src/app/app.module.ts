@@ -14,7 +14,8 @@ import { PostListComponent } from './post/post-list/post-list.component';
 import { FirebaseModule } from './platform/firebase/firebase.module';
 import { NavModule } from './nav/nav.module';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
-import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+
+// have to use old version of Firebase Analytics
 import { AngularFireAnalyticsModule } from '@angular/fire/compat/analytics';
 import { AngularFireModule } from '@angular/fire/compat';
 
@@ -28,7 +29,6 @@ import { AngularFireModule } from '@angular/fire/compat';
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'serverApp' }),
-    provideFirebaseApp(() => initializeApp(environment.firebase)),
     AngularFireModule.initializeApp(environment.firebase),
     AngularFireAnalyticsModule,
     AppRoutingModule,

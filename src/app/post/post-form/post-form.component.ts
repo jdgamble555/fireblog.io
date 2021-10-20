@@ -10,7 +10,6 @@ import { SnackbarService } from 'src/app/shared/snack-bar/snack-bar.service';
 import { TagService } from 'src/app/shared/tag/tag.service';
 import { Post } from '../post.model';
 import { DialogService } from 'src/app/shared/confirm-dialog/dialog.service';
-import { MarkdownService } from 'ngx-markdown';
 import { DbService } from 'src/app/platform/mock/db.service';
 import { AuthService } from 'src/app/platform/mock/auth.service';
 import { ImageUploadService } from 'src/app/platform/mock/image-upload.service';
@@ -76,8 +75,7 @@ export class PostFormComponent {
     public sb: SnackbarService,
     private ns: NavService,
     private seo: SeoService,
-    private dialog: DialogService,
-    private markdownService: MarkdownService
+    private dialog: DialogService
   ) {
     this.postForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(2)]],
@@ -238,7 +236,6 @@ export class PostFormComponent {
     // prepare variables for db
     const formValue = this.postForm.value;
     const slug = this.ts.slugify(formValue.title);
-    console.log(slug)
 
     const uid = (await this.auth.getUser())?.uid;
 
@@ -300,10 +297,6 @@ export class PostFormComponent {
     if (publish && !error) {
       this.sb.showMsg(this.messages.published);
       this.router.navigate(['/post', this.id, slug]);
-
-      // create search index
-      data.content = this.markdownService.compile(data.content as string);
-      await this.db.indexPost(this.id, data);
     }
   }
 

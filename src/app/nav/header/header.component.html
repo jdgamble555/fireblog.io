@@ -30,7 +30,7 @@
     <button mat-button class="ng-button-icon" (click)="this.isActiveSearch = !this.isActiveSearch">
       <mat-icon>search</mat-icon>
     </button>
-    <div *ngIf="auth.user$ | async as user; else guest">
+    <div *ngIf="user$ | async as user; else guest">
       <mat-menu #appMenu="matMenu">
         <button mat-menu-item routerLink="/settings">
           <mat-icon class="ng-menu-icon">settings</mat-icon>
@@ -42,7 +42,7 @@
           <span>Bookmarks</span>
         </button>
         <mat-divider></mat-divider>
-        <ng-container *ngIf="isAdmin">
+        <ng-container *ngIf="user.role == 'admin'">
           <button mat-menu-item [routerLink]="['/user', user.uid]">
             <mat-icon class="ng-menu-icon">account_box</mat-icon>
             <span>My Posts</span>

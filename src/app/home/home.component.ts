@@ -9,6 +9,8 @@ import { SeoService } from '../shared/seo/seo.service';
 })
 export class HomeComponent {
 
+  tabName = 'new';
+
   constructor(
     public ns: NavService,
     private seo: SeoService
@@ -22,4 +24,13 @@ export class HomeComponent {
     });
   }
 
+  tabChange(index: number) {
+    if (index === 1) {
+      this.tabName = 'updated';
+    } else if (index === 2) {
+      this.tabName = 'liked';
+    } else {
+      this.tabName = 'new';
+    }
+  }
 }

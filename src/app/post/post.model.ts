@@ -18,6 +18,8 @@ export interface Post {
   heartsCount?: number;
   bookmarksCount?: number;
   draftsCount?: number;
+  liked?: boolean;
+  saved?: boolean;
   _tmpDoc?: any;
 }
 

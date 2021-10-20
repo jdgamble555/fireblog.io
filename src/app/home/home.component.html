@@ -1,15 +1,29 @@
 <mat-card class="ng-card">
   <h2>
-    <mat-icon color="primary" class="ng-icon-text">comment</mat-icon>Welcome to {{ ns.title }}!
+    <h1>
+      <mat-icon color="primary" class="ng-icon-text">comment</mat-icon>Welcome to {{ ns.title }}!
+    </h1>
+    <span class="ng-front">
+      <mat-icon color="accent" class="ng-icon-text">storage</mat-icon>Advanced techniques for Google Firebase and
+      Firestore!
+    </span>
   </h2>
 </mat-card>
-<mat-tab-group class="ng-card" animationDuration="0ms">
-  <mat-tab label="Latest">
+<mat-tab-group class="ng-card" animationDuration="0ms" (selectedIndexChange)="tabChange($event)">
+  <mat-tab label="New">
     <br>
     <app-post-list></app-post-list>
   </mat-tab>
-  <mat-tab label="Modified">
-    <br>
-    <app-post-list sort="updatedAt"></app-post-list>
+  <mat-tab label="Updated">
+    <ng-template matTabContent>
+      <br>
+      <app-post-list type="updated"></app-post-list>
+    </ng-template>
+  </mat-tab>
+  <mat-tab label="Liked">
+    <ng-template matTabContent>
+      <br>
+      <app-post-list type="liked"></app-post-list>
+    </ng-template>
   </mat-tab>
 </mat-tab-group>
