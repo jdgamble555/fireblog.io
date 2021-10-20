@@ -50,8 +50,7 @@ export class PostListComponent implements OnDestroy {
       this.ns.setBC('Bookmarks');
       this.seo.generateTags({ title: 'Bookmarks - ' + this.ns.title });
       // posts
-      this.user$ = await this.auth.getUser();
-      const uid = this.uid = this.user$?.uid as string;
+      const uid = (await this.auth.getUser())?.uid as string;
       this.posts = this.postPipe(
         this.read.getPosts({ uid, field: 'bookmarks' })
       );
@@ -116,6 +115,7 @@ export class PostListComponent implements OnDestroy {
     ).pipe(
       switchMap((user: User | null) => {
         if (user) {
+          this.user$ = user;
           const actions: any[] = [];
           posts.map((p: Post) => {
             if (p.id) {
