@@ -38,7 +38,7 @@
           </span>
         </button>
       </div>
-      <ng-container *ngIf="user$ && post.authorId == user$.uid">
+      <ng-container *ngIf="user$ && (post.authorId == user$.uid || user$.role == 'admin' || user$.role == 'editor')">
         <button mat-icon-button [routerLink]="['/edit', post.id]">
           <mat-icon>edit</mat-icon>
         </button>

@@ -19,7 +19,7 @@ import {
   authState
 } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { shareReplay, take } from 'rxjs/operators';
 import { Role } from 'src/app/auth/user.model';
 import { DbService } from '../mock/db.service';
 
@@ -47,7 +47,7 @@ export class FbAuthService {
   };
 
   constructor(private auth: Auth, private db: DbService) {
-    this.user$ = authState(auth);
+    this.user$ = authState(auth).pipe(shareReplay());
   }
 
   async getUser(): Promise<User | null> {

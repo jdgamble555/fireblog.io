@@ -18,7 +18,7 @@ import {
   docSnapshots
 } from '@angular/fire/firestore';
 import { Observable, of } from 'rxjs';
-import { debounceTime, map, switchMap, take } from 'rxjs/operators';
+import { debounceTime, map, shareReplay, switchMap, take } from 'rxjs/operators';
 import { User } from 'src/app/auth/user.model';
 import { Post, Tag } from 'src/app/post/post.model';
 import { AuthService } from '../mock/auth.service';
@@ -48,7 +48,8 @@ export class FbReadService {
         user
           ? this.getUser(user.uid)
           : of(null)
-      )
+      ),
+      shareReplay()
     );
   }
   /**
@@ -60,7 +61,7 @@ export class FbReadService {
     return docData<any>(
       doc(this.afs, '_counters', col)
     ).pipe(
-      map((r: any) => r.count)
+      map((r: any) => r ? r.count : null)
     );
   }
   /**
@@ -83,7 +84,7 @@ export class FbReadService {
     return docData<any>(
       doc(this.afs, 'tags', t)
     ).pipe(
-      map((r: any) => r.count)
+      map((r: any) => r ? r.count : null)
     );
   }
   //
@@ -111,7 +112,7 @@ export class FbReadService {
     return docData<any>(
       doc(this.afs, 'users', uid)
     ).pipe(
-      map((r: any) => r[col + 'Count'])
+      map((r: any) => r ? r[col + 'Count'] : null)
     );
   }
 

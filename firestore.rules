@@ -110,7 +110,7 @@ service cloud.firestore {
     	return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
     }
     function hasTime() {
-      return request.time == request.resource.data[request.method + 'dAt']
+      return request.time == request.resource.data[request.method + 'dAt'] 
         || request.method == 'delete';
     }
     function getLatestData(path) {
@@ -147,10 +147,11 @@ service cloud.firestore {
       let postId = latestData['postDoc'][4];
       return request.auth.uid == userId && (
       	(
-        	latestId[1] == request.auth.uid
+          hasTime()
+        	&& latestId[1] == request.auth.uid
         	&& latestId[0] == postId
         	&& latestId.size() == 2
-        	&& request.resource.data.keys().hasOnly(['postDoc', 'userDoc'])
+        	&& request.resource.data.keys().hasOnly(['postDoc', 'userDoc', 'createdAt'])
       	) || deleteDoc(request.path)
       );
     }
@@ -202,16 +203,16 @@ service cloud.firestore {
     match /hearts/{document} {
     	allow read;
       allow update: if false;
-      allow create, delete: if counter()
-        && aCounter('userDoc')
+      allow create, delete: if counter() 
+        && aCounter('userDoc') 
         && aCounter('postDoc')
         && canWriteAction();
     }
     match /bookmarks/{document} {
       allow read;
       allow update: if false;
-      allow create, delete: if counter()
-        && aCounter('userDoc')
+      allow create, delete: if counter() 
+        && aCounter('userDoc') 
         && aCounter('postDoc')
         && canWriteAction();
     }

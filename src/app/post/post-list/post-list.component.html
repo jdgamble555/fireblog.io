@@ -1,4 +1,4 @@
-<ng-container *ngIf="posts | async as _posts; else nopost">
+<ng-container *ngIf="posts | async as _posts; else noposts">
   <mat-card class="ng-card" *ngFor="let post of _posts">
     <img *ngIf="post.image" mat-card-image src="{{ post.image }}" alt="{{ post.title }}"
       [routerLink]="['/post', post.id, post.slug]" class="ng-link" />
@@ -38,7 +38,7 @@
             </span>
           </button>
         </div>
-        <ng-container *ngIf="user$ && post.authorId == user$.uid">
+        <ng-container *ngIf="user$ && (post.authorId == user$.uid || user$.role == 'admin' || user$.role == 'editor')">
           <button mat-icon-button [routerLink]="['/edit', post.id]">
             <mat-icon>edit</mat-icon>
           </button>
@@ -46,17 +46,20 @@
       </div>
     </mat-card-actions>
   </mat-card>
+  <mat-paginator class="ng-transparent" [length]="totalPosts | async" [pageSize]="5" [pageSizeOptions]="[5, 10, 20]"
+    aria-label="Select page" (page)="pageChange($event)">
+  </mat-paginator>
 </ng-container>
-<mat-paginator class="ng-transparent" [length]="totalPosts | async" [pageSize]="5" [pageSizeOptions]="[5, 10, 20]"
-  aria-label="Select page" (page)="pageChange($event)">
-</mat-paginator>
-<ng-template #nopost>
+<ng-template #noposts>
+  <mat-card *ngIf="!loading" class="ng-card">There are no posts here yet!</mat-card>
+</ng-template>
+<ng-container *ngIf="loading">
   <mat-card class="ng-card" *ngFor="let i of [].constructor(5)">
     <mat-card-content>
       <ngx-skeleton-loader animation="pulse" [theme]="{
-        height: '300px',
-        'background-color': ns.bgcolor
-      }">
+      height: '300px',
+      'background-color': ns.bgcolor
+    }">
       </ngx-skeleton-loader>
       <div class="first-section-wrapper">
         <div class="gravatar">
@@ -67,24 +70,24 @@
         <div class="gravatar-title">
           <div>
             <ngx-skeleton-loader animation="pulse" [theme]="{
-          width: '200px',
-          'border-radius': '0',
-          height: '15px',
-          'margin-bottom': '10px',
-          'background-color': ns.bgcolor
-        }"></ngx-skeleton-loader>
+        width: '200px',
+        'border-radius': '0',
+        height: '15px',
+        'margin-bottom': '10px',
+        'background-color': ns.bgcolor
+      }"></ngx-skeleton-loader>
           </div>
           <div>
             <ngx-skeleton-loader animation="pulse" id="me" [theme]="{
-              width: '170px',
-              'border-radius': '0',
-               height: '15px',
-               'background-color': ns.bgcolor
-            }">
+            width: '170px',
+            'border-radius': '0',
+             height: '15px',
+             'background-color': ns.bgcolor
+          }">
             </ngx-skeleton-loader>
           </div>
         </div>
       </div>
     </mat-card-content>
   </mat-card>
-</ng-template>
+</ng-container>

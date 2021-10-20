@@ -1,5 +1,4 @@
-import { Component, Input, OnDestroy } from '@angular/core';
-import { User } from '@angular/fire/auth';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
@@ -9,6 +8,7 @@ import { AuthService } from 'src/app/platform/mock/auth.service';
 import { ReadService } from 'src/app/platform/mock/read.service';
 import { SeoService } from 'src/app/shared/seo/seo.service';
 import { Post } from '../post.model';
+import { User } from '../../auth/user.model';
 
 
 @Component({
@@ -16,11 +16,12 @@ import { Post } from '../post.model';
   templateUrl: './post-list.component.html',
   styleUrls: ['./post-list.component.scss']
 })
-export class PostListComponent implements OnDestroy {
+export class PostListComponent implements OnInit, OnDestroy {
 
-  posts!: Observable<Post[]>;
+  posts!: Observable<Post[] | null>;
   user$!: User | null;
   sub!: Subscription;
+  loading = true;
 
   @Input() type!: string;
 
@@ -36,7 +37,9 @@ export class PostListComponent implements OnDestroy {
     private router: Router,
     public ns: NavService,
     private seo: SeoService
-  ) {
+  ) { }
+
+  ngOnInit(): void {
     this.ns.openLeftNav();
     this.sub = this.route.paramMap.subscribe(async (r: ParamMap) => this.loadPage(r));
   }
@@ -77,6 +80,7 @@ export class PostListComponent implements OnDestroy {
       );
       this.totalPosts = this.read.getUserTotal(uid, 'posts');
     } else if (this.type === 'liked') {
+      console.log('liked')
       // posts by hearts
       this.posts = this.postPipe(
         this.read.getPosts({
@@ -86,6 +90,7 @@ export class PostListComponent implements OnDestroy {
       );
       this.totalPosts = this.read.getTotal('hearts');
     } else if (this.type === 'updated') {
+      console.log('updated')
       // posts by updatedAt
       this.posts = this.postPipe(
         this.read.getPosts({ sortField: 'updatedAt' })
@@ -103,43 +108,51 @@ export class PostListComponent implements OnDestroy {
     }
   }
 
-  postPipe(p: Observable<Post[]>) {
+  postPipe(p: Observable<Post[] | null>): Observable<Post[] | null> {
 
     // pipe in likes and bookmarks
     let posts: Post[];
     return p.pipe(
-      switchMap((r: Post[]) => {
-        posts = r;
-        return this.auth.user$;
+      switchMap((r: Post[] | null) => {
+        if (r && r.length > 0) {
+          posts = r;
+          return this.read.userDoc
+        }
+        this.loading = false;
+        return of(null);
       })
     ).pipe(
       switchMap((user: User | null) => {
         if (user) {
           this.user$ = user;
-          const actions: any[] = [];
-          posts.map((p: Post) => {
-            if (p.id) {
-              actions.push(
-                this.read.getAction(p.id, user.uid, 'hearts'),
-                this.read.getAction(p.id, user.uid, 'bookmarks')
-              );
+          if (posts) {
+            const actions: any[] = [];
+            posts.map((p: Post) => {
+              if (p.id && user.uid) {
+                actions.push(
+                  this.read.getAction(p.id, user.uid, 'hearts'),
+                  this.read.getAction(p.id, user.uid, 'bookmarks')
+                );
+              }
+            });
+            if (actions) {
+              return combineLatest(actions);
             }
-          });
-          return actions
-            ? combineLatest(actions)
-            : of(null);
+          }
         }
         return of(null);
       }),
       map((s: any[] | null) => {
         if (s) {
+          this.loading = false;
           posts.map((p: Post) => {
             p.liked = s.shift();
             p.saved = s.shift();
             return p;
           });
+          return posts;
         }
-        return posts;
+        return null;
       })
     );
   }
@@ -184,7 +197,9 @@ export class PostListComponent implements OnDestroy {
   }
 
   toggleAction(id: string, action: string, toggle?: boolean) {
-    if (this.user$ && toggle !== undefined) {
+
+    // toggle save and like
+    if (this.user$ && this.user$.uid && toggle !== undefined) {
       toggle
         ? this.read.unActionPost(id, this.user$.uid, action)
         : this.read.actionPost(id, this.user$.uid, action);

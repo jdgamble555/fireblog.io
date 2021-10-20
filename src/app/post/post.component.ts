@@ -1,8 +1,8 @@
 import { Component, OnDestroy } from '@angular/core';
-import { User } from '@angular/fire/auth';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
+import { User } from '../auth/user.model';
 import { NavService } from '../nav/nav.service';
 import { AuthService } from '../platform/mock/auth.service';
 import { ReadService } from '../platform/mock/read.service';
@@ -25,7 +25,6 @@ export class PostComponent implements OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     public read: ReadService,
-    private auth: AuthService,
     private seo: SeoService,
     public ns: NavService,
   ) {
@@ -66,11 +65,11 @@ export class PostComponent implements OnDestroy {
             this.router.navigate(['/home']);
           }
           post = r;
-          return this.auth.user$;
+          return this.read.userDoc;
         }),
         switchMap((user: User | null) => {
           // get user and heart
-          if (user) {
+          if (user && user.uid) {
             this.user$ = user;
             return combineLatest([
               this.read.getAction(id, user.uid, 'hearts'),
@@ -104,7 +103,9 @@ export class PostComponent implements OnDestroy {
   }
 
   toggleAction(action: string, toggle?: boolean) {
-    if (this.user$ && toggle !== undefined) {
+
+    // toggle save and like
+    if (this.user$ && this.user$.uid && toggle !== undefined) {
       toggle
         ? this.read.unActionPost(this.postId, this.user$.uid, action)
         : this.read.actionPost(this.postId, this.user$.uid, action);
