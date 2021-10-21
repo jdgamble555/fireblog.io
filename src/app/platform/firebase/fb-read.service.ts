@@ -48,8 +48,7 @@ export class FbReadService {
         user
           ? this.getUser(user.uid)
           : of(null)
-      ),
-      shareReplay()
+      )
     );
   }
   /**

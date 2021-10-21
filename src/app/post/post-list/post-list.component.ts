@@ -2,7 +2,7 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, shareReplay, switchMap } from 'rxjs/operators';
 import { NavService } from 'src/app/nav/nav.service';
 import { AuthService } from 'src/app/platform/mock/auth.service';
 import { ReadService } from 'src/app/platform/mock/read.service';
@@ -58,6 +58,21 @@ export class PostListComponent implements OnInit, OnDestroy {
         this.read.getPosts({ uid, field: 'bookmarks' })
       );
       this.totalPosts = this.read.getUserTotal(uid, 'bookmarks');
+    } else if (this.type === 'liked') {
+      // posts by hearts
+      this.posts = this.postPipe(
+        this.read.getPosts({
+          sortField: 'createdAt',
+          field: 'hearts'
+        })
+      );
+      this.totalPosts = this.read.getTotal('hearts');
+    } else if (this.type === 'updated') {
+      // posts by updatedAt
+      this.posts = this.postPipe(
+        this.read.getPosts({ sortField: 'updatedAt' })
+      );
+      this.totalPosts = this.read.getTotal('posts');
     } else if (tag) {
       // meta
       const uTag = tag.charAt(0).toUpperCase() + tag.slice(1);
@@ -79,23 +94,6 @@ export class PostListComponent implements OnInit, OnDestroy {
         this.read.getPosts({ uid })
       );
       this.totalPosts = this.read.getUserTotal(uid, 'posts');
-    } else if (this.type === 'liked') {
-      console.log('liked')
-      // posts by hearts
-      this.posts = this.postPipe(
-        this.read.getPosts({
-          sortField: 'createdAt',
-          field: 'hearts'
-        })
-      );
-      this.totalPosts = this.read.getTotal('hearts');
-    } else if (this.type === 'updated') {
-      console.log('updated')
-      // posts by updatedAt
-      this.posts = this.postPipe(
-        this.read.getPosts({ sortField: 'updatedAt' })
-      );
-      this.totalPosts = this.read.getTotal('posts');
     } else {
       // meta
       this.seo.generateTags({ title: this.ns.title });
@@ -109,17 +107,14 @@ export class PostListComponent implements OnInit, OnDestroy {
   }
 
   postPipe(p: Observable<Post[] | null>): Observable<Post[] | null> {
-
     // pipe in likes and bookmarks
     let posts: Post[];
     return p.pipe(
       switchMap((r: Post[] | null) => {
         if (r && r.length > 0) {
           posts = r;
-          return this.read.userDoc
         }
-        this.loading = false;
-        return of(null);
+        return this.read.userDoc
       })
     ).pipe(
       switchMap((user: User | null) => {
@@ -127,11 +122,11 @@ export class PostListComponent implements OnInit, OnDestroy {
           this.user$ = user;
           if (posts) {
             const actions: any[] = [];
-            posts.map((p: Post) => {
-              if (p.id && user.uid) {
+            posts.map((_p: Post) => {
+              if (_p.id && user.uid) {
                 actions.push(
-                  this.read.getAction(p.id, user.uid, 'hearts'),
-                  this.read.getAction(p.id, user.uid, 'bookmarks')
+                  this.read.getAction(_p.id, user.uid, 'hearts'),
+                  this.read.getAction(_p.id, user.uid, 'bookmarks')
                 );
               }
             });
@@ -144,16 +139,16 @@ export class PostListComponent implements OnInit, OnDestroy {
       }),
       map((s: any[] | null) => {
         if (s) {
-          this.loading = false;
           posts.map((p: Post) => {
             p.liked = s.shift();
             p.saved = s.shift();
             return p;
           });
-          return posts;
         }
-        return null;
-      })
+        this.loading = false;
+        return posts;
+      }),
+      shareReplay()
     );
   }
 

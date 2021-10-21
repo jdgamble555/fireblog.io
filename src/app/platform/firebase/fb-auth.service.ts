@@ -16,7 +16,7 @@ import {
   updatePassword,
   reauthenticateWithPopup,
   User,
-  authState
+  user
 } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
 import { shareReplay, take } from 'rxjs/operators';
@@ -47,7 +47,7 @@ export class FbAuthService {
   };
 
   constructor(private auth: Auth, private db: DbService) {
-    this.user$ = authState(auth).pipe(shareReplay());
+    this.user$ = user(auth);
   }
 
   async getUser(): Promise<User | null> {
@@ -105,7 +105,7 @@ export class FbAuthService {
         photoURL: credential.user.photoURL,
         role: Role.Author
       };
-      await this.db.createUser(userData, credential.user.uid);
+      return await this.db.createUser(userData, credential.user.uid);
     }
   }
 

@@ -11,8 +11,10 @@
 </mat-card>
 <mat-tab-group class="ng-card" animationDuration="0ms" (selectedIndexChange)="tabChange($event)">
   <mat-tab label="New">
-    <br>
-    <app-post-list></app-post-list>
+    <ng-template matTabContent>
+      <br>
+      <app-post-list></app-post-list>
+    </ng-template>
   </mat-tab>
   <mat-tab label="Updated">
     <ng-template matTabContent>
