@@ -1,10 +1,9 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { map, shareReplay, switchMap } from 'rxjs/operators';
+import { map, switchMap, take } from 'rxjs/operators';
 import { NavService } from 'src/app/nav/nav.service';
-import { AuthService } from 'src/app/platform/mock/auth.service';
 import { ReadService } from 'src/app/platform/mock/read.service';
 import { SeoService } from 'src/app/shared/seo/seo.service';
 import { Post } from '../post.model';
@@ -18,30 +17,37 @@ import { User } from '../../auth/user.model';
 })
 export class PostListComponent implements OnInit, OnDestroy {
 
-  posts!: Observable<Post[] | null>;
-  user$!: User | null;
-  sub!: Subscription;
-  loading = true;
+  posts!: Post[] | null;
+  user!: User | null;
+  total!: string | null;
+  private _posts!: Observable<Post[]>;
+  private totalPosts!: Observable<string>;
+  private postsSub!: Subscription;
+  private userSub!: Subscription;
+  private paramSub!: Subscription;
+  private totalSub!: Subscription;
+
 
   @Input() type!: string;
-
-  totalPosts!: Observable<string>;
 
   tag!: string | null;
   uid!: string | null;
 
   constructor(
     public read: ReadService,
-    private auth: AuthService,
     private route: ActivatedRoute,
     private router: Router,
     public ns: NavService,
-    private seo: SeoService
-  ) { }
+    private seo: SeoService,
+    private cdr: ChangeDetectorRef
+  ) {
+    this.userSub = this.read.userDoc
+      .subscribe((user: User | null) => this.user = user);
+  }
 
   ngOnInit(): void {
     this.ns.openLeftNav();
-    this.sub = this.route.paramMap.subscribe(async (r: ParamMap) => this.loadPage(r));
+    this.paramSub = this.route.paramMap.subscribe(async (r: ParamMap) => this.loadPage(r));
   }
 
   async loadPage(r: ParamMap): Promise<void> {
@@ -53,25 +59,24 @@ export class PostListComponent implements OnInit, OnDestroy {
       this.ns.setBC('Bookmarks');
       this.seo.generateTags({ title: 'Bookmarks - ' + this.ns.title });
       // posts
-      const uid = (await this.auth.getUser())?.uid as string;
-      this.posts = this.postPipe(
-        this.read.getPosts({ uid, field: 'bookmarks' })
-      );
-      this.totalPosts = this.read.getUserTotal(uid, 'bookmarks');
+      // must wait for uid to load bookmarks
+      const _uid = (await this.read.userDoc.pipe(take(1)).toPromise())?.uid;
+      if (_uid) {
+        this._posts = this.read.getPosts({ uid: _uid, field: 'bookmarks' });
+        this.totalPosts = this.read.getUserTotal(_uid, 'bookmarks');
+      } else {
+        this.router.navigate(['login']);
+      }
     } else if (this.type === 'liked') {
       // posts by hearts
-      this.posts = this.postPipe(
-        this.read.getPosts({
-          sortField: 'createdAt',
-          field: 'hearts'
-        })
-      );
+      this._posts = this.read.getPosts({
+        sortField: 'createdAt',
+        field: 'hearts'
+      });
       this.totalPosts = this.read.getTotal('hearts');
     } else if (this.type === 'updated') {
       // posts by updatedAt
-      this.posts = this.postPipe(
-        this.read.getPosts({ sortField: 'updatedAt' })
-      );
+      this._posts = this.read.getPosts({ sortField: 'updatedAt' });
       this.totalPosts = this.read.getTotal('posts');
     } else if (tag) {
       // meta
@@ -81,45 +86,57 @@ export class PostListComponent implements OnInit, OnDestroy {
         title: uTag + ' - ' + this.ns.title
       });
       // posts by tag list
-      this.posts = this.postPipe(
-        this.read.getPosts({ tag })
-      );
+      this._posts = this.read.getPosts({ tag });
       this.totalPosts = this.read.getTagTotal(tag);
     } else if (uid) {
       // meta
       this.ns.setBC('User');
       this.seo.generateTags({ title: 'User - ' + this.ns.title });
       // posts by user list
-      this.posts = this.postPipe(
-        this.read.getPosts({ uid })
-      );
+      this._posts = this.read.getPosts({ uid });
       this.totalPosts = this.read.getUserTotal(uid, 'posts');
     } else {
       // meta
       this.seo.generateTags({ title: this.ns.title });
       this.ns.resetBC();
       // all posts
-      this.posts = this.postPipe(
-        this.read.getPosts()
-      );
+      this._posts = this.read.getPosts();
       this.totalPosts = this.read.getTotal('posts');
     }
+    this.totalSub = this.totalPosts
+      .subscribe((total: string) =>
+        this.total = total == '0'
+          ? 'none'
+          : total
+      );
+    this.createPost();
+  }
+
+  createPost() {
+    // create post subscription with change detection
+    if (this.postsSub) {
+      this.postsSub.unsubscribe();
+    }
+    this.postsSub = this.postPipe(this._posts)
+      .subscribe((p: Post[] | null) => {
+        this.posts = p;
+        this.cdr.detectChanges();
+      });
   }
 
   postPipe(p: Observable<Post[] | null>): Observable<Post[] | null> {
     // pipe in likes and bookmarks
-    let posts: Post[];
+    let posts: Post[] = [];
     return p.pipe(
       switchMap((r: Post[] | null) => {
+        if (posts) {
+          posts = [];
+        }
         if (r && r.length > 0) {
           posts = r;
         }
-        return this.read.userDoc
-      })
-    ).pipe(
-      switchMap((user: User | null) => {
+        const user = this.user;
         if (user) {
-          this.user$ = user;
           if (posts) {
             const actions: any[] = [];
             posts.map((_p: Post) => {
@@ -130,7 +147,7 @@ export class PostListComponent implements OnInit, OnDestroy {
                 );
               }
             });
-            if (actions) {
+            if (actions.length > 0) {
               return combineLatest(actions);
             }
           }
@@ -138,17 +155,15 @@ export class PostListComponent implements OnInit, OnDestroy {
         return of(null);
       }),
       map((s: any[] | null) => {
-        if (s) {
+        if (s && s.length > 0) {
           posts.map((p: Post) => {
             p.liked = s.shift();
             p.saved = s.shift();
             return p;
           });
         }
-        this.loading = false;
         return posts;
-      }),
-      shareReplay()
+      })
     );
   }
 
@@ -163,47 +178,43 @@ export class PostListComponent implements OnInit, OnDestroy {
     // which route
     if (this.router.url === '/bookmarks') {
       const uid = this.uid as string;
-      this.posts = this.postPipe(
-        this.read.getPosts({
-          uid,
-          field: 'bookmarks',
-          ...paging
-        })
-      );
+      this._posts = this.read.getPosts({
+        uid,
+        field: 'bookmarks',
+        ...paging
+      });
     } else if (this.tag) {
-      this.posts = this.postPipe(
-        this.read.getPosts({
-          tag: this.tag,
-          ...paging
-        })
-      );
+      this._posts = this.read.getPosts({
+        tag: this.tag,
+        ...paging
+      });
     } else if (this.uid) {
-      this.posts = this.postPipe(
-        this.read.getPosts({
-          uid: this.uid,
-          ...paging
-        })
-      );
+      this._posts = this.read.getPosts({
+        uid: this.uid,
+        ...paging
+      });
     } else {
-      this.posts = this.postPipe(
-        this.read.getPosts(paging)
-      );
+      this._posts = this.read.getPosts(paging);
     }
+    this.createPost();
   }
 
-  toggleAction(id: string, action: string, toggle?: boolean) {
-
+  async toggleAction(id: string, action: string, toggle?: boolean) {
     // toggle save and like
-    if (this.user$ && this.user$.uid && toggle !== undefined) {
+    if (this.user && this.user.uid && toggle !== undefined) {
       toggle
-        ? this.read.unActionPost(id, this.user$.uid, action)
-        : this.read.actionPost(id, this.user$.uid, action);
+        ? await this.read.unActionPost(id, this.user.uid, action)
+        : await this.read.actionPost(id, this.user.uid, action);
     } else {
       this.router.navigate(['login']);
     }
   }
 
   ngOnDestroy(): void {
-    this.sub.unsubscribe();
+    // don't use template async for change detection after login
+    this.paramSub.unsubscribe();
+    this.userSub.unsubscribe();
+    this.postsSub.unsubscribe();
+    this.totalSub.unsubscribe();
   }
 }

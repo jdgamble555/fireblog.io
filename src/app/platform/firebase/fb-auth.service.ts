@@ -19,7 +19,7 @@ import {
   user
 } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
-import { shareReplay, take } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { Role } from 'src/app/auth/user.model';
 import { DbService } from '../mock/db.service';
 
