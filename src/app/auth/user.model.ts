@@ -12,4 +12,5 @@ export interface User {
   photoURL?: string | null;
   role?: Role;
   uid?: string;
+  username?: string;
 };

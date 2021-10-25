@@ -1,16 +1,18 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormGroupDirective, AbstractControl } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, FormGroupDirective, AbstractControl, ValidatorFn } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { NavService } from 'src/app/nav/nav.service';
 import { DialogService } from 'src/app/shared/confirm-dialog/dialog.service';
 import { SnackbarService } from 'src/app/shared/snack-bar/snack-bar.service';
-import { matchValidator } from 'src/app/shared/form-validators';
+import { matchValidator, MyErrorStateMatcher } from 'src/app/shared/form-validators';
 import { ReLoginComponent } from 'src/app/auth/auth-settings/re-login/re-login.component';
-import { take } from 'rxjs/operators';
+import { debounceTime, map, take } from 'rxjs/operators';
 import { SeoService } from 'src/app/shared/seo/seo.service';
 import { ImageUploadService } from 'src/app/platform/mock/image-upload.service';
 import { AuthService } from 'src/app/platform/mock/auth.service';
+import { ReadService } from 'src/app/platform/mock/read.service';
+import { DbService } from 'src/app/platform/mock/db.service';
 
 @Component({
   selector: 'app-auth-settings',
@@ -21,12 +23,18 @@ export class AuthSettingsComponent implements OnInit {
 
   @ViewChild(FormGroupDirective) private passFormDirective!: FormGroupDirective;
 
+  matcher = new MyErrorStateMatcher();
+
   uploadPercent: Observable<number> | any = '';
   isHovering = false;
   hasPassword = false;
 
   passhide = true;
   confirmhide = true;
+
+  currentUsername!: string;
+  currentEmail!: string;
+  currentDisplayName!: string;
 
   passSub!: Subscription;
 
@@ -54,6 +62,12 @@ export class AuthSettingsComponent implements OnInit {
     },
     displayName: {
       required: 'Name is required.'
+    },
+    username: {
+      required: 'A valid username is required.',
+      minlength: 'Username must be at least 3 characters long.',
+      maxlength: 'Username cannot be more than 25 characters long.',
+      unavailable: 'That username is taken.'
     }
   };
 
@@ -67,7 +81,9 @@ export class AuthSettingsComponent implements OnInit {
     private d: MatDialog,
     private nav: NavService,
     public is: ImageUploadService,
-    private seo: SeoService
+    private seo: SeoService,
+    private read: ReadService,
+    private db: DbService
   ) {
     this.nav.closeLeftNav();
     this.seo.generateTags({ title: 'Settings - ' + this.nav.title });
@@ -80,12 +96,26 @@ export class AuthSettingsComponent implements OnInit {
     this.buildAccountForm();
 
     // get user info
-    const user = await this.auth.user$.pipe(take(1)).toPromise();
+    this.read.userDoc.pipe(take(1)).toPromise()
+      .then((user) => {
+        const username = user?.username;
+        const displayName = user?.displayName;
+        const email = user?.email;
+        if (username) {
+          this.currentUsername = username;
+          this.getField('username').setValue(username);
+        }
+        if (displayName) {
+          this.currentDisplayName = displayName;
+          this.getField('displayName').setValue(user!.displayName);
+        }
+        if (email) {
+          this.currentEmail = email;
+          this.getField('email').setValue(user!.email);
+        }
+      });
     this.providers = await this.auth.getProviders() as string[];
 
-    // patch values
-    this.getField('displayName').setValue(user!.displayName);
-    this.getField('email').setValue(user!.email);
   }
 
   isProvider(p: string) {
@@ -125,7 +155,12 @@ export class AuthSettingsComponent implements OnInit {
       ]],
       email: ['', [Validators.required, Validators.email]],
       displayName: ['', [Validators.required]],
-      photoURL: []
+      photoURL: [],
+      username: ['', [
+        Validators.required,
+        Validators.minLength(3),
+        Validators.maxLength(25),
+      ], this.isAvailable()]
     });
   }
 
@@ -136,20 +171,36 @@ export class AuthSettingsComponent implements OnInit {
 
     // update displayName
     try {
+      const displayName = this.getField('displayName').value;
       const r = await this.auth.updateProfile({
-        displayName: this.accountForm.value.displayName
+        displayName
       });
+      this.currentDisplayName = displayName;
       this.sb.showMsg(r.message);
     } catch (e: any) {
       this.sb.showError(e);
     }
   }
 
+  async updateUsername() {
+
+    const username = this.getField('username').value;
+
+    // update username
+    const r = await this.auth.updateUsername(username, this.currentUsername);
+    if (r.message) {
+      this.currentUsername = username;
+      this.sb.showMsg(r.message);
+    }
+  }
+
   async updateEmail() {
 
     // update email
+    const email = this.getField('email').value;
     try {
-      const r = await this.auth.updateEmail(this.accountForm.value.email);
+      const r = await this.auth.updateEmail(email);
+      this.currentEmail = email;
       this.sb.showMsg(r.message);
     } catch (e: any) {
       if (e.code === 'auth/requires-recent-login') {
@@ -190,6 +241,24 @@ export class AuthSettingsComponent implements OnInit {
       }
     }
   }
+
+  isAvailable(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      const field = control.value;
+      if (field === this.currentUsername) {
+        return of(null);
+      }
+      return this.db.validUsername(field).pipe(
+        debounceTime(500),
+        take(1),
+        map((f: any) => f
+          ? { 'unavailable': true }
+          : null
+        )
+      );
+    }
+  }
+
   /**
    * Toggle's a user's provider
    * @param e element reference
@@ -320,5 +389,10 @@ export class AuthSettingsComponent implements OnInit {
       // upload new image and save it to photoURL in user db
       await this.auth.updateProfile({ photoURL: imageURL });
     }
+  }
+
+  logout() {
+    this.auth.logout();
+    this.nav.home();
   }
 }

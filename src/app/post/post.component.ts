@@ -4,7 +4,6 @@ import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { User } from '../auth/user.model';
 import { NavService } from '../nav/nav.service';
-import { AuthService } from '../platform/mock/auth.service';
 import { ReadService } from '../platform/mock/read.service';
 import { SeoService } from '../shared/seo/seo.service';
 import { Post } from './post.model';

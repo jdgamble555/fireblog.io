@@ -18,7 +18,7 @@ import {
   docSnapshots
 } from '@angular/fire/firestore';
 import { Observable, of } from 'rxjs';
-import { debounceTime, map, shareReplay, switchMap, take } from 'rxjs/operators';
+import { debounceTime, map, switchMap, take } from 'rxjs/operators';
 import { User } from 'src/app/auth/user.model';
 import { Post, Tag } from 'src/app/post/post.model';
 import { AuthService } from '../mock/auth.service';
@@ -48,8 +48,7 @@ export class FbReadService {
         user
           ? this.getUser(user.uid)
           : of(null)
-      ),
-      shareReplay(1)
+      )
     );
   }
   /**
@@ -102,6 +101,7 @@ export class FbReadService {
       { idField: 'uid' }
     );
   }
+
   /**
    * Return total number of docs by a user
    * @param uid - user id

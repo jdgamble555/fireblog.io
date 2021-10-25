@@ -3,13 +3,17 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import {
   FormGroup,
   FormBuilder,
-  Validators
+  Validators,
+  AbstractControl,
+  ValidatorFn
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { matchValidator } from 'src/app/shared/form-validators';
+import { of, Subscription } from 'rxjs';
+import { debounceTime, map, take } from 'rxjs/operators';
+import { matchValidator, MyErrorStateMatcher } from 'src/app/shared/form-validators';
 import { NavService } from '../nav/nav.service';
 import { AuthService } from '../platform/mock/auth.service';
+import { DbService } from '../platform/mock/db.service';
 import { SeoService } from '../shared/seo/seo.service';
 import { SnackbarService } from '../shared/snack-bar/snack-bar.service';
 
@@ -20,6 +24,8 @@ import { SnackbarService } from '../shared/snack-bar/snack-bar.service';
   styleUrls: ['./auth.component.scss']
 })
 export class AuthComponent implements OnInit, OnDestroy {
+
+  matcher = new MyErrorStateMatcher();
 
   userForm!: FormGroup;
 
@@ -35,6 +41,7 @@ export class AuthComponent implements OnInit, OnDestroy {
   isRegister = false;
   isReset = false;
   isVerify = false;
+  isCreateUser = false;
 
   title!: string;
 
@@ -56,6 +63,12 @@ export class AuthComponent implements OnInit, OnDestroy {
     confirmPassword: {
       required: 'Confirm password is required.',
       matching: 'Passwords must match.'
+    },
+    username: {
+      required: 'A valid username is required.',
+      minlength: 'Username must be at least 3 characters long.',
+      maxlength: 'Username cannot be more than 25 characters long.',
+      unavailable: 'That username is taken.'
     }
   };
 
@@ -66,7 +79,8 @@ export class AuthComponent implements OnInit, OnDestroy {
     private router: Router,
     private nav: NavService,
     private seo: SeoService,
-    private sb: SnackbarService
+    private sb: SnackbarService,
+    private db: DbService
   ) {
 
     // get type from route
@@ -91,6 +105,9 @@ export class AuthComponent implements OnInit, OnDestroy {
     } else if (this.type === 'verify') {
       this.isVerify = true;
       this.title = 'Verify Email Address';
+    } else if (this.type === 'username') {
+      this.isCreateUser = true;
+      this.title = 'Create Username';
     }
 
     this.seo.generateTags({
@@ -110,12 +127,22 @@ export class AuthComponent implements OnInit, OnDestroy {
       Validators.required
     ]);
 
-    this.userForm = this.fb.group({
-      email: ['', [
-        Validators.required,
-        Validators.email
-      ]]
-    });
+    if (!this.isCreateUser && !this.isVerify) {
+      this.userForm = this.fb.group({
+        email: ['', [
+          Validators.required,
+          Validators.email
+        ]]
+      });
+    } else {
+      this.userForm = this.fb.group({
+        username: ['', [
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(25),
+        ], this.isAvailable('jdgamble555')]
+      });
+    }
 
     if (this.isLogin || this.isRegister) {
       this.userForm.addControl('password', passwordControl);
@@ -158,21 +185,27 @@ export class AuthComponent implements OnInit, OnDestroy {
         ).then(() => {
           this.router.navigate(['/settings']);
         });
-      }
-      if (this.isRegister) {
+      } else if (this.isRegister) {
         await this.auth.emailSignUp(
           this.getField('email')?.value,
           this.getField('password')?.value
         ).then(() => {
-          this.router.navigate(['/settings']);
+          this.router.navigate(['/username']);
         });;
-      }
-      if (this.isReset) {
+      } else if (this.isReset) {
         const r = await this.auth.resetPassword(
           this.getField('email')?.value
         );
         if (r.message) {
           this.sb.showMsg(r.message);
+        }
+      } else if (this.isCreateUser) {
+        const r = await this.auth.updateUsername(
+          this.getField('username')?.value
+        );
+        if (r.message) {
+          this.sb.showMsg(r.message);
+          this.router.navigate(['/settings']);
         }
       }
     } catch (e: any) {
@@ -183,14 +216,34 @@ export class AuthComponent implements OnInit, OnDestroy {
 
   googleLogin() {
     this.auth.oAuthLogin('google.com')
-      .then(() => {
-        this.router.navigate(['/settings']);
+      .then((isNew) => {
+        isNew
+          ? this.router.navigate(['/username'])
+          : this.router.navigate(['/settings']);
       });
   }
 
   sendEmail() {
     this.auth.sendVerificationEmail();
     this.sb.showMsg(this.messages.email_sent);
+  }
+
+  isAvailable(current?: string): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+
+      const field = control.value;
+      if (field === current) {
+        return of(null);
+      }
+      return this.db.validUsername(field).pipe(
+        debounceTime(500),
+        take(1),
+        map((f: any) => f
+          ? { 'unavailable': true }
+          : null
+        )
+      );
+    }
   }
 
   ngOnDestroy(): void {

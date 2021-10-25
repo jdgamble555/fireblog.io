@@ -6,6 +6,7 @@ import {
 
 import { take } from 'rxjs/operators';
 import { AuthService } from '../platform/mock/auth.service';
+import { DbService } from '../platform/mock/db.service';
 import { ReadService } from '../platform/mock/read.service';
 import { Role } from './user.model';
 
@@ -69,3 +70,27 @@ export class EmailGuard implements CanActivate {
   }
 }
 
+@Injectable({
+  providedIn: 'root'
+})
+export class UsernameGuard implements CanActivate {
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private db: DbService
+  ) { }
+  async canActivate(): Promise<boolean> {
+    // make sure logged in first...
+    const user = await this.auth.user$.pipe(take(1)).toPromise();
+    if (user) {
+      const hasUsername = await this.db.hasUsername(user?.uid).pipe(take(1)).toPromise();
+      if (!hasUsername) {
+        this.router.navigate(['/username']);
+      }
+      return hasUsername;
+    } else {
+      this.router.navigate(['/login']);
+      return false;
+    }
+  }
+}

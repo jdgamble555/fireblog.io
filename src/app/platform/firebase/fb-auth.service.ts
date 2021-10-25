@@ -38,7 +38,8 @@ export class FbAuthService {
     passUpdated: 'Your Password has been updated.',
     profileUpdated: 'Your Profile has been updated.',
     providerRemoved: '{0} has been removed from the account.',
-    resetPassword: 'Your password reset link has been sent.'
+    resetPassword: 'Your password reset link has been sent.',
+    usernameUpdated: 'Your username has been updated!'
   };
 
   private errors = {
@@ -89,7 +90,7 @@ export class FbAuthService {
     return { message: this.messages.resetPassword };
   }
 
-  async oAuthLogin(p: string): Promise<void> {
+  async oAuthLogin(p: string): Promise<boolean> {
 
     // get provider, sign in
     const provider = new OAuthProvider(p);
@@ -105,8 +106,10 @@ export class FbAuthService {
         photoURL: credential.user.photoURL,
         role: Role.Author
       };
-      return await this.db.createUser(userData, credential.user.uid);
+      await this.db.createUser(userData, credential.user.uid);
+      return true;
     }
+    return false;
   }
 
   async oAuthReLogin(p: string): Promise<any> {
@@ -171,6 +174,20 @@ export class FbAuthService {
   //
   // Profile
   //
+
+  async updateUsername(username: string, currentUsername?: string): Promise<any> {
+    // update in firebase authentication
+    const user = await this.getUser();
+
+    if (user) {
+      try {
+        await this.db.updateUsername(username, user.uid, currentUsername);
+      } catch (e: any) {
+        console.error(e);
+      }
+      return { message: this.messages.usernameUpdated };
+    }
+  }
 
   async updateEmail(email: string): Promise<any> {
 

@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthComponent } from './auth/auth.component';
-import { LoginGuard, EmailGuard, NotLoginGuard } from './auth/auth.guard';
+import { LoginGuard, EmailGuard, NotLoginGuard, UsernameGuard } from './auth/auth.guard';
 import { HomeComponent } from './home/home.component';
 import { PostListComponent } from './post/post-list/post-list.component';
 import { PostComponent } from './post/post.component';
@@ -14,6 +14,7 @@ const routes: Routes = [
   { path: 'register', component: AuthComponent, canActivate: [NotLoginGuard] },
   { path: 'reset', component: AuthComponent, canActivate: [NotLoginGuard] },
   { path: 'verify', component: AuthComponent, canActivate: [LoginGuard] },
+  { path: 'username', component: AuthComponent, canActivate: [LoginGuard] },
 
   // backwards compatible with old app, will be removed later
   { path: 'blog/post/:slug', component: PostComponent },
@@ -26,16 +27,17 @@ const routes: Routes = [
   { path: 'bookmarks', component: PostListComponent, canActivate: [LoginGuard] },
 
   // logged in
-  { path: 'new', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [EmailGuard, LoginGuard] },
-  { path: 'edit/:id', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [EmailGuard, LoginGuard] },
+  { path: 'new', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [EmailGuard, LoginGuard, UsernameGuard] },
+  { path: 'edit/:id', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [EmailGuard, LoginGuard, UsernameGuard] },
   { path: 'settings', loadChildren: () => import('./auth/auth-settings/auth-settings.module').then(m => m.AuthSettingsModule), canActivate: [LoginGuard] },
   { path: '**', component: HomeComponent }
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes, {
+    scrollPositionRestoration: 'enabled',
     initialNavigation: 'enabled'
-})],
+  })],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

@@ -1,10 +1,11 @@
 <div class="ng-login-container">
-  <mat-card class="ng-card">
+  <mat-card>
     <mat-card-header>
       <mat-card-title>
         <ng-container *ngIf="isRegister">Register</ng-container>
         <ng-container *ngIf="isLogin">Login</ng-container>
         <ng-container *ngIf="isReset">Reset Password</ng-container>
+        <ng-container *ngIf="isCreateUser">Create Username</ng-container>
         <ng-container *ngIf="isVerify">
           <mat-icon class="ng-icon-text">warning</mat-icon>Email not verified
         </ng-container>
@@ -21,7 +22,8 @@
       </ng-container>
 
       <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
-        <mat-form-field [color]="getField('email')?.valid && 'accent'" appearance="outline" *ngIf="!isVerify">
+        <mat-form-field [color]="getField('email')?.valid && 'accent'" appearance="outline"
+          *ngIf="!isVerify && !isCreateUser">
           <mat-icon matPrefix color="primary" class="ng-form-icon">email</mat-icon>
           <input matInput formControlName="email" type="email" placeholder="Email" autocomplete="off" />
           <mat-error *ngIf="getField('email')?.invalid">
@@ -29,7 +31,17 @@
           </mat-error>
         </mat-form-field>
 
-        <mat-form-field [color]="getField('email')?.valid && 'accent'" *ngIf="!isReset && !isVerify"
+        <mat-form-field [color]="getField('username')?.valid && 'accent'" appearance="outline" *ngIf="isCreateUser">
+          <mat-icon matPrefix color="primary" class="ng-form-icon">person</mat-icon>
+          <input matInput formControlName="username" type="text" placeholder="Username" autocomplete="off"
+            [errorStateMatcher]="matcher" />
+          <mat-error *ngIf="getField('username')?.invalid">
+            {{ getError('username') }}
+          </mat-error>
+          <mat-hint *ngIf="getField('username')?.valid">{{ userForm.value.username }} is available!</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field [color]="getField('email')?.valid && 'accent'" *ngIf="!isReset && !isVerify && !isCreateUser"
           appearance="outline">
           <mat-icon matPrefix color="primary" class="ng-form-icon">lock</mat-icon>
           <mat-icon matSuffix color="primary" (click)="passhide = !passhide">{{ passhide ? 'visibility_off' :
@@ -56,12 +68,13 @@
 
         <button mat-raised-button color="primary" type="submit" [disabled]="userForm.invalid || loading">
           <ng-container *ngIf="isReset">Send Reset Email</ng-container>
+          <ng-container *ngIf="isCreateUser">Create</ng-container>
           <ng-container *ngIf="isLogin">Login</ng-container>
           <ng-container *ngIf="isRegister">Register</ng-container>
         </button>
       </form>
     </mat-card-content>
-    <mat-card-footer class="ng-card-footer" *ngIf="!isVerify">
+    <mat-card-footer class="ng-card-footer" *ngIf="!isVerify && !isCreateUser">
       <button mat-button color="primary" *ngIf="isLogin" routerLink="/reset">
         Forgot password?
       </button>

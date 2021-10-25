@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
@@ -8,6 +8,7 @@ import { ReadService } from 'src/app/platform/mock/read.service';
 import { SeoService } from 'src/app/shared/seo/seo.service';
 import { Post } from '../post.model';
 import { User } from '../../auth/user.model';
+import { DOCUMENT } from '@angular/common';
 
 
 @Component({
@@ -39,7 +40,8 @@ export class PostListComponent implements OnInit, OnDestroy {
     private router: Router,
     public ns: NavService,
     private seo: SeoService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    @Inject(DOCUMENT) private doc: Document
   ) {
     this.userSub = this.read.userDoc
       .subscribe((user: User | null) => this.user = user);
@@ -105,7 +107,7 @@ export class PostListComponent implements OnInit, OnDestroy {
     }
     this.totalSub = this.totalPosts
       .subscribe((total: string) =>
-        this.total = total == '0'
+        this.total = total == '0' || total === undefined
           ? 'none'
           : total
       );
@@ -197,6 +199,9 @@ export class PostListComponent implements OnInit, OnDestroy {
       this._posts = this.read.getPosts(paging);
     }
     this.createPost();
+
+    // scroll to top
+    this.doc.defaultView?.scrollTo(0, 0);
   }
 
   async toggleAction(id: string, action: string, toggle?: boolean) {

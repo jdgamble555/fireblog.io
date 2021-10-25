@@ -18,7 +18,7 @@ $custom-typography: mat.define-typography-config(
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
 $app-primary: mat.define-palette(mat.$blue-palette, 600);
-$app-accent: mat.define-palette(mat.$gray-palette, 300);
+$app-accent: mat.define-palette(mat.$gray-palette, 700);
 $app-background: #fff;
 
 // Create the theme object. A theme consists of configurations for individual
@@ -263,6 +263,7 @@ h3 {
 
 .ng-sidenav {
   text-align: left;
+  position: fixed !important;
 }
 
 .ng-transparent {
@@ -460,11 +461,15 @@ mat-form-field.mat-form-field {
   width: 2.5em;
   height: 2.5em;
   border-radius: 50%;
-  margin-bottom: 12px;
+  //margin-bottom: 12px;
 }
 
 .avatar-account {
   font-size: 30px;
+}
+
+.ng-home-icon {
+  color:rgba(0, 0, 0, 0.5)
 }
 
 .mat-drawer-side {

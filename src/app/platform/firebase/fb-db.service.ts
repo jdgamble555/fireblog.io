@@ -2,7 +2,6 @@ import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
 import {
   doc,
-  deleteDoc,
   Firestore,
   setDoc,
   arrayUnion,
@@ -18,7 +17,8 @@ import {
   increment
 } from '@angular/fire/firestore';
 import { MarkdownService } from 'ngx-markdown';
-import { switchMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { User } from 'src/app/auth/user.model';
 import { Post } from 'src/app/post/post.model';
 import {
@@ -32,7 +32,6 @@ import {
 })
 export class FbDbService {
 
-
   constructor(
     private afs: Firestore,
     private markdownService: MarkdownService,
@@ -42,8 +41,50 @@ export class FbDbService {
   // User
   //
 
+  getUsername(uid: string): Observable<boolean> {
+    return docData<User>(
+      doc(this.afs, 'users', uid)
+    ).pipe(
+      map((r: any) => r ? r.username : null)
+    );
+  }
+
+  hasUsername(uid: string): Observable<boolean> {
+    return docData<User>(
+      doc(this.afs, 'users', uid)
+    ).pipe(
+      map((r: any) => r && 'username' in r)
+    );
+  }
+
+  validUsername(name: string) {
+    return docSnapshots(
+      doc(this.afs, 'usernames', name)
+    ).pipe(
+      map((snap: DocumentSnapshot<any>) => snap.exists())
+    );
+  }
+
+  async updateUsername(username: string, uid: string, currentUsername?: string): Promise<any> {
+    const batch = writeBatch(this.afs);
+    if (currentUsername) {
+      batch.delete(
+        doc(this.afs, 'usernames', currentUsername)
+      );
+    }
+    batch.update(
+      doc(this.afs, 'users', uid),
+      { username }
+    );
+    batch.set(
+      doc(this.afs, 'usernames', username),
+      { uid }
+    );
+    return batch.commit();
+  }
+
   async createUser(user: User, id: string): Promise<void> {
-    await setDoc(
+    await setWithCounter(
       doc(this.afs, 'users', id),
       user
     );
@@ -58,7 +99,7 @@ export class FbDbService {
   }
 
   async deleteUser(id: string): Promise<void> {
-    await deleteDoc(
+    await deleteWithCounter(
       doc(this.afs, 'users', id)
     );
   }

@@ -1,6 +1,7 @@
-import { AbstractControl, ValidationErrors } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroupDirective, NgForm, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { ErrorStateMatcher } from '@angular/material/core';
 
-export function matchValidator(matchTo: string, reverse?: boolean): (control: AbstractControl) => ValidationErrors | null {
+export function matchValidator(matchTo: string, reverse?: boolean): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     if (control.parent && reverse) {
       const c = (control.parent?.controls as any)[matchTo] as AbstractControl;
@@ -15,4 +16,11 @@ export function matchValidator(matchTo: string, reverse?: boolean): (control: Ab
       ? null
       : { matching: true };
   };
+}
+
+export class MyErrorStateMatcher implements ErrorStateMatcher {
+  isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
+    const isSubmitted = form && form.submitted;
+    return !!(control && control.invalid && (control.dirty || control.touched || isSubmitted));
+  }
 }

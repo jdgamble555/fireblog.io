@@ -1,6 +1,6 @@
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { Injectable } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, ValidationErrors } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { MatChipInputEvent, MatChipList } from '@angular/material/chips';
 
 export interface Tag {
@@ -123,7 +123,7 @@ export class TagService {
    * @param control
    * @returns
    */
-  tagValidatorMin(min: number): (control: AbstractControl) => ValidationErrors | null {
+  tagValidatorMin(min: number): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       return (control.value && control.value.length > min)
         ? { min: true }
