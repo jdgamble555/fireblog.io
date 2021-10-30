@@ -58,8 +58,7 @@ export class PostListComponent implements OnInit, OnDestroy {
 
     if (this.router.url === '/bookmarks') {
       // meta
-      this.ns.setBC('Bookmarks');
-      this.seo.generateTags({ title: 'Bookmarks - ' + this.ns.title });
+      this.ns.addTitle('Bookmarks');
       // posts
       // must wait for uid to load bookmarks
       const _uid = (await this.read.userDoc.pipe(take(1)).toPromise())?.uid;
@@ -92,8 +91,7 @@ export class PostListComponent implements OnInit, OnDestroy {
       this.totalPosts = this.read.getTagTotal(tag);
     } else if (uid) {
       // meta
-      this.ns.setBC('User');
-      this.seo.generateTags({ title: 'User - ' + this.ns.title });
+      this.ns.addTitle('User');
       // posts by user list
       this._posts = this.read.getPosts({ uid });
       this.totalPosts = this.read.getUserTotal(uid, 'posts');

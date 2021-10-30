@@ -8,11 +8,11 @@ import { SnackbarService } from 'src/app/shared/snack-bar/snack-bar.service';
 import { matchValidator, MyErrorStateMatcher } from 'src/app/shared/form-validators';
 import { ReLoginComponent } from 'src/app/auth/auth-settings/re-login/re-login.component';
 import { debounceTime, map, take } from 'rxjs/operators';
-import { SeoService } from 'src/app/shared/seo/seo.service';
 import { ImageUploadService } from 'src/app/platform/mock/image-upload.service';
 import { AuthService } from 'src/app/platform/mock/auth.service';
 import { ReadService } from 'src/app/platform/mock/read.service';
 import { DbService } from 'src/app/platform/mock/db.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-auth-settings',
@@ -35,6 +35,7 @@ export class AuthSettingsComponent implements OnInit {
   currentUsername!: string;
   currentEmail!: string;
   currentDisplayName!: string;
+  isVerified!: boolean;
 
   passSub!: Subscription;
 
@@ -42,7 +43,8 @@ export class AuthSettingsComponent implements OnInit {
 
   messages: any = {
     deleteAccount: 'Are you sure you want to delete your account?',
-    selectImage: 'You must choose an image file type.'
+    selectImage: 'You must choose an image file type.',
+    email_sent: 'Your confirmation email has been sent!'
   }
 
   validationMessages: any = {
@@ -81,13 +83,12 @@ export class AuthSettingsComponent implements OnInit {
     private d: MatDialog,
     private nav: NavService,
     public is: ImageUploadService,
-    private seo: SeoService,
     private read: ReadService,
-    private db: DbService
+    private db: DbService,
+    private router: Router
   ) {
     this.nav.closeLeftNav();
-    this.seo.generateTags({ title: 'Settings - ' + this.nav.title });
-    this.nav.setBC('Settings');
+    this.nav.addTitle('Settings');
   }
 
   async ngOnInit() {
@@ -97,25 +98,43 @@ export class AuthSettingsComponent implements OnInit {
 
     // get user info
     this.read.userDoc.pipe(take(1)).toPromise()
-      .then((user) => {
-        const username = user?.username;
-        const displayName = user?.displayName;
-        const email = user?.email;
-        if (username) {
-          this.currentUsername = username;
-          this.getField('username').setValue(username);
-        }
-        if (displayName) {
-          this.currentDisplayName = displayName;
-          this.getField('displayName').setValue(user!.displayName);
-        }
-        if (email) {
-          this.currentEmail = email;
-          this.getField('email').setValue(user!.email);
+      .then(async user => {
+        if (user) {
+          const username = user?.username;
+          const displayName = user?.displayName;
+          const email = user?.email;
+          if (username) {
+            this.currentUsername = username;
+            this.getField('username').setValue(username);
+          }
+          if (displayName) {
+            this.currentDisplayName = displayName;
+            this.getField('displayName').setValue(user!.displayName);
+          }
+          if (email) {
+            this.currentEmail = email;
+            this.getField('email').setValue(user!.email);
+          }
+
+          // get email verified
+          this.auth.getUser().then(user => {
+            if (user) {
+              this.isVerified = user?.emailVerified;
+            }
+          });
+
+          // get providers
+          this.providers = await this.auth.getProviders() as string[];
+
+        } else {
+          this.router.navigate(['/login']);
         }
       });
-    this.providers = await this.auth.getProviders() as string[];
+  }
 
+  sendEmail() {
+    this.auth.sendVerificationEmail();
+    this.sb.showMsg(this.messages.email_sent);
   }
 
   isProvider(p: string) {
@@ -153,14 +172,20 @@ export class AuthSettingsComponent implements OnInit {
         Validators.required,
         matchValidator('password')
       ]],
-      email: ['', [Validators.required, Validators.email]],
-      displayName: ['', [Validators.required]],
+      email: ['', [
+        Validators.required,
+        Validators.email
+      ]],
+      displayName: ['', [
+        Validators.required
+      ]],
       photoURL: [],
       username: ['', [
         Validators.required,
         Validators.minLength(3),
         Validators.maxLength(25),
-      ], this.isAvailable()]
+      ], this.isAvailable()
+      ]
     });
   }
 
@@ -389,6 +414,10 @@ export class AuthSettingsComponent implements OnInit {
       // upload new image and save it to photoURL in user db
       await this.auth.updateProfile({ photoURL: imageURL });
     }
+  }
+
+  onOpen() {
+    this.accountForm.markAsUntouched();
   }
 
   logout() {

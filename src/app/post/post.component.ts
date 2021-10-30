@@ -90,13 +90,12 @@ export class PostComponent implements OnDestroy {
 
   meta(r: Post) {
     // add bread crumbs
-    this.ns.setBC(r.title as string);
+    this.ns.addTitle(r.title as string);
     // generate seo tags
     this.seo.generateTags({
       domain: this.ns.title,
       image: r.image || undefined,
       description: r.content?.substring(0, 125).replace(/(\r\n|\n|\r)/gm, ""),
-      title: r.title + ' - ' + this.ns.title,
       user: this.ns.author
     });
   }

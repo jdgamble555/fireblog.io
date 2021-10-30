@@ -14,7 +14,6 @@ import { matchValidator, MyErrorStateMatcher } from 'src/app/shared/form-validat
 import { NavService } from '../nav/nav.service';
 import { AuthService } from '../platform/mock/auth.service';
 import { DbService } from '../platform/mock/db.service';
-import { SeoService } from '../shared/seo/seo.service';
 import { SnackbarService } from '../shared/snack-bar/snack-bar.service';
 
 
@@ -31,7 +30,7 @@ export class AuthComponent implements OnInit, OnDestroy {
 
   routeSub: Subscription;
 
-  type!: 'login' | 'register' | 'reset' | 'verify';
+  type!: 'login' | 'register' | 'reset' | 'verify' | 'passwordless' | 'username';
   loading = false;
 
   passhide = true;
@@ -42,6 +41,8 @@ export class AuthComponent implements OnInit, OnDestroy {
   isReset = false;
   isVerify = false;
   isCreateUser = false;
+  isPasswordless = false;
+  isReturnLogin = false;
 
   title!: string;
 
@@ -78,7 +79,6 @@ export class AuthComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private nav: NavService,
-    private seo: SeoService,
     private sb: SnackbarService,
     private db: DbService
   ) {
@@ -108,12 +108,21 @@ export class AuthComponent implements OnInit, OnDestroy {
     } else if (this.type === 'username') {
       this.isCreateUser = true;
       this.title = 'Create Username';
+    } else if (this.type === 'passwordless') {
+      this.isPasswordless = true;
+      this.title = 'Passwordless Login';
+    } else if (this.type === '_login') {
+      const email = this.auth.getSavedEmail();
+      if (email) {
+        const url = this.router.url;
+        this.auth.confirmSignIn(url, email)
+          .then(() => this.router.navigate(['/dashboard']));
+      }
+      this.isReturnLogin = true;
+      this.title = 'Passwordless Login';
     }
 
-    this.seo.generateTags({
-      title: this.title + ' - ' + this.nav.title
-    });
-    this.nav.setBC(this.title);
+    this.nav.addTitle(this.title);
 
     // init form controls
     const passwordControl = this.fb.control('', [
@@ -207,6 +216,20 @@ export class AuthComponent implements OnInit, OnDestroy {
           this.sb.showMsg(r.message);
           this.router.navigate(['/settings']);
         }
+      } else if (this.isPasswordless) {
+        const r = await this.auth.sendEmailLink(
+          this.getField('email')?.value
+        );
+        if (r.message) {
+          this.sb.showMsg(r.message);
+          this.router.navigate(['/login']);
+        }
+      } else if (this.isReturnLogin) {
+        const url = this.router.url;
+        this.auth.confirmSignIn(
+          url,
+          this.getField('email')?.value,
+        ).then(() => this.router.navigate(['/dashboard']));
       }
     } catch (e: any) {
       this.sb.showError(e);

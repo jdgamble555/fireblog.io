@@ -9,7 +9,11 @@ export class SeoService {
 
   private cachetitle = '!';
 
-  constructor(private title: Title, private meta: Meta, private router: Router) { }
+  constructor(
+    private title: Title,
+    private meta: Meta,
+    private router: Router
+  ) { }
 
   generateTags({
     title = '',

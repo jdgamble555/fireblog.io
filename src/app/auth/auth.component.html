@@ -6,6 +6,8 @@
         <ng-container *ngIf="isLogin">Login</ng-container>
         <ng-container *ngIf="isReset">Reset Password</ng-container>
         <ng-container *ngIf="isCreateUser">Create Username</ng-container>
+        <ng-container *ngIf="isPasswordless">Login with a Magic Link</ng-container>
+        <ng-container *ngIf="isReturnLogin">Confirm Your Email</ng-container>
         <ng-container *ngIf="isVerify">
           <mat-icon class="ng-icon-text">warning</mat-icon>Email not verified
         </ng-container>
@@ -41,7 +43,7 @@
           <mat-hint *ngIf="getField('username')?.valid">{{ userForm.value.username }} is available!</mat-hint>
         </mat-form-field>
 
-        <mat-form-field [color]="getField('email')?.valid && 'accent'" *ngIf="!isReset && !isVerify && !isCreateUser"
+        <mat-form-field [color]="getField('email')?.valid && 'accent'" *ngIf="isLogin || isRegister"
           appearance="outline">
           <mat-icon matPrefix color="primary" class="ng-form-icon">lock</mat-icon>
           <mat-icon matSuffix color="primary" (click)="passhide = !passhide">{{ passhide ? 'visibility_off' :
@@ -69,19 +71,20 @@
         <button mat-raised-button color="primary" type="submit" [disabled]="userForm.invalid || loading">
           <ng-container *ngIf="isReset">Send Reset Email</ng-container>
           <ng-container *ngIf="isCreateUser">Create</ng-container>
-          <ng-container *ngIf="isLogin">Login</ng-container>
+          <ng-container *ngIf="isLogin || isReturnLogin">Login</ng-container>
+          <ng-container *ngIf="isPasswordless">Send Link</ng-container>
           <ng-container *ngIf="isRegister">Register</ng-container>
         </button>
       </form>
     </mat-card-content>
-    <mat-card-footer class="ng-card-footer" *ngIf="!isVerify && !isCreateUser">
+    <mat-card-footer class="ng-card-footer" *ngIf="!isVerify && !isCreateUser && !isReturnLogin">
       <button mat-button color="primary" *ngIf="isLogin" routerLink="/reset">
         Forgot password?
       </button>
-      <button mat-button color="primary" *ngIf="isReset || isRegister" routerLink="/login">
-        Already registered?
+      <button mat-button color="primary" *ngIf="isReset || isRegister || isPasswordless" routerLink="/login">
+        {{ isPasswordless ? 'Login with Password' : 'Already registered' }}
       </button>
-      <button mat-button color="primary" *ngIf="isLogin" routerLink="/register">
+      <button mat-button color="primary" *ngIf="isLogin || isPasswordless" routerLink="/register">
         Register
       </button>
       <mat-divider></mat-divider>
@@ -92,6 +95,11 @@
       <div class="margin-spacer"></div>
       <button class="g-button provider-button-login" mat-button (click)="googleLogin()">
         Login with Google
+      </button>
+      <div class="margin-spacer"></div>
+      <button *ngIf="!isPasswordless" mat-raised-button color="primary" routerLink="/passwordless">
+        <mat-icon class="ng-button-icon" matSuffix>link</mat-icon>
+        Login with a Magic Link
       </button>
       <div class="margin-spacer"></div>
     </mat-card-footer>

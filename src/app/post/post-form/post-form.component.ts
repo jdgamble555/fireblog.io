@@ -125,10 +125,8 @@ export class PostFormComponent {
     // add title
     this.title = (this.isNewPage ? 'New' : 'Edit') + ' Post';
 
-    this.seo.generateTags({ title: this.title + ' - ' + this.ns.title });
-
     // nav bar
-    this.ns.setBC(this.title);
+    this.ns.addTitle(this.title);
     this.ns.closeLeftNav();
   }
 

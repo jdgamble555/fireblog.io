@@ -3,6 +3,7 @@ import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { Router } from '@angular/router';
+import { SeoService } from '../shared/seo/seo.service';
 
 interface Link {
   name: string;
@@ -34,15 +35,23 @@ export class NavService {
     @Inject(PLATFORM_ID) platformId: Object,
     @Inject(DOCUMENT) private document: Document,
     private router: Router,
-    private overlay: OverlayContainer
+    private overlay: OverlayContainer,
+    private seo: SeoService
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.doc = this.document;
     this.directories = [];
 
-    if (this.isBrowser && localStorage.getItem(this.storage + '-dark-mode')) {
+    if (this.isBrowser && this.doc.defaultView?.localStorage.getItem(this.storage + '-dark-mode')) {
       this.toggleTheme();
     }
+  }
+
+  // add title
+  addTitle(name: string) {
+    this.setBC(name);
+    const title = name + ' - ' + this.title;
+    this.seo.generateTags({ title });
   }
 
   // reset bread crumb
@@ -105,13 +114,13 @@ export class NavService {
       this.overlay.getContainerElement().classList.remove(darkClass);
       this.document.body.classList.remove(darkClass);
       if (this.isBrowser) {
-        localStorage.removeItem(this.storage + '-dark-mode');
+        this.doc.defaultView?.localStorage.removeItem(this.storage + '-dark-mode');
       }
     } else {
       this.overlay.getContainerElement().classList.add(darkClass);
       this.document.body.classList.add(darkClass);
       if (this.isBrowser) {
-        localStorage.setItem(this.storage + '-dark-mode', 'true');
+        this.doc.defaultView?.localStorage.setItem(this.storage + '-dark-mode', 'true');
       }
     }
     this.isDarkMode = !this.isDarkMode;

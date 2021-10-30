@@ -3,7 +3,7 @@
     <form [formGroup]="accountForm">
       <h1>Settings</h1>
       <mat-accordion>
-        <mat-expansion-panel>
+        <mat-expansion-panel (opened)="onOpen()">
           <mat-expansion-panel-header>
             <mat-panel-title>Profile</mat-panel-title>
             <mat-panel-description>Change Your Name and Picture</mat-panel-description>
@@ -43,7 +43,7 @@
           </button>
         </mat-expansion-panel>
 
-        <mat-expansion-panel>
+        <mat-expansion-panel (opened)="onOpen()">
           <mat-expansion-panel-header>
             <mat-panel-title>Username</mat-panel-title>
             <mat-panel-description>Change Your Username</mat-panel-description>
@@ -66,12 +66,24 @@
           </button>
         </mat-expansion-panel>
 
-
-        <mat-expansion-panel>
+        <mat-expansion-panel (opened)="onOpen()">
           <mat-expansion-panel-header>
             <mat-panel-title>Email</mat-panel-title>
             <mat-panel-description>Change Your Email</mat-panel-description>
           </mat-expansion-panel-header>
+          <mat-card class="ng-card mat-elevation-z0 ng-card-outline">
+            <mat-icon class="ng-icon-text {{ isVerified ? 'ng-green' : 'ng-warn' }}">
+              {{ isVerified ? 'verified_user' : 'error' }}
+            </mat-icon>
+            Your Email is {{ isVerified ? '' : 'NOT' }} Verified.
+            <ng-container *ngIf="!isVerified">
+              <div class="margin-spacer"></div>
+              <button mat-raised-button color="accent" (click)="sendEmail()">
+                Resend verfication email
+              </button>
+            </ng-container>
+          </mat-card>
+          <div class="margin-spacer"></div>
           <mat-form-field class="login-text" appearance="outline">
             <mat-icon color="primary" matPrefix class="ng-form-icon">email</mat-icon>
             <input matInput type="text" name="email" placeholder="Email" autocomplete="email" formControlName="email"
@@ -86,7 +98,8 @@
             Save
           </button>
         </mat-expansion-panel>
-        <mat-expansion-panel (opened)="this.accountForm.markAsUntouched()">
+
+        <mat-expansion-panel (opened)="onOpen()">
           <mat-expansion-panel-header>
             <mat-panel-title>Password</mat-panel-title>
             <mat-panel-description>{{ isProvider('password') ? 'Change' : 'Create'}} Your Password
@@ -118,7 +131,7 @@
             Save
           </button>
         </mat-expansion-panel>
-        <mat-expansion-panel>
+        <mat-expansion-panel (opened)="onOpen()">
           <mat-expansion-panel-header>
             <mat-panel-title>Links</mat-panel-title>
             <mat-panel-description>Change Your Linked Accounts</mat-panel-description>
@@ -134,7 +147,7 @@
             </div>
           </div>
         </mat-expansion-panel>
-        <mat-expansion-panel>
+        <mat-expansion-panel (opened)="onOpen()">
           <mat-expansion-panel-header>
             <mat-panel-title>Delete</mat-panel-title>
             <mat-panel-description>Delete Your Account</mat-panel-description>

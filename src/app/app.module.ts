@@ -18,6 +18,7 @@ import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 // have to use old version of Firebase Analytics
 import { AngularFireAnalyticsModule } from '@angular/fire/compat/analytics';
 import { AngularFireModule } from '@angular/fire/compat';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 
 @NgModule({
@@ -25,7 +26,8 @@ import { AngularFireModule } from '@angular/fire/compat';
     AppComponent,
     HomeComponent,
     PostComponent,
-    PostListComponent
+    PostListComponent,
+    DashboardComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'serverApp' }),

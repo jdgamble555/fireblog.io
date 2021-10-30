@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthComponent } from './auth/auth.component';
 import { LoginGuard, EmailGuard, NotLoginGuard, UsernameGuard } from './auth/auth.guard';
+import { DashboardComponent } from './dashboard/dashboard.component';
 import { HomeComponent } from './home/home.component';
 import { PostListComponent } from './post/post-list/post-list.component';
 import { PostComponent } from './post/post.component';
@@ -11,10 +12,13 @@ const routes: Routes = [
 
   // auth
   { path: 'login', component: AuthComponent, canActivate: [NotLoginGuard] },
+  { path: 'passwordless', component: AuthComponent, canActivate: [NotLoginGuard] },
+  { path: '_login', component: AuthComponent, canActivate: [NotLoginGuard] },
   { path: 'register', component: AuthComponent, canActivate: [NotLoginGuard] },
   { path: 'reset', component: AuthComponent, canActivate: [NotLoginGuard] },
   { path: 'verify', component: AuthComponent, canActivate: [LoginGuard] },
   { path: 'username', component: AuthComponent, canActivate: [LoginGuard] },
+  { path: 'dashboard', component: DashboardComponent, canActivate: [LoginGuard] },
 
   // backwards compatible with old app, will be removed later
   { path: 'blog/post/:slug', component: PostComponent },

@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable } from '@angular/core';
 import {
   Auth,
   signOut,
@@ -16,7 +17,10 @@ import {
   updatePassword,
   reauthenticateWithPopup,
   User,
-  user
+  user,
+  sendSignInLinkToEmail,
+  isSignInWithEmailLink,
+  signInWithEmailLink
 } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
@@ -39,7 +43,8 @@ export class FbAuthService {
     profileUpdated: 'Your Profile has been updated.',
     providerRemoved: '{0} has been removed from the account.',
     resetPassword: 'Your password reset link has been sent.',
-    usernameUpdated: 'Your username has been updated!'
+    usernameUpdated: 'Your username has been updated!',
+    sendEmailLink: 'Your email login link has been sent.'
   };
 
   private errors = {
@@ -47,7 +52,11 @@ export class FbAuthService {
     updateProfile: 'Your profile could not be updated.'
   };
 
-  constructor(private auth: Auth, private db: DbService) {
+  constructor(
+    private auth: Auth,
+    private db: DbService,
+    @Inject(DOCUMENT) private doc: Document
+  ) {
     this.user$ = user(auth);
   }
 
@@ -80,6 +89,45 @@ export class FbAuthService {
 
       // create user in db
       await this.db.createUser(userData, credential.user.uid);
+    }
+  }
+
+  async sendEmailLink(email: string): Promise<any> {
+    const actionCodeSettings = {
+      // Your redirect URL
+      url: this.doc.location.origin + '/_login',
+      handleCodeInApp: true,
+    };
+    try {
+      await sendSignInLinkToEmail(
+        this.auth,
+        email,
+        actionCodeSettings
+      );
+      this.doc.defaultView?.localStorage.setItem('emailForSignIn', email);
+    } catch (e: any) {
+      console.error(e);
+    }
+    return { message: this.messages.sendEmailLink };
+  }
+
+  getSavedEmail(): string | null | undefined {
+    return this.doc.defaultView?.localStorage.getItem('emailForSignIn');
+  }
+
+  async confirmSignIn(url: string, email: string) {
+    try {
+      if (isSignInWithEmailLink(this.auth, url)) {
+
+        // Signin user and remove the email localStorage
+        if (email) {
+          const r = await signInWithEmailLink(this.auth as any, email, url)
+          this.doc.defaultView?.localStorage.removeItem('emailForSignIn');
+          this.auth.updateCurrentUser(r.user);
+        }
+      }
+    } catch (e: any) {
+      console.error(e);
     }
   }
 
