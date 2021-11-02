@@ -182,7 +182,8 @@ export class FbReadService {
     uid?: string,
     field?: string,
     page?: number,
-    pageSize?: number
+    pageSize?: number,
+    drafts?: boolean
   }): Observable<Post[]> {
     opts = opts || {};
     opts.sortField = opts.sortField || 'createdAt';
@@ -236,7 +237,7 @@ export class FbReadService {
     return expandRefs<Post>(
       collectionData<Post>(
         query<Post>(
-          collection(this.afs, 'posts') as CollectionReference<Post>,
+          collection(this.afs, opts.drafts ? 'drafts' : 'posts') as CollectionReference<Post>,
           ...filters
         ), { idField: 'id' }
       ).pipe(

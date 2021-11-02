@@ -13,4 +13,8 @@ export interface User {
   role?: Role;
   uid?: string;
   username?: string;
+  heartsCount?: number;
+  draftsCount?: number;
+  postsCount?: number;
+  bookmarksCount?: number;
 };

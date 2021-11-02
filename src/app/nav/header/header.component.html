@@ -20,7 +20,7 @@
   </mat-toolbar-row>
   <mat-toolbar-row *ngIf="!isActiveSearch" class="flex-container">
     <button mat-button (click)='ns.home();'>
-      <mat-icon class="ng-button-icon ng-home-icon">dashboard</mat-icon>
+      <mat-icon class="ng-button-icon ng-home-icon ng-fire">whatshot</mat-icon>
       {{ ns.title }}
     </button>
     <span class="ng-spacer"></span>
@@ -40,6 +40,11 @@
         <button mat-menu-item routerLink="/bookmarks">
           <mat-icon class="ng-menu-icon">bookmarks</mat-icon>
           <span>Bookmarks</span>
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item routerLink="/dashboard">
+          <mat-icon class="ng-menu-icon">dashboard</mat-icon>
+          <span>Dashboard</span>
         </button>
         <mat-divider></mat-divider>
         <ng-container *ngIf="user.role == 'admin'">

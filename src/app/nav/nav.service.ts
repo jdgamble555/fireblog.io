@@ -3,6 +3,7 @@ import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { Router } from '@angular/router';
+import { ReadService } from '../platform/mock/read.service';
 import { SeoService } from '../shared/seo/seo.service';
 
 interface Link {
@@ -36,7 +37,8 @@ export class NavService {
     @Inject(DOCUMENT) private document: Document,
     private router: Router,
     private overlay: OverlayContainer,
-    private seo: SeoService
+    private seo: SeoService,
+    private read: ReadService
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.doc = this.document;

@@ -563,6 +563,12 @@ markdown a:hover {
   font-weight: bold;
 }
 
+.a-button {
+  background-color: rgb(162, 186, 189) !important;
+  color: white;
+  font-weight: bold;
+}
+
 /* Expansion Panel */
 
 .mat-expansion-panel-header-title,
@@ -713,4 +719,8 @@ mat-paginator .mat-form-field {
 
 .ng-green {
   color: green;
+}
+
+.ng-fire {
+  color: #F9A825;
 }

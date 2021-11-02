@@ -1,1 +1,27 @@
-<mat-card>Welcome {{ displayName }}</mat-card>
+<mat-card class="ng-card">
+  <h1>
+    <mat-icon color="primary" class="ng-icon-text">comment</mat-icon>Welcome {{ displayName }}!
+  </h1>
+</mat-card>
+<mat-tab-group class="ng-card" animationDuration="0ms" (selectedIndexChange)="tabChange($event)">
+  <mat-tab label="Bookmarks{{ bCount ? ' (' + bCount + ')' : '' }}">
+    <ng-template matTabContent>
+      <br>
+      <app-post-list type="bookmarks"></app-post-list>
+    </ng-template>
+  </mat-tab>
+  <ng-container *ngIf="user?.role == 'admin' || user?.role == 'editor'">
+    <mat-tab label="Posts{{ pCount ? ' (' + pCount + ')' : '' }}">
+      <ng-template matTabContent>
+        <br>
+        <app-post-list type="user"></app-post-list>
+      </ng-template>
+    </mat-tab>
+    <mat-tab label="Drafts{{ dCount ? ' (' + dCount + ')' : '' }}">
+      <ng-template matTabContent>
+        <br>
+        <app-post-list type="drafts"></app-post-list>
+      </ng-template>
+    </mat-tab>
+  </ng-container>
+</mat-tab-group>

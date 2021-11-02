@@ -1,37 +1,57 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { take } from 'rxjs/operators';
 import { User } from '../auth/user.model';
 import { NavService } from '../nav/nav.service';
-import { AuthService } from '../platform/mock/auth.service';
+import { ReadService } from '../platform/mock/read.service';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent {
 
   displayName!: string;
 
+  tabName = 'posts';
+
+  pCount: number | undefined = 0;
+  dCount: number | undefined = 0;
+  bCount: number | undefined = 0;
+
+  user!: User | null;
+
   constructor(
-    public auth: AuthService,
+    public read: ReadService,
     private router: Router,
     private ns: NavService
   ) {
-    this.auth.getUser().then((user: User | null) => {
-      if (user) {
-        if (user.displayName) {
-          this.displayName = user.displayName;
+    this.read.userDoc.pipe(take(1)).toPromise()
+      .then((user: User | null) => {
+        if (user) {
+          this.user = user;
+          this.pCount = user.postsCount;
+          this.bCount = user.bookmarksCount;
+          this.dCount = user.draftsCount;
+          if (user.displayName) {
+            this.displayName = user.displayName;
+          }
+        } else {
+          this.router.navigate(['/login']);
         }
-      } else {
-        this.router.navigate(['/login']);
-      }
-    });
+      });
     this.ns.closeLeftNav();
     this.ns.addTitle('Dashboard');
   }
 
-  ngOnInit(): void {
+  tabChange(index: number) {
+    if (index === 1) {
+      this.tabName = 'drafts';
+    } else if (index === 2) {
+      this.tabName = 'bookmarks';
+    } else {
+      this.tabName = 'posts';
+    }
   }
-
 }

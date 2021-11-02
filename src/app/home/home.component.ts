@@ -16,6 +16,8 @@ export class HomeComponent {
     private seo: SeoService
   ) {
 
+    this.ns.openLeftNav();
+    
     this.seo.generateTags({
       title: this.ns.title,
       description: 'A blog about Firebase and Firestore! Search, Indexing, Rules, and more!',

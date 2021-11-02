@@ -112,12 +112,11 @@ export class AuthComponent implements OnInit, OnDestroy {
       this.isPasswordless = true;
       this.title = 'Passwordless Login';
     } else if (this.type === '_login') {
-      const email = this.auth.getSavedEmail();
-      if (email) {
-        const url = this.router.url;
-        this.auth.confirmSignIn(url, email)
-          .then(() => this.router.navigate(['/dashboard']));
-      }
+      const url = this.router.url;
+      this.auth.confirmSignIn(url)
+        .then((r: boolean) => r
+          ? this.router.navigate(['/dashboard'])
+          : null);
       this.isReturnLogin = true;
       this.title = 'Passwordless Login';
     }
@@ -192,7 +191,7 @@ export class AuthComponent implements OnInit, OnDestroy {
           this.getField('email')?.value,
           this.getField('password')?.value
         ).then(() => {
-          this.router.navigate(['/settings']);
+          this.router.navigate(['/dashboard']);
         });
       } else if (this.isRegister) {
         await this.auth.emailSignUp(
@@ -214,7 +213,7 @@ export class AuthComponent implements OnInit, OnDestroy {
         );
         if (r.message) {
           this.sb.showMsg(r.message);
-          this.router.navigate(['/settings']);
+          this.router.navigate(['/dashboard']);
         }
       } else if (this.isPasswordless) {
         const r = await this.auth.sendEmailLink(
@@ -242,7 +241,16 @@ export class AuthComponent implements OnInit, OnDestroy {
       .then((isNew) => {
         isNew
           ? this.router.navigate(['/username'])
-          : this.router.navigate(['/settings']);
+          : this.router.navigate(['/dashboard']);
+      });
+  }
+
+  appleLogin() {
+    this.auth.oAuthLogin('apple.com')
+      .then((isNew) => {
+        isNew
+          ? this.router.navigate(['/username'])
+          : this.router.navigate(['/dashboard']);
       });
   }
 

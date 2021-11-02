@@ -111,11 +111,10 @@ export class FbAuthService {
     return { message: this.messages.sendEmailLink };
   }
 
-  getSavedEmail(): string | null | undefined {
-    return this.doc.defaultView?.localStorage.getItem('emailForSignIn');
-  }
-
-  async confirmSignIn(url: string, email: string) {
+  async confirmSignIn(url: string, email?: string): Promise<boolean> {
+    if (!email) {
+      email = this.doc.defaultView?.localStorage.getItem('emailForSignIn') || undefined;
+    }
     try {
       if (isSignInWithEmailLink(this.auth, url)) {
 
@@ -123,12 +122,14 @@ export class FbAuthService {
         if (email) {
           const r = await signInWithEmailLink(this.auth as any, email, url)
           this.doc.defaultView?.localStorage.removeItem('emailForSignIn');
-          this.auth.updateCurrentUser(r.user);
+          await this.auth.updateCurrentUser(r.user);
+          return true;
         }
       }
     } catch (e: any) {
       console.error(e);
     }
+    return false;
   }
 
   async resetPassword(email: string): Promise<any> {

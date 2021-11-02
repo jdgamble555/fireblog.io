@@ -48,7 +48,6 @@ export class PostListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.ns.openLeftNav();
     this.paramSub = this.route.paramMap.subscribe(async (r: ParamMap) => this.loadPage(r));
   }
 
@@ -56,9 +55,12 @@ export class PostListComponent implements OnInit, OnDestroy {
     const tag = this.tag = r.get('tag');
     const uid = this.uid = r.get('uid');
 
-    if (this.router.url === '/bookmarks') {
+    if (this.router.url === '/bookmarks' || this.type === 'bookmarks') {
       // meta
-      this.ns.addTitle('Bookmarks');
+      if (this.router.url === '/bookmarks') {
+        this.ns.openLeftNav();
+        this.ns.addTitle('Bookmarks');
+      }
       // posts
       // must wait for uid to load bookmarks
       const _uid = (await this.read.userDoc.pipe(take(1)).toPromise())?.uid;
@@ -89,8 +91,27 @@ export class PostListComponent implements OnInit, OnDestroy {
       // posts by tag list
       this._posts = this.read.getPosts({ tag });
       this.totalPosts = this.read.getTagTotal(tag);
+    } else if (this.type === 'user') {
+      const _uid = (await this.read.userDoc.pipe(take(1)).toPromise())?.uid;
+      if (_uid) {
+        // posts by user list
+        this._posts = this.read.getPosts({ uid: _uid });
+        this.totalPosts = this.read.getUserTotal(_uid, 'posts');
+      } else {
+        this.router.navigate(['login']);
+      }
+    } else if (this.type === 'drafts') {
+      const _uid = (await this.read.userDoc.pipe(take(1)).toPromise())?.uid;
+      if (_uid) {
+        // posts by user list
+        this._posts = this.read.getPosts({ uid: _uid, drafts: true });
+        this.totalPosts = this.read.getUserTotal(_uid, 'drafts');
+      } else {
+        this.router.navigate(['login']);
+      }
     } else if (uid) {
       // meta
+      this.ns.openLeftNav();
       this.ns.addTitle('User');
       // posts by user list
       this._posts = this.read.getPosts({ uid });
