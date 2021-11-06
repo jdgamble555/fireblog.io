@@ -63,7 +63,7 @@ export class PostListComponent implements OnInit, OnDestroy {
       }
       // posts
       // must wait for uid to load bookmarks
-      const _uid = (await this.read.userDoc.pipe(take(1)).toPromise())?.uid;
+      const _uid = await this.getUID();
       if (_uid) {
         this._posts = this.read.getPosts({ uid: _uid, field: 'bookmarks' });
         this.totalPosts = this.read.getUserTotal(_uid, 'bookmarks');
@@ -92,7 +92,7 @@ export class PostListComponent implements OnInit, OnDestroy {
       this._posts = this.read.getPosts({ tag });
       this.totalPosts = this.read.getTagTotal(tag);
     } else if (this.type === 'user') {
-      const _uid = (await this.read.userDoc.pipe(take(1)).toPromise())?.uid;
+      const _uid = await this.getUID();
       if (_uid) {
         // posts by user list
         this._posts = this.read.getPosts({ uid: _uid });
@@ -101,7 +101,7 @@ export class PostListComponent implements OnInit, OnDestroy {
         this.router.navigate(['login']);
       }
     } else if (this.type === 'drafts') {
-      const _uid = (await this.read.userDoc.pipe(take(1)).toPromise())?.uid;
+      const _uid = await this.getUID();
       if (_uid) {
         // posts by user list
         this._posts = this.read.getPosts({ uid: _uid, drafts: true });
@@ -124,13 +124,19 @@ export class PostListComponent implements OnInit, OnDestroy {
       this._posts = this.read.getPosts();
       this.totalPosts = this.read.getTotal('posts');
     }
-    this.totalSub = this.totalPosts
-      .subscribe((total: string) =>
-        this.total = total == '0' || total === undefined
-          ? 'none'
-          : total
-      );
-    this.createPost();
+    if (this.totalPosts) {
+      this.totalSub = this.totalPosts
+        .subscribe((total: string) =>
+          this.total = total == '0' || total === undefined
+            ? 'none'
+            : total
+        );
+      this.createPost();
+    }
+  }
+
+  async getUID() {
+    return (await this.read.userDoc.pipe(take(1)).toPromise())?.uid;
   }
 
   createPost() {
@@ -236,9 +242,9 @@ export class PostListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     // don't use template async for change detection after login
-    this.paramSub.unsubscribe();
-    this.userSub.unsubscribe();
-    this.postsSub.unsubscribe();
-    this.totalSub.unsubscribe();
+    if (this.paramSub) this.paramSub.unsubscribe();
+    if (this.userSub) this.userSub.unsubscribe();
+    if (this.postsSub) this.postsSub.unsubscribe();
+    if (this.totalSub) this.totalSub.unsubscribe();
   }
 }

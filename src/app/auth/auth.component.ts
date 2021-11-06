@@ -7,14 +7,16 @@ import {
   AbstractControl,
   ValidatorFn
 } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, UrlSegment } from '@angular/router';
 import { of, Subscription } from 'rxjs';
 import { debounceTime, map, take } from 'rxjs/operators';
 import { matchValidator, MyErrorStateMatcher } from 'src/app/shared/form-validators';
 import { NavService } from '../nav/nav.service';
 import { AuthService } from '../platform/mock/auth.service';
 import { DbService } from '../platform/mock/db.service';
+import { ReadService } from '../platform/mock/read.service';
 import { SnackbarService } from '../shared/snack-bar/snack-bar.service';
+import { User } from './user.model';
 
 
 @Component({
@@ -80,13 +82,15 @@ export class AuthComponent implements OnInit, OnDestroy {
     private router: Router,
     private nav: NavService,
     private sb: SnackbarService,
-    private db: DbService
+    private db: DbService,
+    private read: ReadService
   ) {
 
     // get type from route
-    this.routeSub = this.route.url.subscribe((r: any) => {
-      this.type = r[0].path;
-    });
+    this.routeSub = this.route.url
+      .subscribe((r: UrlSegment[]) => {
+        this.type = r[0].path as any;
+      });
     this.nav.closeLeftNav();
   }
 
@@ -106,6 +110,13 @@ export class AuthComponent implements OnInit, OnDestroy {
       this.isVerify = true;
       this.title = 'Verify Email Address';
     } else if (this.type === 'username') {
+      // see if there is already a username
+      this.read.userDoc.pipe(take(1)).toPromise()
+        .then((user: User | null) => {
+          if (user && user.username) {
+            this.router.navigate(['/dashboard']);
+          }
+        });
       this.isCreateUser = true;
       this.title = 'Create Username';
     } else if (this.type === 'passwordless') {
@@ -113,10 +124,12 @@ export class AuthComponent implements OnInit, OnDestroy {
       this.title = 'Passwordless Login';
     } else if (this.type === '_login') {
       const url = this.router.url;
+      // signin with link
       this.auth.confirmSignIn(url)
         .then((r: boolean) => r
           ? this.router.navigate(['/dashboard'])
-          : null);
+          : null
+        );
       this.isReturnLogin = true;
       this.title = 'Passwordless Login';
     }
@@ -208,9 +221,8 @@ export class AuthComponent implements OnInit, OnDestroy {
           this.sb.showMsg(r.message);
         }
       } else if (this.isCreateUser) {
-        const r = await this.auth.updateUsername(
-          this.getField('username')?.value
-        );
+        const username = (this.getField('username')?.value as string).toLowerCase();
+        const r = await this.auth.updateUsername(username);
         if (r.message) {
           this.sb.showMsg(r.message);
           this.router.navigate(['/dashboard']);
@@ -236,18 +248,9 @@ export class AuthComponent implements OnInit, OnDestroy {
     this.loading = false;
   }
 
-  googleLogin() {
-    this.auth.oAuthLogin('google.com')
-      .then((isNew) => {
-        isNew
-          ? this.router.navigate(['/username'])
-          : this.router.navigate(['/dashboard']);
-      });
-  }
-
-  appleLogin() {
-    this.auth.oAuthLogin('apple.com')
-      .then((isNew) => {
+  providerLogin(provider: string) {
+    this.auth.oAuthLogin(provider)
+      .then((isNew: boolean) => {
         isNew
           ? this.router.navigate(['/username'])
           : this.router.navigate(['/dashboard']);
