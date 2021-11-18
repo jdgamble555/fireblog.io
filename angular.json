@@ -74,6 +74,14 @@
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
+            },
+            "dgraph": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.dgraph.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -86,6 +94,9 @@
             },
             "development": {
               "browserTarget": "fireblog:build:development"
+            },
+            "dgraph": {
+              "browserTarget": "fireblog:build:dgraph"
             }
           },
           "defaultConfiguration": "development"
@@ -167,6 +178,14 @@
               "optimization": false,
               "sourceMap": true,
               "extractLicenses": false
+            },
+            "dgraph": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.dgraph.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -181,6 +200,10 @@
             "production": {
               "browserTarget": "fireblog:build:production",
               "serverTarget": "fireblog:server:production"
+            },
+            "dgraph": {
+              "browserTarget": "fireblog:build:dgraph",
+              "serverTarget": "fireblog:server:dgraph"
             }
           },
           "defaultConfiguration": "development"
@@ -200,6 +223,10 @@
             "development": {
               "browserTarget": "fireblog:build:development",
               "serverTarget": "fireblog:server:development"
+            },
+            "dgraph": {
+              "browserTarget": "fireblog:build:dgraph",
+              "serverTarget": "fireblog:server:dgraph"
             }
           },
           "defaultConfiguration": "production"
