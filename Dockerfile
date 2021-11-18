@@ -1,8 +1,7 @@
-FROM node:14
+FROM node:14-slim
 WORKDIR /usr/src/app
-COPY package*.json ./
+COPY . .
 RUN npm i
 RUN npm audit fix
-COPY . .
 RUN npm run build:ssr
 CMD ["npm", "run", "serve:ssr"]

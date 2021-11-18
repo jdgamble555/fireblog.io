@@ -67,14 +67,6 @@
               ],
               "outputHashing": "all"
             },
-            "dgraph": {
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.dgraph.ts"
-                }
-              ]
-            },
             "development": {
               "buildOptimizer": false,
               "optimization": false,
@@ -94,9 +86,6 @@
             },
             "development": {
               "browserTarget": "fireblog:build:development"
-            },
-            "dgraph": {
-              "browserTarget": "fireblog:build:dgraph"
             }
           },
           "defaultConfiguration": "development"
