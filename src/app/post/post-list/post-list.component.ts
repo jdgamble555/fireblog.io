@@ -65,7 +65,10 @@ export class PostListComponent implements OnInit, OnDestroy {
       // must wait for uid to load bookmarks
       const _uid = await this.getUID();
       if (_uid) {
-        this._posts = this.read.getPosts({ uid: _uid, field: 'bookmarks' });
+        this._posts = this.read.getPosts({
+          uid: _uid,
+          field: 'bookmarks'
+        });
         this.totalPosts = this.read.getUserTotal(_uid, 'bookmarks');
       } else {
         this.router.navigate(['login']);
@@ -73,8 +76,7 @@ export class PostListComponent implements OnInit, OnDestroy {
     } else if (this.type === 'liked') {
       // posts by hearts
       this._posts = this.read.getPosts({
-        sortField: 'createdAt',
-        field: 'hearts'
+        sortField: 'heartsCount'
       });
       this.totalPosts = this.read.getTotal('hearts');
     } else if (this.type === 'updated') {
