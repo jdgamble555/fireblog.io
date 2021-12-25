@@ -46,4 +46,4 @@ testem.log
 Thumbs.db
 
 # Config Files
-/src/environments/*
+/src/environments/*.json
