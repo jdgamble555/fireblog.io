@@ -78,7 +78,7 @@ export class PostListComponent implements OnInit, OnDestroy {
       this._posts = this.read.getPosts({
         sortField: 'heartsCount'
       });
-      this.totalPosts = this.read.getTotal('hearts');
+      this.totalPosts = this.read.getTotal('posts');
     } else if (this.type === 'updated') {
       // posts by updatedAt
       this._posts = this.read.getPosts({ sortField: 'updatedAt' });
