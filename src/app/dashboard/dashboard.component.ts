@@ -1,7 +1,7 @@
-import { Component, NgZone } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { take } from 'rxjs/operators';
-import { Role, User } from '../auth/user.model';
+import { firstValueFrom } from 'rxjs';
+import { Role, UserRec } from '../auth/user.model';
 import { NavService } from '../nav/nav.service';
 import { AuthService } from '../platform/mock/auth.service';
 import { DbService } from '../platform/mock/db.service';
@@ -22,23 +22,22 @@ export class DashboardComponent {
   dCount: number | undefined = 0;
   bCount: number | undefined = 0;
 
-  user!: User | null;
+  user!: UserRec | null;
 
   constructor(
     public read: ReadService,
     private db: DbService,
     private auth: AuthService,
     private router: Router,
-    private ns: NavService,
-    private zone: NgZone
+    private ns: NavService
   ) {
     // see if logged in
     this.auth.getUser()
       .then((user) => {
         if (user) {
           // see if user is in db
-          this.read.getUser(user?.uid).pipe(take(1)).toPromise()
-            .then((userDoc: User) => {
+          firstValueFrom(this.read.getUser(user?.uid))
+            .then((userDoc: UserRec) => {
               if (userDoc) {
                 if (userDoc.username) {
                   // update count views

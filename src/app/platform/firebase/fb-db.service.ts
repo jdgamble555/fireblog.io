@@ -19,7 +19,7 @@ import {
 import { MarkdownService } from 'ngx-markdown';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { User } from 'src/app/auth/user.model';
+import { UserRec } from 'src/app/auth/user.model';
 import { Post } from 'src/app/post/post.model';
 import {
   deleteWithCounter,
@@ -42,7 +42,7 @@ export class FbDbService {
   //
 
   getUsername(uid: string): Observable<boolean> {
-    return docData<User>(
+    return docData<UserRec>(
       doc(this.afs, 'users', uid)
     ).pipe(
       map((r: any) => r ? r.username : null)
@@ -50,7 +50,7 @@ export class FbDbService {
   }
 
   hasUsername(uid: string): Observable<boolean> {
-    return docData<User>(
+    return docData<UserRec>(
       doc(this.afs, 'users', uid)
     ).pipe(
       map((r: any) => r && 'username' in r)
@@ -83,7 +83,7 @@ export class FbDbService {
     return batch.commit();
   }
 
-  async createUser(user: User, id: string): Promise<void> {
+  async createUser(user: UserRec, id: string): Promise<void> {
     await setWithCounter(
       doc(this.afs, 'users', id),
       user

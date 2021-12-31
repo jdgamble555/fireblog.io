@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { User as Auth } from '@angular/fire/auth';
+import { User } from '@angular/fire/auth';
 import {
   collection,
   collectionData,
@@ -19,7 +19,7 @@ import {
 } from '@angular/fire/firestore';
 import { Observable, of } from 'rxjs';
 import { debounceTime, map, switchMap, take } from 'rxjs/operators';
-import { User } from 'src/app/auth/user.model';
+import { UserRec } from 'src/app/auth/user.model';
 import { Post, Tag } from 'src/app/post/post.model';
 import { AuthService } from '../mock/auth.service';
 import {
@@ -35,7 +35,7 @@ import {
 })
 export class FbReadService {
 
-  userDoc: Observable<User | null>;
+  userRec: Observable<UserRec | null>;
 
   constructor(
     private afs: Firestore,
@@ -43,8 +43,8 @@ export class FbReadService {
   ) {
 
     // get user doc if logged in
-    this.userDoc = this.auth.user$.pipe(
-      switchMap((user: Auth | null) =>
+    this.userRec = this.auth.user$.pipe(
+      switchMap((user: User | null) =>
         user
           ? this.getUser(user.uid)
           : of(null)

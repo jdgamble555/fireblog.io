@@ -22,8 +22,7 @@ import {
   isSignInWithEmailLink,
   signInWithEmailLink
 } from '@angular/fire/auth';
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, Observable } from 'rxjs';
 import { Role } from 'src/app/auth/user.model';
 import { DbService } from '../mock/db.service';
 
@@ -61,7 +60,7 @@ export class FbAuthService {
   }
 
   async getUser(): Promise<User | null> {
-    return await this.user$.pipe(take(1)).toPromise();
+    return await firstValueFrom(this.user$);
   }
 
   //

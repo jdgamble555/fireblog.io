@@ -1,13 +1,13 @@
 import { ChangeDetectorRef, Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { map, switchMap, take } from 'rxjs/operators';
+import { combineLatest, firstValueFrom, Observable, of, Subscription } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { NavService } from 'src/app/nav/nav.service';
 import { ReadService } from 'src/app/platform/mock/read.service';
 import { SeoService } from 'src/app/shared/seo/seo.service';
 import { Post } from '../post.model';
-import { User } from '../../auth/user.model';
+import { UserRec } from '../../auth/user.model';
 import { DOCUMENT } from '@angular/common';
 
 
@@ -19,7 +19,7 @@ import { DOCUMENT } from '@angular/common';
 export class PostListComponent implements OnInit, OnDestroy {
 
   posts!: Post[] | null;
-  user!: User | null;
+  user!: UserRec | null;
   total!: string | null;
   private _posts!: Observable<Post[]>;
   private totalPosts!: Observable<string>;
@@ -43,8 +43,8 @@ export class PostListComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     @Inject(DOCUMENT) private doc: Document
   ) {
-    this.userSub = this.read.userDoc
-      .subscribe((user: User | null) => this.user = user);
+    this.userSub = this.read.userRec
+      .subscribe((user: UserRec | null) => this.user = user);
   }
 
   ngOnInit(): void {
@@ -138,7 +138,7 @@ export class PostListComponent implements OnInit, OnDestroy {
   }
 
   async getUID() {
-    return (await this.read.userDoc.pipe(take(1)).toPromise())?.uid;
+    return (await firstValueFrom(this.read.userRec))?.uid;
   }
 
   createPost() {

@@ -1,7 +1,14 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormGroupDirective, AbstractControl, ValidatorFn } from '@angular/forms';
+import {
+  FormGroup,
+  FormBuilder,
+  Validators,
+  FormGroupDirective,
+  AbstractControl,
+  ValidatorFn
+} from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable, of, Subscription } from 'rxjs';
+import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
 import { NavService } from 'src/app/nav/nav.service';
 import { DialogService } from 'src/app/shared/confirm-dialog/dialog.service';
 import { SnackbarService } from 'src/app/shared/snack-bar/snack-bar.service';
@@ -13,6 +20,7 @@ import { AuthService } from 'src/app/platform/mock/auth.service';
 import { ReadService } from 'src/app/platform/mock/read.service';
 import { DbService } from 'src/app/platform/mock/db.service';
 import { Router } from '@angular/router';
+import { UserRec } from '../user.model';
 
 @Component({
   selector: 'app-auth-settings',
@@ -97,8 +105,8 @@ export class AuthSettingsComponent implements OnInit {
     this.buildAccountForm();
 
     // get user info
-    this.read.userDoc.pipe(take(1)).toPromise()
-      .then(async user => {
+    firstValueFrom(this.read.userRec)
+      .then(async (user: UserRec | null) => {
         if (user) {
           const username = user?.username;
           const displayName = user?.displayName;

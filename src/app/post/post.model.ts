@@ -1,4 +1,4 @@
-import { User } from '../auth/user.model';
+import { UserRec } from '../auth/user.model';
 
 export interface Post {
   id?: string;
@@ -13,7 +13,7 @@ export interface Post {
   tags?: any;
   slug?: string;
   minutes?: string;
-  authorDoc?: User | any;
+  authorDoc?: UserRec | any;
   published?: boolean;
   heartsCount?: number;
   bookmarksCount?: number;

@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Output, Input } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { User } from 'src/app/auth/user.model';
+import { UserRec } from 'src/app/auth/user.model';
 import { AuthService } from 'src/app/platform/mock/auth.service';
 import { ReadService } from 'src/app/platform/mock/read.service';
 import { Post } from 'src/app/post/post.model';
@@ -20,14 +20,14 @@ export class HeaderComponent {
 
   isActiveSearch = false;
   terms!: Observable<Post[] | null>;
-  user$: Observable<User | null>;
+  user$: Observable<UserRec | null>;
 
   constructor(
     private auth: AuthService,
     public ns: NavService,
     private read: ReadService
   ) {
-    this.user$ = this.read.userDoc;
+    this.user$ = this.read.userRec;
   }
 
   toggle() {

@@ -16,8 +16,6 @@ import { NavModule } from './nav/nav.module';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 
 // have to use old version of Firebase Analytics
-import { AngularFireAnalyticsModule } from '@angular/fire/compat/analytics';
-import { AngularFireModule } from '@angular/fire/compat';
 import { DashboardComponent } from './dashboard/dashboard.component';
 
 
@@ -31,8 +29,6 @@ import { DashboardComponent } from './dashboard/dashboard.component';
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'serverApp' }),
-    AngularFireModule.initializeApp(environment.firebase),
-    AngularFireAnalyticsModule,
     AppRoutingModule,
     FirebaseModule,
     NgxSkeletonLoaderModule,

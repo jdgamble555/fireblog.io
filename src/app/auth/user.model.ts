@@ -5,7 +5,7 @@ export enum Role {
   Subscriber = "subscriber"
 };
 
-export interface User {
+export interface UserRec {
   displayName?: string | null;
   email?: string | null;
   phoneNumber?: string | null;

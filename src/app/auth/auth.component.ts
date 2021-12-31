@@ -8,7 +8,7 @@ import {
   ValidatorFn
 } from '@angular/forms';
 import { ActivatedRoute, Router, UrlSegment } from '@angular/router';
-import { of, Subscription } from 'rxjs';
+import { firstValueFrom, of, Subscription } from 'rxjs';
 import { debounceTime, map, take } from 'rxjs/operators';
 import { matchValidator, MyErrorStateMatcher } from 'src/app/shared/form-validators';
 import { NavService } from '../nav/nav.service';
@@ -16,7 +16,7 @@ import { AuthService } from '../platform/mock/auth.service';
 import { DbService } from '../platform/mock/db.service';
 import { ReadService } from '../platform/mock/read.service';
 import { SnackbarService } from '../shared/snack-bar/snack-bar.service';
-import { User } from './user.model';
+import { UserRec } from './user.model';
 
 
 @Component({
@@ -111,8 +111,8 @@ export class AuthComponent implements OnInit, OnDestroy {
       this.title = 'Verify Email Address';
     } else if (this.type === 'username') {
       // see if there is already a username
-      this.read.userDoc.pipe(take(1)).toPromise()
-        .then((user: User | null) => {
+      firstValueFrom(this.read.userRec)
+        .then((user: UserRec | null) => {
           if (user && user.username) {
             this.router.navigate(['/dashboard']);
           }

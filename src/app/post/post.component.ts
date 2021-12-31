@@ -2,7 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
-import { User } from '../auth/user.model';
+import { UserRec } from '../auth/user.model';
 import { NavService } from '../nav/nav.service';
 import { ReadService } from '../platform/mock/read.service';
 import { SeoService } from '../shared/seo/seo.service';
@@ -16,7 +16,7 @@ import { Post } from './post.model';
 export class PostComponent implements OnDestroy {
 
   post!: Observable<Post> | Promise<Post>;
-  user$!: User | null;
+  user$!: UserRec | null;
   sub!: Subscription;
   postId!: string;
 
@@ -64,9 +64,9 @@ export class PostComponent implements OnDestroy {
             this.router.navigate(['/home']);
           }
           post = r;
-          return this.read.userDoc;
+          return this.read.userRec;
         }),
-        switchMap((user: User | null) => {
+        switchMap((user: UserRec | null) => {
           // get user and heart
           if (user && user.uid) {
             this.user$ = user;

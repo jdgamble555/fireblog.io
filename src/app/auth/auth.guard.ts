@@ -3,8 +3,7 @@ import {
   CanActivate,
   Router
 } from '@angular/router';
-
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../platform/mock/auth.service';
 import { DbService } from '../platform/mock/db.service';
 import { ReadService } from '../platform/mock/read.service';
@@ -16,7 +15,7 @@ import { Role } from './user.model';
 export class RoleGuard implements CanActivate {
   constructor(private read: ReadService, private router: Router) { }
   async canActivate(): Promise<boolean> {
-    const user = await this.read.userDoc.pipe(take(1)).toPromise();
+    const user = await firstValueFrom(this.read.userRec);
     const isAdmin = !!(user && user.role === Role.Admin);
     if (!isAdmin) {
       this.router.navigate(['/home']);
@@ -30,7 +29,7 @@ export class RoleGuard implements CanActivate {
 export class LoginGuard implements CanActivate {
   constructor(private auth: AuthService, private router: Router) { }
   async canActivate(): Promise<boolean> {
-    const user = await this.auth.user$.pipe(take(1)).toPromise();
+    const user = await firstValueFrom(this.auth.user$);
     const isLoggedIn = !!user;
     if (!isLoggedIn) {
       this.router.navigate(['/login']);
@@ -45,7 +44,7 @@ export class LoginGuard implements CanActivate {
 export class NotLoginGuard implements CanActivate {
   constructor(private auth: AuthService, private router: Router) { }
   async canActivate(): Promise<boolean> {
-    const user = await this.auth.user$.pipe(take(1)).toPromise();
+    const user = await firstValueFrom(this.auth.user$);
     const isLoggedIn = !!user;
     if (isLoggedIn) {
       this.router.navigate(['/settings']);
@@ -61,7 +60,7 @@ export class EmailGuard implements CanActivate {
   constructor(private auth: AuthService, private router: Router) { }
   async canActivate(): Promise<boolean> {
     // make sure logged in first...
-    const user = await this.auth.user$.pipe(take(1)).toPromise();
+    const user = await firstValueFrom(this.auth.user$);
     const emailVerified = !!(user && user?.emailVerified);
     if (!emailVerified) {
       this.router.navigate(['/verify']);
@@ -81,9 +80,9 @@ export class UsernameGuard implements CanActivate {
   ) { }
   async canActivate(): Promise<boolean> {
     // make sure logged in first...
-    const user = await this.auth.user$.pipe(take(1)).toPromise();
+    const user = await firstValueFrom(this.auth.user$);
     if (user) {
-      const hasUsername = await this.db.hasUsername(user?.uid).pipe(take(1)).toPromise();
+      const hasUsername = await firstValueFrom(this.db.hasUsername(user?.uid));
       if (!hasUsername) {
         this.router.navigate(['/username']);
       }
