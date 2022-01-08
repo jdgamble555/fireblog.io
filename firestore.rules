@@ -167,7 +167,7 @@ service cloud.firestore {
           && request.resource.data.content.size() > 2
           && request.resource.data.title is string
           && request.resource.data.title.size() > 1
-          && request.resource.data.tags.size() > 0
+          //&& request.resource.data.tags.size() > 0
           && request.resource.data.slug is string
           // simple slug version, should be updated for utf8 characters
           && request.resource.data.slug == request.resource.data.title

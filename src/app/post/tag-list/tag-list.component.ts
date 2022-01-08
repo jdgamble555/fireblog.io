@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 import { NavService } from 'src/app/nav/nav.service';
-import { ReadService } from 'src/app/platform/mock/read.service';
+import { ReadService } from 'src/app/platform/firebase/read.service';
 import { Tag } from '../post.model';
 
 @Component({

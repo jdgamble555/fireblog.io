@@ -18,7 +18,7 @@ interface Preview {
 @Injectable({
   providedIn: 'root'
 })
-export class FbImageUploadService {
+export class ImageUploadService {
 
     // image type
     type = 'image/jpeg';

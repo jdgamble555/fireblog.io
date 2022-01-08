@@ -30,7 +30,7 @@ import {
 @Injectable({
   providedIn: 'root'
 })
-export class FbDbService {
+export class DbService {
 
   constructor(
     private afs: Firestore,
@@ -41,7 +41,7 @@ export class FbDbService {
   // User
   //
 
-  getUsername(uid: string): Observable<boolean> {
+  getUsername(uid: string): Observable<string | null> {
     return docData<UserRec>(
       doc(this.afs, 'users', uid)
     ).pipe(
@@ -57,7 +57,7 @@ export class FbDbService {
     );
   }
 
-  validUsername(name: string) {
+  validUsername(name: string): Observable<boolean> {
     return docSnapshots(
       doc(this.afs, 'usernames', name)
     ).pipe(
@@ -112,7 +112,7 @@ export class FbDbService {
     * @param id
     * @returns
     */
-  getPostData(id: string) {
+  getPostData(id: string): Observable<Post> {
 
     // get doc refs
     const docRef = doc(this.afs, 'posts', id);
@@ -246,7 +246,7 @@ export class FbDbService {
   * Generates an id for a new firestore doc
   * @returns
   */
-  getId() {
+  getId(): string {
     return doc(
       collection(this.afs, 'id')
     ).id;
@@ -261,7 +261,7 @@ export class FbDbService {
    * @param id
    * @param data
    */
-  async indexPost(id: string, data: any) {
+  async indexPost(id: string, data: any): Promise<void> {
     await searchIndex(this.document, {
       ref: doc(this.afs, 'posts', id),
       after: data,
@@ -280,7 +280,7 @@ export class FbDbService {
     before: string[] = [],
     after: string[] = [],
     tagsDoc = 'tags'
-  ) {
+  ): Promise<void> {
 
     const removed = before.length > 0
       ? before.filter((x: string) => !after.includes(x))

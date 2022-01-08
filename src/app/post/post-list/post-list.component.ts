@@ -4,7 +4,7 @@ import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { combineLatest, firstValueFrom, Observable, of, Subscription } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { NavService } from 'src/app/nav/nav.service';
-import { ReadService } from 'src/app/platform/mock/read.service';
+import { ReadService } from 'src/app/platform/firebase/read.service';
 import { SeoService } from 'src/app/shared/seo/seo.service';
 import { Post } from '../post.model';
 import { UserRec } from '../../auth/user.model';

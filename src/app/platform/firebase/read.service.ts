@@ -21,7 +21,7 @@ import { Observable, of } from 'rxjs';
 import { debounceTime, map, switchMap, take } from 'rxjs/operators';
 import { UserRec } from 'src/app/auth/user.model';
 import { Post, Tag } from 'src/app/post/post.model';
-import { AuthService } from '../mock/auth.service';
+import { AuthService } from './auth.service';
 import {
   deleteWithCounter,
   expandRef,
@@ -33,7 +33,7 @@ import {
 @Injectable({
   providedIn: 'root'
 })
-export class FbReadService {
+export class ReadService {
 
   userRec: Observable<UserRec | null>;
 

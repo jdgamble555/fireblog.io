@@ -12,9 +12,9 @@ import { firstValueFrom, of, Subscription } from 'rxjs';
 import { debounceTime, map, take } from 'rxjs/operators';
 import { matchValidator, MyErrorStateMatcher } from 'src/app/shared/form-validators';
 import { NavService } from '../nav/nav.service';
-import { AuthService } from '../platform/mock/auth.service';
-import { DbService } from '../platform/mock/db.service';
-import { ReadService } from '../platform/mock/read.service';
+import { AuthService } from '../platform/firebase/auth.service';
+import { DbService } from '../platform/firebase/db.service';
+import { ReadService } from '../platform/firebase/read.service';
 import { SnackbarService } from '../shared/snack-bar/snack-bar.service';
 import { UserRec } from './user.model';
 

@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Output, Input } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { UserRec } from 'src/app/auth/user.model';
-import { AuthService } from 'src/app/platform/mock/auth.service';
-import { ReadService } from 'src/app/platform/mock/read.service';
+import { AuthService } from 'src/app/platform/firebase/auth.service';
+import { ReadService } from 'src/app/platform/firebase/read.service';
 import { Post } from 'src/app/post/post.model';
 import { NavService } from '../nav.service';
 
@@ -28,6 +28,7 @@ export class HeaderComponent {
     private read: ReadService
   ) {
     this.user$ = this.read.userRec;
+    
   }
 
   toggle() {

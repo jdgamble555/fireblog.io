@@ -5,14 +5,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { NavService } from 'src/app/nav/nav.service';
-import { SeoService } from 'src/app/shared/seo/seo.service';
 import { SnackbarService } from 'src/app/shared/snack-bar/snack-bar.service';
 import { TagService } from 'src/app/shared/tag/tag.service';
 import { Post } from '../post.model';
 import { DialogService } from 'src/app/shared/confirm-dialog/dialog.service';
-import { DbService } from 'src/app/platform/mock/db.service';
-import { AuthService } from 'src/app/platform/mock/auth.service';
-import { ImageUploadService } from 'src/app/platform/mock/image-upload.service';
+import { DbService } from 'src/app/platform/firebase/db.service';
+import { AuthService } from 'src/app/platform/firebase/auth.service';
+import { ImageUploadService } from 'src/app/platform/firebase/image-upload.service';
 
 
 @Component({
@@ -74,7 +73,6 @@ export class PostFormComponent {
     private db: DbService,
     public sb: SnackbarService,
     private ns: NavService,
-    private seo: SeoService,
     private dialog: DialogService
   ) {
     this.postForm = this.fb.group({

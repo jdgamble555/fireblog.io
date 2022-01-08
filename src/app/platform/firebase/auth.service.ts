@@ -24,13 +24,13 @@ import {
 } from '@angular/fire/auth';
 import { firstValueFrom, Observable } from 'rxjs';
 import { Role } from 'src/app/auth/user.model';
-import { DbService } from '../mock/db.service';
+import { DbService } from './db.service';
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class FbAuthService {
+export class AuthService {
 
   user$: Observable<User | null>;
 

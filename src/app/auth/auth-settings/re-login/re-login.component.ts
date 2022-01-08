@@ -1,7 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
-import { AuthService } from 'src/app/platform/mock/auth.service';
+import { AuthService } from 'src/app/platform/firebase/auth.service';
 
 import { SnackbarService } from '../../../shared/snack-bar/snack-bar.service';
 
