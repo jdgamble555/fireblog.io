@@ -5,8 +5,7 @@ import { MaterialModule } from './material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthComponent } from '../auth/auth.component';
-import { isObservable, Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, isObservable, Observable } from 'rxjs';
 
 
 const modules = [
@@ -38,7 +37,7 @@ export class CoreModule {
 
   async waitFor(prom: Promise<any> | Observable<any>): Promise<any> {
     if (isObservable(prom)) {
-      prom = prom.pipe(take(1)).toPromise();
+      prom = firstValueFrom(prom);
     }
     const macroTask = Zone.current
       .scheduleMacroTask(

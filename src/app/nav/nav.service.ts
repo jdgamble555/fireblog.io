@@ -16,6 +16,7 @@ interface Link {
 export class NavService {
 
   title = 'Fireblog.io';
+  site = "https://fireblog.io";
   storage = 'fireblog';
 
   author = 'Jonathan Gamble';
@@ -50,8 +51,9 @@ export class NavService {
   // add title
   addTitle(name: string) {
     this.setBC(name);
-    const title = name + ' - ' + this.title;
-    this.seo.generateTags({ title });
+    this.seo.generateTags({
+      title: name + ' - ' + this.title
+    });
   }
 
   // reset bread crumb

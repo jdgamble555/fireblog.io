@@ -53,7 +53,6 @@ export class DashboardComponent {
                 }
               } else {
                 // add user to db
-                console.log(user)
                 try {
                   this.db.createUser({
                     displayName: user.displayName,

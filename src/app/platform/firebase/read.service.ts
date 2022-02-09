@@ -11,7 +11,6 @@ import {
   orderBy,
   query,
   where,
-  OrderByDirection,
   limit,
   getDoc,
   DocumentSnapshot,
@@ -175,51 +174,60 @@ export class ReadService {
    * Gets all posts
    * @returns posts joined by authorDoc
    */
-  getPosts<Post>(opts?: {
+  getPosts({
+    sortField = 'createdAt',
+    sortDirection = 'desc',
+    pageSize = 5,
+    page = 1,
+    tag,
+    uid,
+    field
+  }: {
     sortField?: string,
-    sortDirection?: OrderByDirection,
+    sortDirection?: 'desc' | 'asc',
     tag?: string,
     uid?: string,
     field?: string,
     page?: number,
-    pageSize?: number,
-    drafts?: boolean
-  }): Observable<Post[]> {
-    opts = opts || {};
-    opts.sortField = opts.sortField || 'createdAt';
-    opts.sortDirection = opts.sortDirection || 'desc';
-    opts.pageSize = opts.pageSize || 5;
-    opts.page = opts.page || 1;
+    pageSize?: number
+  } = {}): {
+    count: Observable<string>,
+    posts: Observable<Post[]>
+  } {
 
-    const _limit = opts.page * opts.pageSize;
-    const _offset = (opts.page - 1) * opts.pageSize;
+    const drafts = field === 'drafts';
+
+    const _limit = page * pageSize;
+    const _offset = (page - 1) * pageSize;
 
     const filters = [
-      orderBy(opts.sortField, opts.sortDirection)
+      orderBy(sortField, sortDirection)
     ];
-    if (opts.tag) {
+    if (tag) {
       filters.push(
-        where('tags', 'array-contains', opts.tag)
+        where('tags', 'array-contains', tag)
       );
     }
-    if (opts.uid && !opts.field) {
+    if (uid && !field) {
       filters.push(
-        where('authorId', '==', opts.uid)
+        where('authorId', '==', uid)
       );
     }
-    if (opts.uid && opts.field) {
+    if (uid && field) {
       filters.push(
-        where('userDoc', '==', doc(this.afs, 'users', opts.uid))
+        where('userDoc', '==', doc(this.afs, 'users', uid))
       );
     }
     filters.push(
       limit(_limit)
     );
 
+    let posts: Observable<Post[]>;
+    let count: Observable<string>;
+
     // if posts by hearts or bookmarks
-    if (opts.field) {
-      const field = opts.field;
-      return expandRefs<Post>(
+    if (field) {
+      posts = expandRefs<Post>(
         expandRefs<Post>(
           collectionData<any>(
             query(
@@ -234,16 +242,34 @@ export class ReadService {
     }
 
     // otherwise just posts
-    return expandRefs<Post>(
+    posts = expandRefs<Post>(
       collectionData<Post>(
         query<Post>(
-          collection(this.afs, opts.drafts ? 'drafts' : 'posts') as CollectionReference<Post>,
-          ...filters
+          collection(this.afs, drafts ? 'drafts' : 'posts') as CollectionReference<Post>,
+          ...filters,
         ), { idField: 'id' }
       ).pipe(
         // offset is only okay here because of caching
         map((l: Post[]) => l.slice(_offset))
       ), ['authorDoc']);
+
+    // count
+    if (uid && field) {
+      count = this.getUserTotal(uid, field);
+    } else if (tag) {
+      count = this.getTagTotal(tag);
+    } else {
+      count = this.getTotal('posts');
+    }
+
+    count = count.pipe(
+      map((total: string) =>
+        total == '0' || total === undefined
+          ? 'none'
+          : total
+      ));
+
+    return { posts, count };
   }
   /**
    * Get Post by post id

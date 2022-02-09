@@ -10,6 +10,15 @@ import { Post } from '../post.model';
 import { UserRec } from '../../auth/user.model';
 import { DOCUMENT } from '@angular/common';
 
+interface postInput {
+  sortField?: string,
+  sortDirection?: 'desc' | 'asc',
+  tag?: string,
+  uid?: string,
+  field?: string,
+  page?: number,
+  pageSize?: number
+};
 
 @Component({
   selector: 'app-post-list',
@@ -22,17 +31,14 @@ export class PostListComponent implements OnInit, OnDestroy {
   user!: UserRec | null;
   total!: string | null;
   private _posts!: Observable<Post[]>;
-  private totalPosts!: Observable<string>;
   private postsSub!: Subscription;
   private userSub!: Subscription;
   private paramSub!: Subscription;
   private totalSub!: Subscription;
 
+  @Input() type!: 'bookmarks' | 'liked' | 'updated' | 'user' | 'drafts';
 
-  @Input() type!: string;
-
-  tag!: string | null;
-  uid!: string | null;
+  input!: postInput;
 
   constructor(
     public read: ReadService,
@@ -43,17 +49,36 @@ export class PostListComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     @Inject(DOCUMENT) private doc: Document
   ) {
-    this.userSub = this.read.userRec
-      .subscribe((user: UserRec | null) => this.user = user);
+    // reset posts input obj
+    this.input = {};
   }
 
-  ngOnInit(): void {
-    this.paramSub = this.route.paramMap.subscribe(async (r: ParamMap) => this.loadPage(r));
+  async ngOnInit(): Promise<void> {
+    if (this.ns.isBrowser) {
+      this.userSub = this.read.userRec
+        .subscribe((user: UserRec | null) => this.user = user);
+    }
+    this.paramSub = this.route.paramMap
+      .subscribe(async (r: ParamMap) => await this.loadPage(r));
   }
 
   async loadPage(r: ParamMap): Promise<void> {
-    const tag = this.tag = r.get('tag');
-    const uid = this.uid = r.get('uid');
+
+    const tag = r.get('tag');
+    const uid = r.get('uid');
+    if (tag) {
+      this.input.tag = tag;
+    } else if (uid) {
+      this.input.uid = uid;
+    }
+
+    // get uid for user
+    if (this.type === 'bookmarks' || this.type === 'drafts' || this.type === 'user') {
+      this.input.uid = (await firstValueFrom(this.read.userRec))?.uid || undefined;
+      if (!this.input.uid) {
+        this.router.navigate(['login']);
+      }
+    }
 
     if (this.router.url === '/bookmarks' || this.type === 'bookmarks') {
       // meta
@@ -61,84 +86,42 @@ export class PostListComponent implements OnInit, OnDestroy {
         this.ns.openLeftNav();
         this.ns.addTitle('Bookmarks');
       }
-      // posts
-      // must wait for uid to load bookmarks
-      const _uid = await this.getUID();
-      if (_uid) {
-        this._posts = this.read.getPosts({
-          uid: _uid,
-          field: 'bookmarks'
-        });
-        this.totalPosts = this.read.getUserTotal(_uid, 'bookmarks');
-      } else {
-        this.router.navigate(['login']);
-      }
+      this.input.field = 'bookmarks';
     } else if (this.type === 'liked') {
       // posts by hearts
-      this._posts = this.read.getPosts({
-        sortField: 'heartsCount'
-      });
-      this.totalPosts = this.read.getTotal('posts');
+      this.input.sortField = 'heartsCount';
     } else if (this.type === 'updated') {
       // posts by updatedAt
-      this._posts = this.read.getPosts({ sortField: 'updatedAt' });
-      this.totalPosts = this.read.getTotal('posts');
-    } else if (tag) {
+      this.input.sortField = 'updatedAt';
+    } else if (this.input?.tag) {
       // meta
+      const tag = this.input.tag;
       const uTag = tag.charAt(0).toUpperCase() + tag.slice(1);
       this.ns.setBC('# ' + uTag);
       this.seo.generateTags({
         title: uTag + ' - ' + this.ns.title
       });
-      // posts by tag list
-      this._posts = this.read.getPosts({ tag });
-      this.totalPosts = this.read.getTagTotal(tag);
-    } else if (this.type === 'user') {
-      const _uid = await this.getUID();
-      if (_uid) {
-        // posts by user list
-        this._posts = this.read.getPosts({ uid: _uid });
-        this.totalPosts = this.read.getUserTotal(_uid, 'posts');
-      } else {
-        this.router.navigate(['login']);
-      }
     } else if (this.type === 'drafts') {
-      const _uid = await this.getUID();
-      if (_uid) {
-        // posts by user list
-        this._posts = this.read.getPosts({ uid: _uid, drafts: true });
-        this.totalPosts = this.read.getUserTotal(_uid, 'drafts');
-      } else {
-        this.router.navigate(['login']);
-      }
-    } else if (uid) {
+      this.input.field = 'drafts';
+    } else if (this.input?.uid) {
       // meta
       this.ns.openLeftNav();
       this.ns.addTitle('User');
-      // posts by user list
-      this._posts = this.read.getPosts({ uid });
-      this.totalPosts = this.read.getUserTotal(uid, 'posts');
     } else {
       // meta
       this.seo.generateTags({ title: this.ns.title });
       this.ns.resetBC();
-      // all posts
-      this._posts = this.read.getPosts();
-      this.totalPosts = this.read.getTotal('posts');
     }
-    if (this.totalPosts) {
-      this.totalSub = this.totalPosts
-        .subscribe((total: string) =>
-          this.total = total == '0' || total === undefined
-            ? 'none'
-            : total
-        );
+
+    const { count, posts } = this.read.getPosts(this.input);
+
+    if (count) {
+      this.totalSub = count.subscribe((t: string) => this.total = t);
+    }
+    if (posts) {
+      this._posts = posts;
       this.createPost();
     }
-  }
-
-  async getUID() {
-    return (await firstValueFrom(this.read.userRec))?.uid;
   }
 
   createPost() {
@@ -204,27 +187,12 @@ export class PostListComponent implements OnInit, OnDestroy {
       pageSize: event.pageSize
     };
 
-    // which route
-    if (this.router.url === '/bookmarks') {
-      const uid = this.uid as string;
-      this._posts = this.read.getPosts({
-        uid,
-        field: 'bookmarks',
-        ...paging
-      });
-    } else if (this.tag) {
-      this._posts = this.read.getPosts({
-        tag: this.tag,
-        ...paging
-      });
-    } else if (this.uid) {
-      this._posts = this.read.getPosts({
-        uid: this.uid,
-        ...paging
-      });
-    } else {
-      this._posts = this.read.getPosts(paging);
-    }
+    const { posts } = this.read.getPosts({
+      ...this.input,
+      ...paging
+    });
+
+    this._posts = posts;
     this.createPost();
 
     // scroll to top

@@ -25,7 +25,6 @@ export class SeoService {
     imageH = '',
     locale = ''
   }): void {
-
     // do nothing if same page
     if (title === this.cachetitle) {
       return;
