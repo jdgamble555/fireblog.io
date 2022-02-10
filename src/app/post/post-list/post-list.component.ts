@@ -9,6 +9,7 @@ import { SeoService } from 'src/app/shared/seo/seo.service';
 import { Post } from '../post.model';
 import { UserRec } from '../../auth/user.model';
 import { DOCUMENT } from '@angular/common';
+import { CoreModule } from 'src/app/core/core.module';
 
 interface postInput {
   sortField?: string,
@@ -47,6 +48,7 @@ export class PostListComponent implements OnInit, OnDestroy {
     public ns: NavService,
     private seo: SeoService,
     private cdr: ChangeDetectorRef,
+    private core: CoreModule,
     @Inject(DOCUMENT) private doc: Document
   ) {
     // reset posts input obj
@@ -116,24 +118,34 @@ export class PostListComponent implements OnInit, OnDestroy {
     const { count, posts } = this.read.getPosts(this.input);
 
     if (count) {
-      this.totalSub = count.subscribe((t: string) => this.total = t);
+      // ssr version
+      if (!this.ns.isBrowser) {
+        this.total = await this.core.waitFor(count);
+      } else {
+        this.totalSub = count.subscribe((t: string) => this.total = t);
+      }
     }
     if (posts) {
       this._posts = posts;
-      this.createPost();
+      await this.createPost();
     }
   }
 
-  createPost() {
+  async createPost() {
     // create post subscription with change detection
     if (this.postsSub) {
       this.postsSub.unsubscribe();
     }
-    this.postsSub = this.postPipe(this._posts)
-      .subscribe((p: Post[] | null) => {
-        this.posts = p;
-        this.cdr.detectChanges();
-      });
+    // ssr version
+    if (!this.ns.isBrowser) {
+      this.posts = await this.core.waitFor(this._posts);
+    } else {
+      this.postsSub = this.postPipe(this._posts)
+        .subscribe((p: Post[] | null) => {
+          this.posts = p;
+          this.cdr.detectChanges();
+        });
+    }
   }
 
   postPipe(p: Observable<Post[] | null>): Observable<Post[] | null> {
@@ -179,7 +191,7 @@ export class PostListComponent implements OnInit, OnDestroy {
     );
   }
 
-  pageChange(event: PageEvent): void {
+  async pageChange(event: PageEvent): Promise<void> {
 
     // pages
     const paging = {
@@ -193,7 +205,7 @@ export class PostListComponent implements OnInit, OnDestroy {
     });
 
     this._posts = posts;
-    this.createPost();
+    await this.createPost();
 
     // scroll to top
     this.doc.defaultView?.scrollTo(0, 0);
