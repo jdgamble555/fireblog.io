@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, Inject, Input, OnDestroy, OnInit } from '
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { combineLatest, firstValueFrom, Observable, of, Subscription } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, take } from 'rxjs/operators';
 import { NavService } from 'src/app/nav/nav.service';
 import { ReadService } from 'src/app/platform/firebase/read.service';
 import { SeoService } from 'src/app/shared/seo/seo.service';
@@ -18,7 +18,8 @@ interface postInput {
   uid?: string,
   field?: string,
   page?: number,
-  pageSize?: number
+  pageSize?: number,
+  drafts?: boolean
 };
 
 @Component({
@@ -28,10 +29,11 @@ interface postInput {
 })
 export class PostListComponent implements OnInit, OnDestroy {
 
-  posts!: Post[] | null;
   user!: UserRec | null;
-  total!: string | null;
-  private _posts!: Observable<Post[]>;
+  //posts!: Post[] | null;
+  //total!: string | null;
+  public posts!: Observable<Post[] | null> | Promise<Post[] | null>;
+  public total!: Observable<string | null> | Promise<string | null>;
   private postsSub!: Subscription;
   private userSub!: Subscription;
   private paramSub!: Subscription;
@@ -47,7 +49,7 @@ export class PostListComponent implements OnInit, OnDestroy {
     private router: Router,
     public ns: NavService,
     private seo: SeoService,
-    private cdr: ChangeDetectorRef,
+    //private cdr: ChangeDetectorRef,
     private core: CoreModule,
     @Inject(DOCUMENT) private doc: Document
   ) {
@@ -56,9 +58,15 @@ export class PostListComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
+
+    let paramSub = this.route.paramMap;
+
     if (this.ns.isBrowser) {
       this.userSub = this.read.userRec
         .subscribe((user: UserRec | null) => this.user = user);
+    } else {
+      // ssr
+      paramSub = paramSub.pipe(take(1));
     }
     this.paramSub = this.route.paramMap
       .subscribe(async (r: ParamMap) => await this.loadPage(r));
@@ -104,10 +112,9 @@ export class PostListComponent implements OnInit, OnDestroy {
         title: uTag + ' - ' + this.ns.title
       });
     } else if (this.type === 'drafts') {
-      this.input.field = 'drafts';
+      this.input.drafts = true;
     } else if (this.input?.uid) {
       // meta
-      this.ns.openLeftNav();
       this.ns.addTitle('User');
     } else {
       // meta
@@ -118,26 +125,24 @@ export class PostListComponent implements OnInit, OnDestroy {
     const { count, posts } = this.read.getPosts(this.input);
 
     if (count) {
-      // ssr version
-      if (!this.ns.isBrowser) {
-        this.total = await this.core.waitFor(count);
-      } else {
-        this.totalSub = count.subscribe((t: string) => this.total = t);
-      }
+      this.total = this.ns.isServer
+        ? this.core.waitFor(count)
+        : count;
     }
     if (posts) {
-      this._posts = posts;
-      await this.createPost();
+      this.posts = this.ns.isServer
+        ? this.posts = this.core.waitFor(posts)
+        : this.posts = this.postPipe(posts);
     }
   }
 
-  async createPost() {
+  /*async createPost() {
     // create post subscription with change detection
     if (this.postsSub) {
       this.postsSub.unsubscribe();
     }
     // ssr version
-    if (!this.ns.isBrowser) {
+    if (this.ns.isServer) {
       this.posts = await this.core.waitFor(this._posts);
     } else {
       this.postsSub = this.postPipe(this._posts)
@@ -146,7 +151,7 @@ export class PostListComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         });
     }
-  }
+  }*/
 
   postPipe(p: Observable<Post[] | null>): Observable<Post[] | null> {
     // pipe in likes and bookmarks
@@ -204,8 +209,8 @@ export class PostListComponent implements OnInit, OnDestroy {
       ...paging
     });
 
-    this._posts = posts;
-    await this.createPost();
+    this.posts = this.postPipe(posts);
+    //await this.createPost();
 
     // scroll to top
     this.doc.defaultView?.scrollTo(0, 0);

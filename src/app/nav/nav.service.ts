@@ -28,6 +28,7 @@ export class NavService {
   private rightNav!: MatSidenav;
 
   isBrowser: Boolean;
+  isServer: Boolean;
   doc: Document;
 
   directories: Link[];
@@ -40,6 +41,7 @@ export class NavService {
     private seo: SeoService
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
+    this.isServer = !isPlatformBrowser(platformId);
     this.doc = this.document;
     this.directories = [];
 

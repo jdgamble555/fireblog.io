@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
+import { CoreModule } from 'src/app/core/core.module';
 import { NavService } from 'src/app/nav/nav.service';
 import { ReadService } from 'src/app/platform/firebase/read.service';
 import { Tag } from '../post.model';
@@ -13,12 +14,13 @@ export class TagListComponent {
 
   @Input() display!: string;
 
-  tags: Observable<Tag[]>;
+  tags: Observable<Tag[]> | Promise<Tag[]>;
 
   constructor(
     private read: ReadService,
-    public ns: NavService
+    public ns: NavService,
+    private core: CoreModule
   ) {
-    this.tags = this.read.getTags();
+    this.tags = this.core.waitFor(this.read.getTags());
   }
 }

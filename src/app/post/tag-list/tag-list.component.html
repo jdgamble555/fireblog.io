@@ -1,4 +1,4 @@
-<mat-card class="ng-card mat-elevation-z0 ng-card-outline" *ngIf="tags | async as _tags; else loading">
+<mat-card class="ng-card mat-elevation-z0 ng-card-outline" *ngIf="tags | async as _tags">
   <mat-card-content>
     <ul class="tag_list">
       <li [ngClass]="{
@@ -8,13 +8,3 @@
     </ul>
   </mat-card-content>
 </mat-card>
-<ng-template #loading>
-  <mat-card class="ng-card mat-elevation-z0 ng-card-outline tag-bar">
-    <mat-card-content class="ng-absolute">
-      <ngx-skeleton-loader animation="pulse" count="5" [theme]="{
-      width: '125px',
-      'background-color': ns.bgcolor
-    }"></ngx-skeleton-loader>
-    </mat-card-content>
-  </mat-card>
-</ng-template>

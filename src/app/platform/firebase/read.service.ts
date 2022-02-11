@@ -181,7 +181,8 @@ export class ReadService {
     page = 1,
     tag,
     uid,
-    field
+    field,
+    drafts = false
   }: {
     sortField?: string,
     sortDirection?: 'desc' | 'asc',
@@ -189,17 +190,15 @@ export class ReadService {
     uid?: string,
     field?: string,
     page?: number,
-    pageSize?: number
+    pageSize?: number,
+    drafts?: boolean
   } = {}): {
     count: Observable<string>,
     posts: Observable<Post[]>
   } {
 
-    const drafts = field === 'drafts';
-
     const _limit = page * pageSize;
     const _offset = (page - 1) * pageSize;
-
     const filters = [
       orderBy(sortField, sortDirection)
     ];
@@ -239,19 +238,20 @@ export class ReadService {
             // offset is only okay here because of caching
             map((l: Post[]) => l.slice(_offset))
           ), ['authorDoc']);
-    }
+    } else {
 
-    // otherwise just posts
-    posts = expandRefs<Post>(
-      collectionData<Post>(
-        query<Post>(
-          collection(this.afs, drafts ? 'drafts' : 'posts') as CollectionReference<Post>,
-          ...filters,
-        ), { idField: 'id' }
-      ).pipe(
-        // offset is only okay here because of caching
-        map((l: Post[]) => l.slice(_offset))
-      ), ['authorDoc']);
+      // otherwise just posts
+      posts = expandRefs<Post>(
+        collectionData<Post>(
+          query<Post>(
+            collection(this.afs, drafts ? 'drafts' : 'posts') as CollectionReference<Post>,
+            ...filters,
+          ), { idField: 'id' }
+        ).pipe(
+          // offset is only okay here because of caching
+          map((l: Post[]) => l.slice(_offset))
+        ), ['authorDoc']);
+    }
 
     // count
     if (uid && field) {

@@ -13,7 +13,6 @@ import { PostComponent } from './post/post.component';
 import { PostListComponent } from './post/post-list/post-list.component';
 import { FirebaseModule } from './platform/firebase/firebase.module';
 import { NavModule } from './nav/nav.module';
-import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 
 // have to use old version of Firebase Analytics
 import { DashboardComponent } from './dashboard/dashboard.component';
@@ -33,7 +32,6 @@ import { CommentComponent } from './post/comment/comment.component';
     BrowserModule.withServerTransition({ appId: 'serverApp' }),
     AppRoutingModule,
     FirebaseModule,
-    NgxSkeletonLoaderModule,
     NavModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production,

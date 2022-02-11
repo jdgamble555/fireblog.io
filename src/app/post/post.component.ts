@@ -1,7 +1,8 @@
 import { Component, OnDestroy } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { map, switchMap, take, tap } from 'rxjs/operators';
 import { UserRec } from '../auth/user.model';
 import { CoreModule } from '../core/core.module';
 import { NavService } from '../nav/nav.service';
@@ -29,9 +30,13 @@ export class PostComponent implements OnDestroy {
     private seo: SeoService,
     private core: CoreModule,
     public ns: NavService,
+    private sanitizer: DomSanitizer
   ) {
-    this.ns.openLeftNav();
-    this.sub = this.route.paramMap.subscribe(async (r: ParamMap) => await this.loadPage(r));
+    let paramMap = this.route.paramMap;
+    if (this.ns.isServer) {
+      paramMap = paramMap.pipe(take(1));
+    }
+    this.sub = paramMap.subscribe(async (r: ParamMap) => await this.loadPage(r));
   }
 
   async loadPage(p: ParamMap) {
@@ -128,15 +133,6 @@ export class PostComponent implements OnDestroy {
     } else {
       this.router.navigate(['login']);
     }
-  }
-
-  // encode for share button
-  urlEncode(s?: string) {
-    return encodeURIComponent(s || '');
-  }
-
-  shareURL(title?: string) {
-    return this.urlEncode(this.ns.site + '/post/' + this.postId + '/' + title);
   }
 
   ngOnDestroy(): void {
