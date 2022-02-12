@@ -65,10 +65,14 @@ export class NavService {
     return state;
   }
 
+  hasState<T>(key: string) {
+    return this.transferState.hasKey<T>(makeStateKey(key));
+  }
+
   load<T>(key: string, obs: Observable<T>): Promise<T> {
     return this.isServer
-      ? this.waitFor(obs.pipe(take(1), tap((data: T) => this.saveState(key, data))))
-      : Promise.resolve(this.getState(key));
+      ? this.waitFor(obs.pipe(tap((data: T) => this.saveState(key, data))))
+      : this.hasState(key) ? Promise.resolve(this.getState(key)) : firstValueFrom(obs);
   }
 
   // add title
