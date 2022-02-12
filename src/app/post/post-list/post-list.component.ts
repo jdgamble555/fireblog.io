@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { combineLatest, firstValueFrom, Observable, of, Subscription } from 'rxjs';
@@ -9,7 +9,6 @@ import { SeoService } from 'src/app/shared/seo/seo.service';
 import { Post } from '../post.model';
 import { UserRec } from '../../auth/user.model';
 import { DOCUMENT } from '@angular/common';
-import { CoreModule } from 'src/app/core/core.module';
 
 interface postInput {
   sortField?: string,
@@ -30,10 +29,10 @@ interface postInput {
 export class PostListComponent implements OnInit, OnDestroy {
 
   user!: UserRec | null;
-  //posts!: Post[] | null;
-  //total!: string | null;
-  public posts!: Observable<Post[] | null> | Promise<Post[] | null>;
-  public total!: Observable<string | null> | Promise<string | null>;
+  posts!: Post[] | null;
+  total!: string | null;
+  //posts!: Observable<Post[] | null> | Promise<Post[] | null>;
+  //total!: Observable<string | null> | Promise<string | null>;
   private postsSub!: Subscription;
   private userSub!: Subscription;
   private paramSub!: Subscription;
@@ -49,8 +48,6 @@ export class PostListComponent implements OnInit, OnDestroy {
     private router: Router,
     public ns: NavService,
     private seo: SeoService,
-    //private cdr: ChangeDetectorRef,
-    private core: CoreModule,
     @Inject(DOCUMENT) private doc: Document
   ) {
     // reset posts input obj
@@ -125,33 +122,31 @@ export class PostListComponent implements OnInit, OnDestroy {
     const { count, posts } = this.read.getPosts(this.input);
 
     if (count) {
-      this.total = this.ns.isServer
-        ? this.core.waitFor(count)
-        : count;
+      this.total = await this.ns.load('count', count);
+      if (this.ns.isBrowser) {
+        this.totalSub = count.subscribe((t: string) => this.total = t);
+      }
     }
     if (posts) {
-      this.posts = this.ns.isServer
-        ? this.posts = this.core.waitFor(posts)
-        : this.posts = this.postPipe(posts);
+      this.createPost(posts);
     }
   }
 
-  /*async createPost() {
-    // create post subscription with change detection
+  async createPost(posts: Observable<Post[] | null>) {
+
+    posts = this.postPipe(posts);
+
+    // unsubscribe to existing subscription
     if (this.postsSub) {
       this.postsSub.unsubscribe();
     }
-    // ssr version
-    if (this.ns.isServer) {
-      this.posts = await this.core.waitFor(this._posts);
-    } else {
-      this.postsSub = this.postPipe(this._posts)
-        .subscribe((p: Post[] | null) => {
-          this.posts = p;
-          this.cdr.detectChanges();
-        });
+
+    // get promise posts, then subscribe
+    this.posts = await this.ns.load('posts', posts);
+    if (this.ns.isBrowser) {
+      this.postsSub = posts.subscribe((p: Post[] | null) => this.posts = p);
     }
-  }*/
+  }
 
   postPipe(p: Observable<Post[] | null>): Observable<Post[] | null> {
     // pipe in likes and bookmarks
@@ -209,8 +204,7 @@ export class PostListComponent implements OnInit, OnDestroy {
       ...paging
     });
 
-    this.posts = this.postPipe(posts);
-    //await this.createPost();
+    this.createPost(posts);
 
     // scroll to top
     this.doc.defaultView?.scrollTo(0, 0);

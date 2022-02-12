@@ -1,10 +1,8 @@
 import { Component, OnDestroy } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { map, switchMap, take, tap } from 'rxjs/operators';
+import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
+import { take, tap } from 'rxjs/operators';
 import { UserRec } from '../auth/user.model';
-import { CoreModule } from '../core/core.module';
 import { NavService } from '../nav/nav.service';
 import { ReadService } from '../platform/firebase/read.service';
 import { SeoService } from '../shared/seo/seo.service';
@@ -18,94 +16,77 @@ import { Post } from './post.model';
 })
 export class PostComponent implements OnDestroy {
 
-  post!: Observable<Post> | Promise<Post>;
+  paramSub!: Subscription;
+  postSub!: Subscription;
+  userSub!: Subscription;
+  //post!: Observable<Post> | Promise<Post>;
+  post!: Post;
   user$!: UserRec | null;
-  sub!: Subscription;
   postId!: string;
+  slug!: string;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     public read: ReadService,
     private seo: SeoService,
-    private core: CoreModule,
-    public ns: NavService,
-    private sanitizer: DomSanitizer
+    public ns: NavService
   ) {
     let paramMap = this.route.paramMap;
     if (this.ns.isServer) {
       paramMap = paramMap.pipe(take(1));
     }
-    this.sub = paramMap.subscribe(async (r: ParamMap) => await this.loadPage(r));
+    this.paramSub = paramMap.subscribe(async (r: ParamMap) => await this.loadPage(r));
   }
 
   async loadPage(p: ParamMap) {
-    const slug = p.get('slug');
-    const id = p.get('id');
+    const slug = this.slug = p.get('slug') as string;
+    const id = this.postId = p.get('id') as string;
 
-    // backwards compatible for 'blog', will be removed later
+    // backwards compatible for 'blog'
     if (slug && !id) {
-      this.post = this.read.getPostBySlug(slug).pipe(
+      this.read.getPostBySlug(slug).pipe(
+        take(1),
         tap((r: Post) => {
           if (r) {
             this.router.navigate(['/post', r.id, r.slug]);
           }
         })
       );
-      return;
     }
 
-    if (id) {
-      this.postId = id;
-      let post: Post;
-
-      // browser version
-      if (this.ns.isBrowser) {
-        this.post = this.read.getPostById(id).pipe(
-          switchMap((r: Post) => {
-
-            // if post from id
-            if (r) {
-              this.meta(r);
-              // check slug
-              if (r.slug !== slug) {
-                this.router.navigate(['/post', id, r.slug]);
-              }
-            } else {
-              this.router.navigate(['/home']);
-            }
-            post = r;
-            return this.read.userRec;
-          }),
-          switchMap((user: UserRec | null) => {
-            // get user and heart
-            if (user && user.uid) {
-              this.user$ = user;
-              return combineLatest([
-                this.read.getAction(id, user.uid, 'hearts'),
-                this.read.getAction(id, user.uid, 'bookmarks')
-              ]);
-            }
-            return of(null);
-          }),
-          map((p: [boolean, boolean] | null) => {
-            if (p) {
-              // save liked and saved
-              [post.liked, post.saved] = p;
-            }
-            return post;
-          })
-        );
-      } else {
-
-        // ssr render
-        this.post = this.core.waitFor(
-          this.read.getPostById(id)
-        ).then((p: Post) => {
+    const post = this.read.getPostById(id).pipe(
+      tap((p: Post) => {
+        // if post from id
+        if (p) {
           this.meta(p);
-          return p;
+          // check slug
+          if (p.slug !== this.slug) {
+            this.router.navigate(['/post', this.postId, p.slug]);
+          }
+        } else {
+          this.router.navigate(['/home']);
+        }
+      }));
+
+    // ssr render
+    this.post = await this.ns.load('post', post);
+
+    // browser version subscription
+    if (this.ns.isBrowser) {
+
+      this.userSub = this.read.userRec
+        .subscribe((user: UserRec | null) => {
+          if (this.postSub) {
+            this.postSub.unsubscribe();
+          }
+          let post = user
+            ? this.read.getPostById(id, user)
+            : this.read.getPostById(id);
+
+          this.postSub = post
+            .subscribe((p: Post) => this.post = p);
         });
-      }
     }
   }
 
@@ -136,8 +117,7 @@ export class PostComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.sub) {
-      this.sub.unsubscribe();
-    }
+    if (this.paramSub) this.paramSub.unsubscribe();
+    if (this.postSub) this.postSub.unsubscribe();
   }
 }

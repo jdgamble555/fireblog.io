@@ -1,10 +1,14 @@
 import { OverlayContainer } from '@angular/cdk/overlay';
-import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { DOCUMENT, isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
+import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { Router } from '@angular/router';
+import { firstValueFrom, isObservable, map, Observable, of, take, tap } from 'rxjs';
 import { SeoService } from '../shared/seo/seo.service';
 
+
+declare const Zone: any;
 interface Link {
   name: string;
   location: string;
@@ -36,18 +40,35 @@ export class NavService {
   constructor(
     @Inject(PLATFORM_ID) platformId: Object,
     @Inject(DOCUMENT) private document: Document,
+    private transferState: TransferState,
     private router: Router,
     private overlay: OverlayContainer,
     private seo: SeoService
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
-    this.isServer = !isPlatformBrowser(platformId);
+    this.isServer = isPlatformServer(platformId);
     this.doc = this.document;
     this.directories = [];
 
     if (this.isBrowser && this.doc.defaultView?.localStorage.getItem(this.storage + '-dark-mode')) {
       this.toggleTheme();
     }
+  }
+
+  saveState<T>(key: string, data: any): void {
+    this.transferState.set<T>(makeStateKey(key), data);
+  }
+
+  getState<T>(key: string, defaultValue: any = []): T {
+    const state = this.transferState.get<T>(makeStateKey(key), defaultValue);
+    this.transferState.remove(makeStateKey(key));
+    return state;
+  }
+
+  load<T>(key: string, obs: Observable<T>): Promise<T> {
+    return this.isServer
+      ? this.waitFor(obs.pipe(take(1), tap((data: T) => this.saveState(key, data))))
+      : Promise.resolve(this.getState(key));
   }
 
   // add title
@@ -129,5 +150,22 @@ export class NavService {
     }
     this.isDarkMode = !this.isDarkMode;
     this.bgcolor = this.isDarkMode ? '#303030' : '';
+  }
+
+  async waitFor<T>(prom: Promise<T> | Observable<T>): Promise<T> {
+    if (isObservable(prom)) {
+      prom = firstValueFrom(prom);
+    }
+    const macroTask = Zone.current
+      .scheduleMacroTask(
+        `WAITFOR-${Math.random()}`,
+        () => { },
+        {},
+        () => { }
+      );
+    return prom.then((p: T) => {
+      macroTask.invoke();
+      return p;
+    });
   }
 }

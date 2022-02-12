@@ -1,8 +1,8 @@
-<mat-card class="ng-card mat-elevation-z0 ng-card-outline" *ngIf="tags | async as _tags">
+<mat-card class="ng-card mat-elevation-z0 ng-card-outline" *ngIf="tags as _tags">
   <mat-card-content>
     <ul class="tag_list">
       <li [ngClass]="{
-        'tag-li-footer': display == 'footer'
+        'tag-li-footer': display === 'footer'
       }" *ngFor="let tag of _tags" [routerLink]="['t', tag.name]"><i># </i>{{ tag.name }}
         ({{ tag.count }})</li>
     </ul>

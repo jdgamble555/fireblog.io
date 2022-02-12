@@ -1,5 +1,5 @@
 import { NgModule, SecurityContext } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, BrowserTransferStateModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -40,6 +40,7 @@ import { CommentComponent } from './post/comment/comment.component';
       registrationStrategy: 'registerWhenStable:30000'
     }),
     BrowserAnimationsModule,
+    BrowserTransferStateModule,
     CoreModule,
     MarkdownModule.forRoot({
       sanitize: SecurityContext.NONE

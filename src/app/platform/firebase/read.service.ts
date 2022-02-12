@@ -9,6 +9,7 @@ import {
   DocumentReference,
   Firestore,
   orderBy,
+  Timestamp,
   query,
   where,
   limit,
@@ -16,7 +17,7 @@ import {
   DocumentSnapshot,
   docSnapshots
 } from '@angular/fire/firestore';
-import { Observable, of } from 'rxjs';
+import { combineLatest, Observable, of } from 'rxjs';
 import { debounceTime, map, switchMap, take } from 'rxjs/operators';
 import { UserRec } from 'src/app/auth/user.model';
 import { Post, Tag } from 'src/app/post/post.model';
@@ -182,7 +183,8 @@ export class ReadService {
     tag,
     uid,
     field,
-    drafts = false
+    drafts = false,
+    user
   }: {
     sortField?: string,
     sortDirection?: 'desc' | 'asc',
@@ -191,7 +193,8 @@ export class ReadService {
     field?: string,
     page?: number,
     pageSize?: number,
-    drafts?: boolean
+    drafts?: boolean,
+    user?: UserRec
   } = {}): {
     count: Observable<string>,
     posts: Observable<Post[]>
@@ -262,6 +265,13 @@ export class ReadService {
       count = this.getTotal('posts');
     }
 
+    // convert date types for ssr
+    posts = posts.pipe(map((p) => p.map((data: any) => ({
+      ...data,
+      createdAt: (data?.createdAt as Timestamp)?.toMillis() || 0,
+      updatedAt: (data?.updatedAt as Timestamp)?.toMillis() || 0,
+    }))));
+
     count = count.pipe(
       map((total: string) =>
         total == '0' || total === undefined
@@ -269,20 +279,51 @@ export class ReadService {
           : total
       ));
 
+    if (user) {
+
+      //posts.pipe((map((p) => p)))
+
+    }
+
     return { posts, count };
   }
+
   /**
    * Get Post by post id
    * @param id post id
    * @returns post observable joined by author doc
    */
-  getPostById(id: string): Observable<Post> {
+  getPostById(id: string, user?: UserRec): Observable<Post> {
+    let _post: Post;
     return expandRef<Post>(
       docData<Post>(
         doc(this.afs, 'posts', id)
       ), ['authorDoc']).pipe(
-        // add id field
-        map((p: Post) => p ? { ...p, id } : p)
+        // add id field, ssr dates
+        map((p: Post) => ({
+          ...p,
+          id,
+          createdAt: (p?.createdAt as Timestamp)?.toMillis() || 0,
+          updatedAt: (p?.updatedAt as Timestamp)?.toMillis() || 0,
+        }))
+      ).pipe(
+        switchMap((p: Post) => {
+          _post = p;
+          if (user && user.uid) {
+            return combineLatest([
+              this.getAction(id, user.uid, 'hearts'),
+              this.getAction(id, user.uid, 'bookmarks')
+            ]);
+          }
+          return of(null);
+        }),
+        map((p: [boolean, boolean] | null) => {
+          if (p) {
+            // save liked and saved
+            [_post.liked, _post.saved] = p;
+          }
+          return _post;
+        })
       );
   }
   /**
@@ -301,15 +342,14 @@ export class ReadService {
    * @returns
    */
   getPostBySlug(slug: string): Observable<Post> {
-    return expandRefs<Post>(
-      collectionData<Post>(
-        query<Post>(
-          collection(this.afs, 'posts') as CollectionReference<Post>,
-          where('slug', '==', slug),
-          limit(1)
-        ), { idField: 'id' }
-      ), ['authorDoc']).pipe(
-        map((p: Post[]) => p[0])
-      );
+    return collectionData<Post>(
+      query<Post>(
+        collection(this.afs, 'posts') as CollectionReference<Post>,
+        where('slug', '==', slug),
+        limit(1)
+      ), { idField: 'id' }
+    ).pipe(
+      map((p: Post[]) => p[0])
+    );
   }
 }

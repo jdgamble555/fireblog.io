@@ -47,7 +47,7 @@
           <span>Dashboard</span>
         </button>
         <mat-divider></mat-divider>
-        <ng-container *ngIf="user.role == 'admin'">
+        <ng-container *ngIf="user.role === 'admin'">
           <button mat-menu-item [routerLink]="['/user', user.uid]">
             <mat-icon class="ng-menu-icon">account_box</mat-icon>
             <span>My Posts</span>

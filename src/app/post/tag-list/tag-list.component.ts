@@ -1,6 +1,5 @@
-import { Component, Input } from '@angular/core';
-import { Observable } from 'rxjs';
-import { CoreModule } from 'src/app/core/core.module';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { NavService } from 'src/app/nav/nav.service';
 import { ReadService } from 'src/app/platform/firebase/read.service';
 import { Tag } from '../post.model';
@@ -10,17 +9,32 @@ import { Tag } from '../post.model';
   templateUrl: './tag-list.component.html',
   styleUrls: ['./tag-list.component.scss']
 })
-export class TagListComponent {
+export class TagListComponent implements OnInit, OnDestroy {
 
   @Input() display!: string;
 
-  tags: Observable<Tag[]> | Promise<Tag[]>;
+  //tags: Observable<Tag[]> | Promise<Tag[]>;
+  tagsSub!: Subscription;
+  tags!: Tag[];
 
   constructor(
     private read: ReadService,
-    public ns: NavService,
-    private core: CoreModule
-  ) {
-    this.tags = this.core.waitFor(this.read.getTags());
+    public ns: NavService
+  ) { }
+
+  async ngOnInit(): Promise<void> {
+
+    // get tags
+    const tags = this.read.getTags();
+    this.tags = await this.ns.load('tags', tags);
+
+    // subscribe
+    if (this.ns.isBrowser) {
+      this.tagsSub = this.read.getTags().subscribe((t: Tag[]) => this.tags = t);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.tagsSub) this.tagsSub.unsubscribe();
   }
 }

@@ -1,5 +1,5 @@
 <ng-container *ngIf="posts">
-  <mat-card class="ng-card" *ngFor="let post of posts | async">
+  <mat-card class="ng-card" *ngFor="let post of posts">
     <img *ngIf="post.image" mat-card-image src="{{ post.image }}" alt="{{ post.title }}"
       [routerLink]="['/post', post.id, post.slug]" class="ng-link" />
     <h1 [routerLink]="['/post', post.id, post.slug]" class="ng-post-title">
@@ -11,9 +11,9 @@
       <mat-icon *ngIf="!post.authorDoc?.photoURL" class="ng-photo-icon">account_circle</mat-icon>
       <p><small><b>{{ post.authorDoc?.displayName }}</b>
           <ng-container *ngIf="post.createdAt"> on
-            {{ post.createdAt.toDate() | date: 'EEEE, MMMM d, yyyy' }}</ng-container>
+            {{ post.createdAt | date: 'EEEE, MMMM d, yyyy' }}</ng-container>
           <ng-container *ngIf="post.updatedAt"> (last modified on
-            {{ post.updatedAt.toDate() | date: 'EEEE, MMMM d, yyyy' }})</ng-container>
+            {{ post.updatedAt | date: 'EEEE, MMMM d, yyyy' }})</ng-container>
         </small></p>
     </div>
     <br />
@@ -38,7 +38,7 @@
             </span>
           </button>
         </div>
-        <ng-container *ngIf="(post.authorId == user?.uid || user?.role == 'admin' || user?.role == 'editor')">
+        <ng-container *ngIf="(post.authorId === user?.uid || user?.role === 'admin' || user?.role === 'editor')">
           <button mat-icon-button [routerLink]="['/edit', post.id]">
             <mat-icon>edit</mat-icon>
           </button>
@@ -47,7 +47,7 @@
     </mat-card-actions>
   </mat-card>
 </ng-container>
-<ng-container *ngIf="total | async as t">
+<ng-container *ngIf="total as t">
   <ng-container *ngIf="t ==='none'">
     <mat-card class="ng-card">There are no posts here yet!</mat-card>
   </ng-container>
