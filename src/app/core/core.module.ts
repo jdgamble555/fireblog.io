@@ -5,6 +5,7 @@ import { MaterialModule } from './material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthComponent } from '../auth/auth.component';
+import { HttpClientModule } from '@angular/common/http';
 
 
 const modules = [
@@ -12,7 +13,8 @@ const modules = [
   FormsModule,
   ReactiveFormsModule,
   MaterialModule,
-  RouterModule
+  RouterModule,
+  HttpClientModule
 ];
 
 const components = [

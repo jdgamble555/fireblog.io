@@ -1,6 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
-import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
 import { UserRec } from '../auth/user.model';
 import { NavService } from '../nav/nav.service';

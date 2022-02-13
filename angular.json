@@ -29,7 +29,8 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              "src/manifest.webmanifest"
+              "src/manifest.webmanifest",
+              "src/ads.txt"
             ],
             "styles": [
               "node_modules/prismjs/themes/prism-tomorrow.css",
@@ -118,7 +119,8 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              "src/manifest.webmanifest"
+              "src/manifest.webmanifest",
+              "src/ads.txt"
             ],
             "styles": [
               "node_modules/prismjs/themes/prism-tomorrow.css",

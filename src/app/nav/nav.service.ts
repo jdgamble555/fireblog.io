@@ -4,7 +4,7 @@ import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
 import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { firstValueFrom, isObservable, map, Observable, of, take, tap } from 'rxjs';
+import { firstValueFrom, isObservable, Observable, tap } from 'rxjs';
 import { SeoService } from '../shared/seo/seo.service';
 
 
