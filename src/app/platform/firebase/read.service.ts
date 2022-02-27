@@ -183,8 +183,7 @@ export class ReadService {
     tag,
     uid,
     field,
-    drafts = false,
-    user
+    drafts = false
   }: {
     sortField?: string,
     sortDirection?: 'desc' | 'asc',
@@ -193,8 +192,7 @@ export class ReadService {
     field?: string,
     page?: number,
     pageSize?: number,
-    drafts?: boolean,
-    user?: UserRec
+    drafts?: boolean
   } = {}): {
     count: Observable<string>,
     posts: Observable<Post[]>
@@ -278,12 +276,6 @@ export class ReadService {
           ? 'none'
           : total
       ));
-
-    if (user) {
-
-      //posts.pipe((map((p) => p)))
-
-    }
 
     return { posts, count };
   }

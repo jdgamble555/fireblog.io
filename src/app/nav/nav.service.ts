@@ -114,7 +114,9 @@ export class NavService {
     this.rightNav = rightNav;
   }
   openLeftNav(): void {
-    this.leftNav.open();
+    if (!this.leftNav.opened) {
+      this.leftNav.open();
+    }
   }
   closeLeftNav(): void {
     this.leftNav.close();
