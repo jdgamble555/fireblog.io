@@ -1,1 +1,0 @@
-These are just old functions I wrote that I am storing here.  This package does NOT use any firebase functions to work.
