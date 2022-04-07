@@ -17,10 +17,10 @@ const FirebaseEVN = (state: StateService): any => {
   let process: any;
   if (process?.env?.firebase) {
     if (typeof window === 'undefined') {
-      state.saveState('fb', JSON.parse(process.env.firebase));
+      state.saveState('fb', process.env.firebase);
       return process.env.firebase;
     } else if (state.hasState('fb')) {
-      return state.getState('fb');
+      return JSON.parse(state.getState('fb'));
     }
   }
 };
