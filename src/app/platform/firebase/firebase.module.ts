@@ -10,12 +10,26 @@ import {
   ScreenTrackingService,
   UserTrackingService
 } from '@angular/fire/analytics';
+import { StateService } from 'src/app/core/state.service';
+import { TransferState } from '@angular/platform-browser';
+
+const FirebaseEVN = (state: StateService): any => {
+  let process: any;
+  if (process?.env?.firebase) {
+    if (typeof window === 'undefined') {
+      state.saveState('fb', process.env.firebase);
+    } else if (state.hasState('fb')) {
+      return state.getState('fb');
+    }
+  }
+  return environment.firebase;
+};
 
 @NgModule({
   declarations: [],
   imports: [
     provideAnalytics(() => getAnalytics()),
-    provideFirebaseApp(() => initializeApp(environment.firebase)),
+    provideFirebaseApp(() => initializeApp(FirebaseEVN(new StateService(new TransferState)))),
     provideFirestore(() => getFirestore()),
     provideAuth(() => getAuth()),
     provideStorage(() => getStorage())

@@ -2,9 +2,9 @@ import { OverlayContainer } from '@angular/cdk/overlay';
 import { DOCUMENT, isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
-import { makeStateKey, TransferState } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { firstValueFrom, isObservable, Observable, tap } from 'rxjs';
+import { StateService } from '../core/state.service';
 import { SeoService } from '../shared/seo/seo.service';
 
 
@@ -40,7 +40,7 @@ export class NavService {
   constructor(
     @Inject(PLATFORM_ID) platformId: Object,
     @Inject(DOCUMENT) private document: Document,
-    private transferState: TransferState,
+    private state: StateService,
     private router: Router,
     private overlay: OverlayContainer,
     private seo: SeoService
@@ -55,24 +55,10 @@ export class NavService {
     }
   }
 
-  saveState<T>(key: string, data: any): void {
-    this.transferState.set<T>(makeStateKey(key), data);
-  }
-
-  getState<T>(key: string, defaultValue: any = []): T {
-    const state = this.transferState.get<T>(makeStateKey(key), defaultValue);
-    this.transferState.remove(makeStateKey(key));
-    return state;
-  }
-
-  hasState<T>(key: string) {
-    return this.transferState.hasKey<T>(makeStateKey(key));
-  }
-
   load<T>(key: string, obs: Observable<T>): Promise<T> {
     return this.isServer
-      ? this.waitFor(obs.pipe(tap((data: T) => this.saveState(key, data))))
-      : this.hasState(key) ? Promise.resolve(this.getState(key)) : firstValueFrom(obs);
+      ? this.waitFor(obs.pipe(tap((data: T) => this.state.saveState(key, data))))
+      : this.state.hasState(key) ? Promise.resolve(this.state.getState(key)) : firstValueFrom(obs);
   }
 
   // add title
