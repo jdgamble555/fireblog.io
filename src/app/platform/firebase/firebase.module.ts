@@ -22,6 +22,7 @@ const FirebaseEVN = (state: StateService): any => {
     }
   } else if (state.hasState('fb')) {
     const fb = state.getState('fb');
+    console.log(fb);
     return fb;
   }
 };
