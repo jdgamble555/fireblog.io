@@ -1,2 +1,2 @@
-const server = require('../dist/angular-test/server/main');
+const server = require('../dist/fireblog/server/main');
 module.exports = server.app();
