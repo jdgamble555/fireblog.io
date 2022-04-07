@@ -7,7 +7,7 @@
   ],
   "functions": {
     "api/index.ts": {
-      "includeFiles": "dist/angular-test/browser/**"
+      "includeFiles": "dist/fireblog/browser/**"
     }
   }
 }
