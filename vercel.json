@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "public": true,
+  "name": "test-universal",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api" }
+  ],
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": "dist/angular-test/browser/**"
+    }
+  }
+}
