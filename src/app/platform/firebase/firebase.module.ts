@@ -3,7 +3,7 @@ import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getStorage, provideStorage } from '@angular/fire/storage';
 import { getAuth, provideAuth } from '@angular/fire/auth';
-import { environment } from 'src/environments/environment';
+//import { environment } from 'src/environments/environment';
 import {
   getAnalytics,
   provideAnalytics,
@@ -18,11 +18,11 @@ const FirebaseEVN = (state: StateService): any => {
   if (process?.env?.firebase) {
     if (typeof window === 'undefined') {
       state.saveState('fb', process.env.firebase);
+      return process.env.firebase;
     } else if (state.hasState('fb')) {
       return state.getState('fb');
     }
   }
-  return environment?.firebase;
 };
 
 @NgModule({
