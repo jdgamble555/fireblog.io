@@ -25,6 +25,7 @@ const FirebaseEVN = (state: StateService): any => {
     console.log(fb);
     return fb;
   }
+  console.log("nope");
 };
 
 @NgModule({
