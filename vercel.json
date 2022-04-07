@@ -1,7 +1,7 @@
 {
   "version": 2,
   "public": true,
-  "name": "test-universal",
+  "name": "fireblog",
   "rewrites": [
     { "source": "/(.*)", "destination": "/api" }
   ],

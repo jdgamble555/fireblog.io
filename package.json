@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build-dev": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "gc-deploy": "gcloud builds submit --tag gcr.io/fireblog-io/fireblog --timeout=3600",
@@ -13,7 +13,8 @@
     "build:ssr": "ng build && ng run fireblog:server",
     "prod": "npm run build:ssr && npm run serve:ssr",
     "prerender": "ng run fireblog:prerender",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "vercel-build": "npm run build:ssr"
   },
   "engines": {
     "node": "14"
