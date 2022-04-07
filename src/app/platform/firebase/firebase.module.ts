@@ -14,13 +14,13 @@ import { StateService } from 'src/app/core/state.service';
 import { TransferState } from '@angular/platform-browser';
 
 const FirebaseEVN = (state: StateService): any => {
-  let process: any;
-  if (process?.env?.firebase) {
-    if (typeof window === 'undefined') {
-      state.saveState('fb', process.env.firebase);
-      return process.env.firebase;
+  if (typeof window === 'undefined') {
+    if (process.env.firebase) {
+      const fb = JSON.parse(process.env.firebase);
+      state.saveState('fb', fb);
+      return fb;
     } else if (state.hasState('fb')) {
-      return JSON.parse(state.getState('fb'));
+      return state.getState('fb');
     }
   }
 };
