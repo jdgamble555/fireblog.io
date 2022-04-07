@@ -22,7 +22,7 @@ const FirebaseEVN = (state: StateService): any => {
       return state.getState('fb');
     }
   }
-  return environment.firebase;
+  return environment?.firebase;
 };
 
 @NgModule({
