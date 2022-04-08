@@ -3,7 +3,7 @@ import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getStorage, provideStorage } from '@angular/fire/storage';
 import { getAuth, provideAuth } from '@angular/fire/auth';
-//import { environment } from 'src/environments/environment';
+import { environment } from 'src/environments/environment';
 import {
   getAnalytics,
   provideAnalytics,
@@ -11,23 +11,12 @@ import {
   UserTrackingService
 } from '@angular/fire/analytics';
 
-declare let process: any | undefined;
-
-const FirebaseEVN = () => {
-  if (process?.env?.VUE_APP_FIREBASE) {
-    return JSON.parse(process.env.VUE_APP_FIREBASE);
-  }
-  //else {
-  //  return environment.firebase;
-  //}
-};
 
 @NgModule({
   declarations: [],
   imports: [
     provideAnalytics(() => getAnalytics()),
-    provideFirebaseApp(() => initializeApp(FirebaseEVN())
-    ),
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideFirestore(() => getFirestore()),
     provideAuth(() => getAuth()),
     provideStorage(() => getStorage())
