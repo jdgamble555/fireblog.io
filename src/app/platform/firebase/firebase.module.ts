@@ -11,12 +11,13 @@ import {
   UserTrackingService
 } from '@angular/fire/analytics';
 
+declare let process: any | undefined;
 
 const FirebaseEVN = () => {
-  let process: any;
-  //if (process?.env?.VUE_APP_FIREBASE) {
+  if (process?.env?.VUE_APP_FIREBASE) {
     return JSON.parse(process.env.VUE_APP_FIREBASE);
-  //} else {
+  }
+  //else {
   //  return environment.firebase;
   //}
 };
