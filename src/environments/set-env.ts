@@ -2,7 +2,7 @@ const setEnv = () => {
   const fs = require('fs');
   const writeFile = fs.writeFile;
   // Configure Angular `environment.ts` file path
-  const targetPath = './src/environments/environment.prod.json';
+  const targetPath = '../../src/environments/environment.prod.json';
 
   // `environment.ts` file structure
   const envConfigFile = process.env.FIREBASE;
