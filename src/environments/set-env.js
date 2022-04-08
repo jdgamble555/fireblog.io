@@ -5,8 +5,8 @@ function setEnv() {
   targetPath = "./src/environments/environment.prod.json";
 
   // `environment.prod.json` file structure
-  //envConfigFile = process.env.FIREBASE;
-  envConfigFile = 'tester';
+  envConfigFile = JSON.stringify(JSON.parse(process.env.FIREBASE));
+
 
   console.log(
     "The file `environment.prod.json` will be written with the following content: \n"
