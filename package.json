@@ -14,7 +14,7 @@
     "prod": "npm run build:ssr && npm run serve:ssr",
     "prerender": "ng run fireblog:prerender",
     "lint": "ng lint",
-    "config": "@vercel/node src/environments/set-env.ts",
+    "config": "node src/environments/set-env.js",
     "vercel-build": "npm run config && npm run build:ssr"
   },
   "engines": {
