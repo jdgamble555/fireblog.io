@@ -1,11 +1,11 @@
 function setEnv() {
   fs = require("fs");
   writeFile = fs.writeFile;
-  // Configure Angular `environment.ts` file path
+  // Configure Angular `environment.prod.json` file path
   targetPath = "./src/environments/environment.prod.json";
 
-  // `environment.ts` file structure
-  envConfigFile = process.env.FIREBASE;
+  // `environment.prod.json` file structure
+  envConfigFile = JSON.parse(process.env.FIREBASE);
 
   console.log(
     "The file `environment.prod.json` will be written with the following content: \n"
@@ -16,7 +16,7 @@ function setEnv() {
       throw err;
     } else {
       console.log(
-        "Angular environment.prod.json file generated correctly at ${targetPath} \n"
+        "Angular environment.prod.json file generated correctly at" + targetPath + "\n"
       );
     }
   });
