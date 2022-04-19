@@ -263,8 +263,9 @@ export class ReadService {
       count = this.getTotal('posts');
     }
 
+
     // convert date types for ssr
-    posts = posts.pipe(map((p) => p.map((data: any) => ({
+    posts = posts.pipe(map((p: Post[]) => p.map((data: any) => ({
       ...data,
       createdAt: (data?.createdAt as Timestamp)?.toMillis() || 0,
       updatedAt: (data?.updatedAt as Timestamp)?.toMillis() || 0,

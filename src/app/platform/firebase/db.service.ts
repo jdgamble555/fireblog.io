@@ -232,8 +232,7 @@ export class DbService {
   /**
    * Delete image from post doc
    * @param id
-   * @param val
-   * @param publish
+   * @param url
    */
   async deletePostImage(id: string, url: string): Promise<void> {
     await updateDoc(

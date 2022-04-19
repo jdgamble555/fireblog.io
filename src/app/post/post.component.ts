@@ -80,7 +80,7 @@ export class PostComponent implements OnDestroy {
           if (this.postSub) {
             this.postSub.unsubscribe();
           }
-          let post = user
+          const post = user
             ? this.read.getPostById(id, user)
             : this.read.getPostById(id);
 

@@ -5,11 +5,8 @@ import { Component, OnInit } from '@angular/core';
   templateUrl: './rightnav.component.html',
   styleUrls: ['./rightnav.component.scss']
 })
-export class RightnavComponent implements OnInit {
+export class RightnavComponent {
 
   constructor() { }
-
-  ngOnInit(): void {
-  }
 
 }

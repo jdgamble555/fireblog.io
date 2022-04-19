@@ -1,6 +1,4 @@
-import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
 import { NavService } from '../nav/nav.service';
 import { SeoService } from '../shared/seo/seo.service';
 
@@ -15,8 +13,7 @@ export class HomeComponent {
 
   constructor(
     public ns: NavService,
-    private seo: SeoService,
-    private http: HttpClient
+    private seo: SeoService
   ) {
 
     this.ns.openLeftNav();

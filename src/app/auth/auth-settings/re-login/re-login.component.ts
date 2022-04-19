@@ -54,8 +54,7 @@ export class ReLoginComponent implements OnInit {
     this.userForm = this.fb.group({
       password: ['', [
         Validators.required
-      ]
-      ]
+      ]]
     });
   }
 
