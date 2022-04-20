@@ -1,5 +1,4 @@
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
-import { MatSidenav } from '@angular/material/sidenav';
+import { Component } from '@angular/core';
 import { NavService } from './nav.service';
 
 @Component({
@@ -7,16 +6,8 @@ import { NavService } from './nav.service';
   templateUrl: './nav.component.html',
   styleUrls: ['./nav.component.scss']
 })
-export class NavComponent implements AfterViewInit {
+export class NavComponent {
 
-  @ViewChild('leftNav', { static: true }) leftNav!: MatSidenav;
-  @ViewChild('rightNav', { static: true }) rightNav!: MatSidenav;
-
-  constructor(public nav: NavService) { }
-
-  ngAfterViewInit(): void {
-    this.nav.setLeftNav(this.leftNav);
-    this.nav.setRightNav(this.rightNav);
-  }
+  constructor(public ns: NavService) { }
 
 }

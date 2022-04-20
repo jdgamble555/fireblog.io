@@ -1,13 +1,15 @@
-<app-header></app-header>
-<mat-sidenav-container class="ng-container centered" autosize hasBackdrop="false" [@.disabled]="true">
-  <mat-sidenav #leftNav opened="true" mode="side" class="ng-sidenav ng-transparent">
-    <app-leftnav></app-leftnav>
-  </mat-sidenav>
-  <mat-sidenav #rightNav closed mode="side" position="end">
-    <app-rightnav></app-rightnav>
-  </mat-sidenav>
-  <mat-sidenav-content class="ng-content">
-    <router-outlet></router-outlet>
-  </mat-sidenav-content>
-</mat-sidenav-container>
-<app-footer></app-footer>
+<ol class="arrows" itemscope itemtype="https://schema.org/BreadcrumbList">
+  <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+    <a itemprop="item" mat-button routerLink="/">
+      <mat-icon color="primary" class="ng-button-icon">home</mat-icon><span itemprop="name">Home</span>
+    </a>
+    <meta itemprop="position" content="1" />
+  </li>
+  <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"
+    *ngFor="let c of ns.directories; index as i">
+    <a itemprop="item" mat-button [routerLink]="c.location ? c.location : []">
+      <span itemprop="name">{{ c.name }}</span>
+    </a>
+    <meta itemprop="position" content="{{ i + 2 }}" />
+  </li>
+</ol>

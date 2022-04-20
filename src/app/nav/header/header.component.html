@@ -74,20 +74,4 @@
     </ng-template>
   </mat-toolbar-row>
 </mat-toolbar>
-<div class="ng-container bc-container">
-  <ol class="arrows" itemscope itemtype="https://schema.org/BreadcrumbList">
-    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-      <a itemprop="item" mat-button routerLink="/">
-        <mat-icon color="primary" class="ng-button-icon">home</mat-icon><span itemprop="name">Home</span>
-      </a>
-      <meta itemprop="position" content="1" />
-    </li>
-    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"
-      *ngFor="let c of ns.directories; index as i">
-      <a itemprop="item" mat-button [routerLink]="c.location ? c.location : []">
-        <span itemprop="name">{{ c.name }}</span>
-      </a>
-      <meta itemprop="position" content="{{ i + 2 }}" />
-    </li>
-  </ol>
-</div>
+

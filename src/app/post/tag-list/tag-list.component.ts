@@ -11,9 +11,6 @@ import { Tag } from '../post.model';
 })
 export class TagListComponent implements OnInit, OnDestroy {
 
-  @Input() display!: string;
-
-  //tags: Observable<Tag[]> | Promise<Tag[]>;
   tagsSub!: Subscription;
   tags!: Tag[];
 

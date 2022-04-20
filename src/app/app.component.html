@@ -1,1 +1,15 @@
-<app-nav></app-nav>
+<app-header></app-header>
+<div [ngClass]="this.ns.simple ? 'simple-wrapper' : 'wrapper'">
+  <nav class="header">
+    <app-nav></app-nav>
+  </nav>
+  <article class="content">
+    <router-outlet></router-outlet>
+  </article>
+  <nav class="leftnav">
+    <app-leftnav></app-leftnav>
+  </nav>
+  <footer class="footer">
+    <app-footer></app-footer>
+  </footer>
+</div>

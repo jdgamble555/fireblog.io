@@ -1,7 +1,6 @@
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { DOCUMENT, isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
-import { MatSidenav } from '@angular/material/sidenav';
 import { Router } from '@angular/router';
 import { firstValueFrom, isObservable, Observable, tap } from 'rxjs';
 import { StateService } from '../core/state.service';
@@ -25,11 +24,10 @@ export class NavService {
 
   author = 'Jonathan Gamble';
 
+  simple = false;
+
   isDarkMode = false;
   bgcolor = '';
-
-  private leftNav!: MatSidenav;
-  private rightNav!: MatSidenav;
 
   isBrowser: Boolean;
   isServer: Boolean;
@@ -93,31 +91,23 @@ export class NavService {
     this.directories.push(data);
   }
 
-  setLeftNav(leftNav: MatSidenav): void {
-    this.leftNav = leftNav;
-  }
-  setRightNav(rightNav: MatSidenav): void {
-    this.rightNav = rightNav;
-  }
   openLeftNav(): void {
-    if (!this.leftNav.opened) {
-      this.leftNav.open();
-    }
+    this.simple = false;
   }
   closeLeftNav(): void {
-    this.leftNav.close();
+    this.simple = true;
   }
   toggleLeftNav(): void {
-    this.leftNav.toggle();
+
   }
   openRightNav(): void {
-    this.rightNav.open();
+
   }
   closeRightNav(): void {
-    this.rightNav.close();
+
   }
   toggleRightNav(): void {
-    this.rightNav.toggle();
+
   }
   home(): void {
     this.router.navigate(['/']);

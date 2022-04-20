@@ -17,7 +17,7 @@ $custom-typography: mat.define-typography-config(
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
-$app-primary: mat.define-palette(mat.$blue-palette, 600);
+$app-primary: mat.define-palette(mat.$blue-palette, 800);
 $app-accent: mat.define-palette(mat.$gray-palette, 700);
 $app-background: #fff;
 
@@ -41,7 +41,7 @@ $app-theme: mat.define-light-theme(
   background-color: white;
 }
 
-$dark-primary: mat.define-palette(mat.$light-blue-palette, 700);
+$dark-primary: mat.define-palette(mat.$light-blue-palette, 800);
 $dark-accent: mat.define-palette(mat.$blue-gray-palette, 100);
 $dark-theme-background: mat.define-palette(mat.$gray-palette, 600);
 $dark-theme: mat.define-dark-theme(
@@ -279,21 +279,15 @@ h3 {
 }
 
 .ng-post-title:hover {
-  color: #565350;
+  opacity: 0.75;
   cursor: pointer;
 }
 
-@media (min-width: 767px) {
-  .ng-height {
-    min-height: 650px;
-  }
-}
-
 .ng-container {
-  margin-top: 15px;
-  margin-bottom: 15px;
   max-width: 995px;
   background-color: transparent !important;
+  margin-right: auto;
+  margin-left: auto;
 }
 
 // Snackbar styling
@@ -336,11 +330,6 @@ h3 {
   position: sticky;
   top: 0;
   z-index: 1000;
-}
-
-.bc-container {
-  margin-right: auto;
-  margin-left: auto;
 }
 
 .centered {
@@ -421,11 +410,6 @@ mat-form-field.mat-form-field {
   display: inline;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-}
-
-.tag-li-footer {
-  display: inline-block;
-  margin-left: 5px;
 }
 
 .ng-footer {
@@ -941,4 +925,61 @@ mat-paginator .mat-form-field {
 .resp-sharing-button--reddit:active {
   background-color: #3a80c1;
   border-color: #3a80c1;
+}
+
+.header {
+  grid-area: header;
+}
+.content {
+  grid-area: content;
+}
+.leftnav {
+  grid-area: leftnav;
+}
+.footer {
+  grid-area: footer;
+  text-align: center;
+}
+.wrapper {
+  margin-right: auto;
+  margin-left: auto;
+  max-width: 995px;
+  display: grid;
+  grid-template-areas:
+    "header"
+    "content"
+    "leftnav"
+    "footer";
+}
+
+@media (max-width: 699px) {
+  .tag_list > li {
+    display: inline-block;
+    margin-left: 5px;
+  }
+}
+
+.simple-wrapper {
+  grid-template-areas:
+    "header"
+    "content"
+    "footer";
+}
+.simple-wrapper .leftnav {
+  visibility: hidden;
+  display: none;
+}
+
+@media (min-width: 700px) {
+  .wrapper {
+    grid-template-columns: 1fr 4fr;
+    grid-template-rows: 1fr;
+    grid-template-areas:
+      "header header"
+      "leftnav content"
+      "footer footer";
+  }
+  nav ul {
+    flex-direction: column;
+  }
 }

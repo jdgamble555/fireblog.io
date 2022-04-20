@@ -28,7 +28,7 @@ export class HeaderComponent {
     private read: ReadService
   ) {
     this.user$ = this.read.userRec;
-    
+
   }
 
   toggle() {
