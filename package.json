@@ -14,8 +14,7 @@
     "prod": "npm run build:ssr && npm run serve:ssr",
     "prerender": "ng run fireblog:prerender",
     "lint": "ng lint",
-    "config": "node src/environments/set-env.js",
-    "vercel-build": "npm run config && npm run build:ssr"
+    "vercel-build": "npm run build:ssr"
   },
   "engines": {
     "node": "14"
@@ -45,6 +44,8 @@
     "zone.js": "~0.11.4"
   },
   "devDependencies": {
+    "@angular-builders/custom-webpack": "^13.1.0",
+    "@angular-builders/dev-server": "^7.3.1",
     "@angular-devkit/architect": "^0.1303.3",
     "@angular-devkit/build-angular": "^13.3.3",
     "@angular-eslint/builder": "13.2.1",
@@ -60,6 +61,7 @@
     "@types/node": "^12.20.38",
     "@typescript-eslint/eslint-plugin": "5.3.0",
     "@typescript-eslint/parser": "5.3.0",
+    "dotenv": "^16.0.0",
     "eslint": "^7.32.0",
     "firebase-admin": "^8.10.0",
     "firebase-functions": "^3.6.0",

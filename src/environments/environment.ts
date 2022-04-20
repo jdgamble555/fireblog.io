@@ -2,11 +2,9 @@
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-import * as firebase_env from 'src/environments/environment.json';
-
 export const environment = {
   production: false,
-  firebase: firebase_env
+  firebase: JSON.parse(process.env.FIREBASE_API_DEV as string)
 };
 
 /*
