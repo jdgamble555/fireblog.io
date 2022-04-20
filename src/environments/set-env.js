@@ -30,7 +30,7 @@ function setEnv() {
     } else {
       console.log(
         "Angular environment.prod.json file generated correctly at" +
-          targetPath +
+          targetPath2 +
           "\n"
       );
     }
