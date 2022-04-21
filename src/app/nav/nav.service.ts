@@ -3,7 +3,7 @@ import { DOCUMENT, isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, isObservable, Observable, tap } from 'rxjs';
-import { StateService } from '../core/state.service';
+import { StateService } from '../shared/state/state.service';
 import { SeoService } from '../shared/seo/seo.service';
 
 

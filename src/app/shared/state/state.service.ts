@@ -6,7 +6,7 @@ import { makeStateKey, TransferState } from '@angular/platform-browser';
 })
 export class StateService {
 
-  constructor(private transferState: TransferState,) { }
+  constructor(private transferState: TransferState) { }
 
   saveState<T>(key: string, data: any): void {
     this.transferState.set<T>(makeStateKey(key), data);

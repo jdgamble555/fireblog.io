@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { CoreModule } from 'src/app/core/core.module';
 
 import { CommentComponent } from './comment.component';
 
@@ -8,9 +9,10 @@ describe('CommentComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ CommentComponent ]
+      declarations: [CommentComponent],
+      imports: [CoreModule]
     })
-    .compileComponents();
+      .compileComponents();
   });
 
   beforeEach(() => {

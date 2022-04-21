@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { CoreModule } from 'src/app/core/core.module';
+import { AuthService } from 'src/app/platform/firebase/auth.service';
 
 import { RightnavComponent } from './rightnav.component';
 
@@ -8,9 +10,11 @@ describe('RightnavComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ RightnavComponent ]
+      declarations: [RightnavComponent],
+      imports: [CoreModule],
+      providers: [AuthService]
     })
-    .compileComponents();
+      .compileComponents();
   });
 
   beforeEach(() => {

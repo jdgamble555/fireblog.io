@@ -94,7 +94,7 @@ export class AuthComponent implements OnInit, OnDestroy {
     this.nav.closeLeftNav();
   }
 
-  ngOnInit() {
+  async ngOnInit() {
 
     // define types
     if (this.type === 'login') {
@@ -111,7 +111,7 @@ export class AuthComponent implements OnInit, OnDestroy {
       this.title = 'Verify Email Address';
     } else if (this.type === 'username') {
       // see if there is already a username
-      firstValueFrom(this.read.userRec)
+      await firstValueFrom(this.read.userRec)
         .then((user: UserRec | null) => {
           if (user && user.username) {
             this.router.navigate(['/dashboard']);
@@ -125,7 +125,7 @@ export class AuthComponent implements OnInit, OnDestroy {
     } else if (this.type === '_login') {
       const url = this.router.url;
       // signin with link
-      this.auth.confirmSignIn(url)
+      await this.auth.confirmSignIn(url)
         .then((r: boolean) => r
           ? this.router.navigate(['/dashboard'])
           : null
