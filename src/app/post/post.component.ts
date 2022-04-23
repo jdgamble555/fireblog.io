@@ -1,5 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { environment } from '@env/environment';
 import { Subscription } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
 import { UserRec } from '../auth/user.model';
@@ -25,6 +26,8 @@ export class PostComponent implements OnDestroy {
   postId!: string;
   slug!: string;
 
+  env: any;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -32,6 +35,7 @@ export class PostComponent implements OnDestroy {
     private seo: SeoService,
     public ns: NavService
   ) {
+    this.env = environment;
     let paramMap = this.route.paramMap;
     if (this.ns.isServer) {
       paramMap = paramMap.pipe(take(1));
@@ -96,11 +100,11 @@ export class PostComponent implements OnDestroy {
     this.ns.setBC(r.title as string);
     // generate seo tags
     this.seo.generateTags({
-      title: r.title + ' - ' + this.ns.title,
-      domain: this.ns.title,
+      title: r.title + ' - ' + this.env.title,
+      domain: this.env.title,
       image: r.image || undefined,
       description: r.content?.substring(0, 125).replace(/(\r\n|\n|\r)/gm, ""),
-      user: this.ns.author
+      user: environment.author
     });
   }
 

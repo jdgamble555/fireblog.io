@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
-import { NavService } from '../nav.service';
+import { environment } from '@env/environment';
+import { DarkModeService } from '@shared/dark-mode/dark-mode.service';
+
 
 @Component({
   selector: 'app-footer',
@@ -8,6 +10,10 @@ import { NavService } from '../nav.service';
 })
 export class FooterComponent {
 
-  constructor(public ns: NavService) { }
+  env: any;
+
+  constructor() {
+    this.env = environment;
+  }
 
 }

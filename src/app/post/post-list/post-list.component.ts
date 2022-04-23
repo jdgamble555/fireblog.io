@@ -9,6 +9,7 @@ import { SeoService } from 'src/app/shared/seo/seo.service';
 import { Post } from '../post.model';
 import { UserRec } from '../../auth/user.model';
 import { DOCUMENT } from '@angular/common';
+import { environment } from '@env/environment';
 
 interface postInput {
   sortField?: string,
@@ -42,6 +43,8 @@ export class PostListComponent implements OnInit, OnDestroy {
 
   input!: postInput;
 
+  env: any;
+
   constructor(
     public read: ReadService,
     private route: ActivatedRoute,
@@ -52,6 +55,8 @@ export class PostListComponent implements OnInit, OnDestroy {
   ) {
     // reset posts input obj
     this.input = {};
+
+    this.env = environment;
   }
 
   async ngOnInit(): Promise<void> {
@@ -106,7 +111,7 @@ export class PostListComponent implements OnInit, OnDestroy {
       const uTag = tag.charAt(0).toUpperCase() + tag.slice(1);
       this.ns.setBC('# ' + uTag);
       this.seo.generateTags({
-        title: uTag + ' - ' + this.ns.title
+        title: uTag + ' - ' + this.env.title
       });
     } else if (this.type === 'drafts') {
       this.input.drafts = true;
@@ -115,7 +120,7 @@ export class PostListComponent implements OnInit, OnDestroy {
       this.ns.addTitle('User');
     } else {
       // meta
-      this.seo.generateTags({ title: this.ns.title });
+      this.seo.generateTags({ title: this.env.title });
       this.ns.resetBC();
     }
 

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { environment } from '@env/environment';
 import { NavService } from '../nav/nav.service';
 import { SeoService } from '../shared/seo/seo.service';
 
@@ -11,18 +12,22 @@ export class HomeComponent {
 
   tabName = 'new';
 
+  env: any;
+
   constructor(
     public ns: NavService,
     private seo: SeoService
   ) {
 
+    this.env = environment;
+
     this.ns.openLeftNav();
 
     this.seo.generateTags({
-      title: this.ns.title,
-      description: 'A blog about Firebase and Firestore! Search, Indexing, Rules, and more!',
-      domain: 'fireblog.io',
-      user: 'Jonathan Gamble'
+      title: this.env.title,
+      description: this.env.description,
+      domain: this.env.domain,
+      user: this.env.author
     });
   }
 

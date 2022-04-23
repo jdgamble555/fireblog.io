@@ -1,4 +1,6 @@
 import { Component, EventEmitter, Output, Input } from '@angular/core';
+import { environment } from '@env/environment';
+import { DarkModeService } from '@shared/dark-mode/dark-mode.service';
 import { Observable, of } from 'rxjs';
 import { UserRec } from 'src/app/auth/user.model';
 import { AuthService } from 'src/app/platform/firebase/auth.service';
@@ -18,6 +20,8 @@ export class HeaderComponent {
   @Output() menuButtonClicked = new EventEmitter();
   @Input() title!: string;
 
+  env: any;
+
   isActiveSearch = false;
   terms!: Observable<Post[] | null>;
   user$: Observable<UserRec | null>;
@@ -25,14 +29,16 @@ export class HeaderComponent {
   constructor(
     private auth: AuthService,
     public ns: NavService,
+    public dm: DarkModeService,
     private read: ReadService
   ) {
     this.user$ = this.read.userRec;
-
+    this.dm.setTheme();
+    this.env = environment;
   }
 
   toggle() {
-    this.ns.toggleTheme();
+    this.dm.toggleTheme();
   }
 
   logout() {
