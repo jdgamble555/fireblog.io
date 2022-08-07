@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { NavService } from 'src/app/nav/nav.service';
 import { ReadService } from 'src/app/platform/firebase/read.service';

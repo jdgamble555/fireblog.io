@@ -36,7 +36,7 @@
             </mat-error>
           </mat-form-field>
           <button class="login-button" type="submit" color="accent" mat-raised-button
-            [disabled]="getField('displayName')?.invalid || currentDisplayName === accountForm.value.displayName"
+            [disabled]="getField('displayName').invalid || currentDisplayName === accountForm.value.displayName"
             (click)="updateProfile()">
             <mat-icon class="ng-button-icon">save</mat-icon>
             Save
@@ -48,7 +48,7 @@
             <mat-panel-title>Username</mat-panel-title>
             <mat-panel-description>Change Your Username</mat-panel-description>
           </mat-expansion-panel-header>
-          <mat-form-field [color]="getField('username')?.valid && 'accent'" appearance="outline">
+          <mat-form-field [color]="getField('username').valid && 'accent'" appearance="outline">
             <mat-icon matPrefix color="primary" class="ng-form-icon">person</mat-icon>
             <input matInput formControlName="username" type="text" placeholder="Username" autocomplete="off"
               [errorStateMatcher]="matcher" />
@@ -59,7 +59,7 @@
               accountForm.value.username }} is available!</mat-hint>
           </mat-form-field>
           <button class="login-button" type="submit" color="accent" mat-raised-button
-            [disabled]="getField('username')?.invalid || currentUsername === accountForm.value.username"
+            [disabled]="getField('username').invalid || currentUsername === accountForm.value.username"
             (click)="updateUsername()">
             <mat-icon class="ng-button-icon">save</mat-icon>
             Save
@@ -93,7 +93,7 @@
             </mat-error>
           </mat-form-field>
           <button class="login-button" type="submit" color="accent" mat-raised-button
-            [disabled]="getField('email')?.invalid || currentEmail === accountForm.value.email" (click)="updateEmail()">
+            [disabled]="getField('email').invalid || currentEmail === accountForm.value.email" (click)="updateEmail()">
             <mat-icon class="ng-button-icon">save</mat-icon>
             Save
           </button>
@@ -126,7 +126,7 @@
             </mat-error>
           </mat-form-field>
           <button class="login-button" type="submit" color="accent" mat-raised-button
-            [disabled]="getField('password')?.invalid || getField('confirmPassword')?.invalid" (click)="updatePass()">
+            [disabled]="getField('password').invalid || getField('confirmPassword').invalid" (click)="updatePass()">
             <mat-icon class="ng-button-icon">save</mat-icon>
             Save
           </button>

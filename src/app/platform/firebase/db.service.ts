@@ -186,7 +186,7 @@ export class DbService {
         );
 
         // index post, run in background, don't wait
-        data.content = this.markdownService.compile(data.content as string);
+        data.content = this.markdownService.parse(data.content as string);
         data.tags = tags;
         this.indexPost(id, data);
 
