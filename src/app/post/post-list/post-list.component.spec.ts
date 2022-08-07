@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserTransferStateModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
+import { DbModule } from '@db/db.module';
 import { MarkdownModule, MarkdownService } from 'ngx-markdown';
 import { CoreModule } from 'src/app/core/core.module';
-import { FirebaseModule } from 'src/app/platform/firebase/firebase.module';
+
 
 import { PostListComponent } from './post-list.component';
 
@@ -16,10 +16,9 @@ describe('PostListComponent', () => {
       declarations: [PostListComponent],
       imports: [
         CoreModule,
-        FirebaseModule,
+        DbModule,
         MarkdownModule.forRoot(),
-        RouterModule.forRoot([]),
-        BrowserTransferStateModule
+        RouterModule.forRoot([])
       ],
       providers: [MarkdownService]
     })

@@ -12,6 +12,7 @@ import {
 } from '@angular/fire/analytics';
 
 
+
 @NgModule({
   declarations: [],
   imports: [
@@ -26,4 +27,4 @@ import {
     UserTrackingService
   ],
 })
-export class FirebaseModule { }
+export class DbModule { }

@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '@db/auth.service';
+import { DbService } from '@db/db.service';
+import { ReadService } from '@db/read.service';
 import { firstValueFrom } from 'rxjs';
 import { Role, UserRec } from '../auth/user.model';
 import { NavService } from '../nav/nav.service';
-import { AuthService } from '../platform/firebase/auth.service';
-import { DbService } from '../platform/firebase/db.service';
-import { ReadService } from '../platform/firebase/read.service';
+
 
 @Component({
   selector: 'app-dashboard',

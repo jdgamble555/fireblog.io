@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { RouterModule } from '@angular/router';
+import { DbModule } from '@db/db.module';
 import { MarkdownModule } from 'ngx-markdown';
 import { CoreModule } from '../core/core.module';
-import { FirebaseModule } from '../platform/firebase/firebase.module';
+
 
 import { LoginGuard } from './auth.guard';
 
@@ -13,7 +14,7 @@ describe('LoginGuard', () => {
     TestBed.configureTestingModule({
       imports: [
         CoreModule,
-        FirebaseModule,
+        DbModule,
         MarkdownModule.forRoot(),
         RouterModule.forRoot([])
       ]

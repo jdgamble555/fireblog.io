@@ -3,10 +3,11 @@ import {
   CanActivate,
   Router
 } from '@angular/router';
+import { AuthService } from '@db/auth.service';
+import { DbService } from '@db/db.service';
+import { ReadService } from '@db/read.service';
 import { firstValueFrom } from 'rxjs';
-import { AuthService } from '../platform/firebase/auth.service';
-import { DbService } from '../platform/firebase/db.service';
-import { ReadService } from '../platform/firebase/read.service';
+
 import { Role } from './user.model';
 
 @Injectable({

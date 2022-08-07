@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { ReadService } from 'src/app/platform/firebase/read.service';
+import { ReadService } from '@db/read.service';
 
 import { TagService } from './tag.service';
 

@@ -1,7 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ReadService } from '@db/read.service';
 import { Subscription } from 'rxjs';
 import { NavService } from 'src/app/nav/nav.service';
-import { ReadService } from 'src/app/platform/firebase/read.service';
+
 import { Tag } from '../post.model';
 
 @Component({

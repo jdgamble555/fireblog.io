@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserTransferStateModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
+import { DbModule } from '@db/db.module';
+import { ReadService } from '@db/read.service';
 import { MarkdownModule } from 'ngx-markdown';
 import { CoreModule } from 'src/app/core/core.module';
-import { FirebaseModule } from 'src/app/platform/firebase/firebase.module';
-import { ReadService } from 'src/app/platform/firebase/read.service';
+
 
 import { TagListComponent } from './tag-list.component';
 
@@ -15,7 +15,7 @@ describe('TagListComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [TagListComponent],
-      imports: [CoreModule, FirebaseModule, MarkdownModule.forRoot(), BrowserTransferStateModule, RouterModule.forRoot([])],
+      imports: [CoreModule, DbModule, MarkdownModule.forRoot(), RouterModule.forRoot([])],
       providers: [ReadService]
     })
       .compileComponents();

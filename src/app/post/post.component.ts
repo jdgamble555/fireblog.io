@@ -1,11 +1,11 @@
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { ReadService } from '@db/read.service';
 import { environment } from '@env/environment';
 import { Subscription } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
 import { UserRec } from '../auth/user.model';
 import { NavService } from '../nav/nav.service';
-import { ReadService } from '../platform/firebase/read.service';
 import { SeoService } from '../shared/seo/seo.service';
 import { Post } from './post.model';
 
@@ -59,22 +59,26 @@ export class PostComponent implements OnDestroy {
       );
     }
 
-    const post = this.read.getPostById(id).pipe(
-      tap((p: Post) => {
-        // if post from id
-        if (p) {
-          this.meta(p);
-          // check slug
-          if (p.slug !== this.slug) {
-            this.router.navigate(['/post', this.postId, p.slug]);
+    if (id) {
+      
+      const post = this.read.getPostById(id).pipe(
+        tap((p: Post) => {
+          // if post from id
+          if (p) {
+            this.meta(p);
+            // check slug
+            if (p.slug !== this.slug) {
+              this.router.navigate(['/post', this.postId, p.slug]);
+            }
+          } else {
+            this.router.navigate(['/home']);
           }
-        } else {
-          this.router.navigate(['/home']);
-        }
-      }));
+        }));
 
-    // ssr render
-    this.post = await this.ns.load('post', post);
+      // ssr render
+      this.post = await this.ns.load('post', post);
+    }
+
 
     // browser version subscription
     if (this.ns.isBrowser) {

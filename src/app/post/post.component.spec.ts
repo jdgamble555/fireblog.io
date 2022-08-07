@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserTransferStateModule } from '@angular/platform-browser';
+import { DbModule } from '@db/db.module';
 import { MarkdownModule } from 'ngx-markdown';
 import { AppRoutingModule } from '../app-routing.module';
 import { CoreModule } from '../core/core.module';
-import { FirebaseModule } from '../platform/firebase/firebase.module';
+
 
 import { PostComponent } from './post.component';
 
@@ -17,9 +17,8 @@ describe('PostComponent', () => {
       imports: [
         CoreModule,
         AppRoutingModule,
-        FirebaseModule,
-        MarkdownModule.forRoot(),
-        BrowserTransferStateModule
+        DbModule,
+        MarkdownModule.forRoot()
       ]
     })
       .compileComponents();

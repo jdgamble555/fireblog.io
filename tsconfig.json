@@ -23,7 +23,8 @@
     ],
     "paths": {
       "@shared/*": ["src/app/shared/*"],
-      "@env/*": ["src/environments/*"]
+      "@env/*": ["src/environments/*"],
+      "@db/*": ["src/app/platform/firebase/*"]
     }
   },
   "angularCompilerOptions": {

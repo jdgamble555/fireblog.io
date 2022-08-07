@@ -1,10 +1,10 @@
 import { Component, EventEmitter, Output, Input } from '@angular/core';
+import { AuthService } from '@db/auth.service';
+import { ReadService } from '@db/read.service';
 import { environment } from '@env/environment';
 import { DarkModeService } from '@shared/dark-mode/dark-mode.service';
 import { Observable, of } from 'rxjs';
 import { UserRec } from 'src/app/auth/user.model';
-import { AuthService } from 'src/app/platform/firebase/auth.service';
-import { ReadService } from 'src/app/platform/firebase/read.service';
 import { Post } from 'src/app/post/post.model';
 import { NavService } from '../nav.service';
 

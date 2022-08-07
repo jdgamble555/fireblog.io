@@ -1,15 +1,16 @@
 import { TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 import { MarkdownModule, MarkdownService } from 'ngx-markdown';
-
+import { DbModule } from './db.module';
 import { DbService } from './db.service';
-import { FirebaseModule } from './firebase.module';
+
 
 describe('DbService', () => {
   let service: DbService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [FirebaseModule, MarkdownModule.forRoot()],
+      imports: [DbModule, MarkdownModule.forRoot(), RouterTestingModule],
       providers: [MarkdownService]
     });
     service = TestBed.inject(DbService);

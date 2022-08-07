@@ -9,9 +9,10 @@ import { SnackbarService } from 'src/app/shared/snack-bar/snack-bar.service';
 import { TagService } from 'src/app/shared/tag/tag.service';
 import { Post } from '../post.model';
 import { DialogService } from 'src/app/shared/confirm-dialog/dialog.service';
-import { DbService } from 'src/app/platform/firebase/db.service';
-import { AuthService } from 'src/app/platform/firebase/auth.service';
-import { ImageUploadService } from 'src/app/platform/firebase/image-upload.service';
+import { ImageUploadService } from '@db/image-upload.service';
+import { AuthService } from '@db/auth.service';
+import { DbService } from '@db/db.service';
+
 
 
 @Component({

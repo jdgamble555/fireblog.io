@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { FirebaseAppModule } from '@angular/fire/app';
 import { FirestoreModule } from '@angular/fire/firestore';
+import { RouterTestingModule } from '@angular/router/testing';
 import { MarkdownModule, MarkdownService } from 'ngx-markdown';
-import { FirebaseModule } from './firebase.module';
+import { DbModule } from './db.module';
+
 
 import { ReadService } from './read.service';
 
@@ -11,7 +12,7 @@ describe('ReadService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [FirebaseModule, MarkdownModule, FirestoreModule, MarkdownModule.forRoot()],
+      imports: [DbModule, MarkdownModule, FirestoreModule, MarkdownModule.forRoot(), RouterTestingModule],
       providers: [MarkdownService]
     });
     service = TestBed.inject(ReadService);

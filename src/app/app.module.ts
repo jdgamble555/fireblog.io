@@ -1,5 +1,5 @@
 import { NgModule, SecurityContext } from '@angular/core';
-import { BrowserModule, BrowserTransferStateModule } from '@angular/platform-browser';
+import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -11,10 +11,11 @@ import { CoreModule } from './core/core.module';
 import { MarkdownModule } from 'ngx-markdown';
 import { PostComponent } from './post/post.component';
 import { PostListComponent } from './post/post-list/post-list.component';
-import { FirebaseModule } from './platform/firebase/firebase.module';
+
 import { NavModule } from './nav/nav.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CommentComponent } from './post/comment/comment.component';
+import { DbModule } from '@db/db.module';
 
 
 @NgModule({
@@ -29,7 +30,7 @@ import { CommentComponent } from './post/comment/comment.component';
   imports: [
     BrowserModule.withServerTransition({ appId: 'serverApp' }),
     AppRoutingModule,
-    FirebaseModule,
+    DbModule,
     NavModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: environment.production,
@@ -38,7 +39,6 @@ import { CommentComponent } from './post/comment/comment.component';
       registrationStrategy: 'registerWhenStable:30000'
     }),
     BrowserAnimationsModule,
-    BrowserTransferStateModule,
     CoreModule,
     MarkdownModule.forRoot({
       sanitize: SecurityContext.NONE

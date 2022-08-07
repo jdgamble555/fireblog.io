@@ -3,10 +3,11 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterTestingModule } from '@angular/router/testing';
+import { DbModule } from '@db/db.module';
 import { SharedModule } from '@shared/shared.module';
 import { MarkdownModule } from 'ngx-markdown';
 import { CoreModule } from 'src/app/core/core.module';
-import { FirebaseModule } from 'src/app/platform/firebase/firebase.module';
 import { ReLoginComponent } from './re-login.component';
 
 describe('ReLoginComponent', () => {
@@ -20,10 +21,11 @@ describe('ReLoginComponent', () => {
         CoreModule,
         SharedModule,
         ReactiveFormsModule,
-        FirebaseModule,
+        DbModule,
         MarkdownModule.forRoot(),
         MatSnackBarModule,
-        BrowserAnimationsModule
+        BrowserAnimationsModule,
+        RouterTestingModule
       ],
       providers: [
         { provide: MatDialogRef, useValue: ReLoginComponent },

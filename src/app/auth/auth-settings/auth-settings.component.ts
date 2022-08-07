@@ -15,12 +15,12 @@ import { SnackbarService } from 'src/app/shared/snack-bar/snack-bar.service';
 import { matchValidator, MyErrorStateMatcher } from 'src/app/shared/form-validators';
 import { ReLoginComponent } from 'src/app/auth/auth-settings/re-login/re-login.component';
 import { debounceTime, map, take } from 'rxjs/operators';
-import { ImageUploadService } from 'src/app/platform/firebase/image-upload.service';
-import { AuthService } from 'src/app/platform/firebase/auth.service';
-import { ReadService } from 'src/app/platform/firebase/read.service';
-import { DbService } from 'src/app/platform/firebase/db.service';
 import { Router } from '@angular/router';
 import { UserRec } from '../user.model';
+import { AuthService } from '@db/auth.service';
+import { ImageUploadService } from '@db/image-upload.service';
+import { ReadService } from '@db/read.service';
+import { DbService } from '@db/db.service';
 
 @Component({
   selector: 'app-auth-settings',
