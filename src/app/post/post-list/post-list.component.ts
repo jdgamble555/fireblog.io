@@ -55,7 +55,6 @@ export class PostListComponent implements OnInit, OnDestroy {
   ) {
     // reset posts input obj
     this.input = {};
-
     this.env = environment;
   }
 
