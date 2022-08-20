@@ -21,7 +21,7 @@ export class PostComponent implements OnDestroy {
   postSub!: Subscription;
   userSub!: Subscription;
   //post!: Observable<Post> | Promise<Post>;
-  post!: Post;
+  post!: Post | null;
   user$!: UserRec | null;
   postId!: string;
   slug!: string;
@@ -50,20 +50,21 @@ export class PostComponent implements OnDestroy {
 
     // backwards compatible router for 'blog'
     if (slug && !id) {
-      this.read.getPostBySlug(slug).pipe(
+
+      this.ns.waitFor(this.read.getPostBySlug(slug).pipe(
         take(1),
         tap((r: Post) => {
           if (r) {
             this.router.navigate(['/post', r.id, r.slug]);
           }
         })
-      );
+      ));
     }
 
     if (id) {
 
       const post = this.read.getPostById(id).pipe(
-        tap((p: Post) => {
+        tap((p: Post | null) => {
           // if post from id
           if (p) {
             this.meta(p);
@@ -72,14 +73,17 @@ export class PostComponent implements OnDestroy {
               this.router.navigate(['/post', this.postId, p.slug]);
             }
           } else {
-            this.router.navigate(['/home']);
+            this.ns.home();
           }
         }));
 
       // ssr render
       this.post = await this.ns.load('post', post);
-    }
+    } else {
 
+      // no id or slug
+      this.ns.home();
+    }
 
     // browser version subscription
     if (this.ns.isBrowser) {
@@ -95,7 +99,7 @@ export class PostComponent implements OnDestroy {
             : this.read.getPostById(id);
 
           this.postSub = post
-            .subscribe((p: Post) => this.post = p);
+            .subscribe((p: Post | null) => this.post = p);
         });
     }
   }

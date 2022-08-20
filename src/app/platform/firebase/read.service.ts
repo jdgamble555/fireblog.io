@@ -286,21 +286,21 @@ export class ReadService {
    * @param id post id
    * @returns post observable joined by author doc
    */
-  getPostById(id: string, user?: UserRec): Observable<Post> {
-    let _post: Post;
+  getPostById(id: string, user?: UserRec): Observable<Post | null> {
+    let _post: Post | null;
     return expandRef<Post>(
       docData<Post>(
         doc(this.afs, 'posts', id)
       ), ['authorDoc']).pipe(
         // add id field, ssr dates
-        map((p: Post) => ({
+        map((p: Post) => p ? ({
           ...p,
           id,
           createdAt: (p?.createdAt as Timestamp)?.toMillis() || 0,
           updatedAt: (p?.updatedAt as Timestamp)?.toMillis() || 0,
-        }))
+        }) : null)
       ).pipe(
-        switchMap((p: Post) => {
+        switchMap((p: Post | null) => {
           _post = p;
           if (user && user.uid) {
             return combineLatest([
@@ -311,7 +311,7 @@ export class ReadService {
           return of(null);
         }),
         map((p: [boolean, boolean] | null) => {
-          if (p) {
+          if (p && _post) {
             // save liked and saved
             [_post.liked, _post.saved] = p;
           }
@@ -342,7 +342,7 @@ export class ReadService {
         limit(1)
       ), { idField: 'id' }
     ).pipe(
-      map((p: Post[]) => p[0])
+      map((p: Post[]) => p ? p[0] : p)
     );
   }
 }

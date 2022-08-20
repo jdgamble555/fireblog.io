@@ -34,7 +34,7 @@ const routes: Routes = [
   { path: 'new', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [EmailGuard, LoginGuard, UsernameGuard] },
   { path: 'edit/:id', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [EmailGuard, LoginGuard, UsernameGuard] },
   { path: 'settings', loadChildren: () => import('./auth/auth-settings/auth-settings.module').then(m => m.AuthSettingsModule), canActivate: [LoginGuard] },
-  { path: '**', component: HomeComponent }
+  { path: '**', redirectTo: '/' },
 ];
 
 @NgModule({

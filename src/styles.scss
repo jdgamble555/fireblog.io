@@ -950,6 +950,7 @@ mat-paginator .mat-form-field {
 }
 .leftnav {
   grid-area: leftnav;
+  min-width: 200px;
 }
 .footer {
   grid-area: footer;
