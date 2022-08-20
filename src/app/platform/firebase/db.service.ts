@@ -220,8 +220,7 @@ export class DbService {
   /**
    * Add image to post doc
    * @param id
-   * @param val
-   * @param publish
+   * @param url
    */
   async addPostImage(id: string, url: string): Promise<void> {
     await updateDoc(

@@ -19,7 +19,7 @@
     </div>
   </mat-toolbar-row>
   <mat-toolbar-row *ngIf="!isActiveSearch" class="flex-container">
-    <button mat-button (click)='ns.home();'>
+    <button mat-button (click)='ns.home();' class="ng-toolbar">
       <mat-icon class="ng-button-icon ng-home-icon ng-fire">whatshot</mat-icon>
       {{ env.title }}
     </button>
@@ -74,4 +74,3 @@
     </ng-template>
   </mat-toolbar-row>
 </mat-toolbar>
-

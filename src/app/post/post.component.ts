@@ -36,6 +36,7 @@ export class PostComponent implements OnDestroy {
     public ns: NavService
   ) {
     this.env = environment;
+    this.ns.openLeftNav();
     let paramMap = this.route.paramMap;
     if (this.ns.isServer) {
       paramMap = paramMap.pipe(take(1));
@@ -47,7 +48,7 @@ export class PostComponent implements OnDestroy {
     const slug = this.slug = p.get('slug') as string;
     const id = this.postId = p.get('id') as string;
 
-    // backwards compatible for 'blog'
+    // backwards compatible router for 'blog'
     if (slug && !id) {
       this.read.getPostBySlug(slug).pipe(
         take(1),
@@ -60,7 +61,7 @@ export class PostComponent implements OnDestroy {
     }
 
     if (id) {
-      
+
       const post = this.read.getPostById(id).pipe(
         tap((p: Post) => {
           // if post from id
@@ -88,6 +89,7 @@ export class PostComponent implements OnDestroy {
           if (this.postSub) {
             this.postSub.unsubscribe();
           }
+          this.user$ = user;
           const post = user
             ? this.read.getPostById(id, user)
             : this.read.getPostById(id);

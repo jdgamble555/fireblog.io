@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { environment } from '@env/environment';
+import { DarkModeService } from '@shared/dark-mode/dark-mode.service';
 import { NavService } from '../nav/nav.service';
 import { SeoService } from '../shared/seo/seo.service';
 
@@ -16,7 +17,8 @@ export class HomeComponent {
 
   constructor(
     public ns: NavService,
-    private seo: SeoService
+    private seo: SeoService,
+    public dm: DarkModeService
   ) {
 
     this.env = environment;

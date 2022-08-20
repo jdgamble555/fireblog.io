@@ -120,6 +120,20 @@ h3 {
   padding: 15px;
 }
 
+.ng-blue-back {
+  background-color: #1565c0 !important;
+  color: #fff !important;
+}
+
+.ng-toolbar {
+  font-size: 1.25rem;
+  line-height: 2rem !important;
+  font-weight: 500;
+  letter-spacing: 0.0125em;
+  -webkit-font-smoothing: antialiased;
+  font-family: Roboto, sans serif;
+}
+
 .ng-center {
   text-align: center;
 }
@@ -712,7 +726,7 @@ mat-paginator .mat-form-field {
 }
 
 .ng-fire {
-  color: #f9a825;
+  color: #f9a825 !important;
 }
 
 .text-left {

@@ -1,11 +1,10 @@
-<mat-card class="ng-card">
-  <h1>
-    <mat-icon color="primary" class="ng-icon-text">comment</mat-icon>Welcome to {{ env.title }}!
-  </h1>
-  <span class="ng-front">
-    <mat-icon color="accent" class="ng-icon-text">storage</mat-icon>Advanced techniques for Google Firebase and
-    Firestore!
-  </span>
+<mat-card class="ng-card {{ this.dm.isDarkMode ? '' : 'ng-blue-back' }}">
+  <div class="ng-center">
+    <h1>
+      <mat-icon color="primary" class="ng-icon-text ng-fire">whatshot</mat-icon>{{ env.title }}!
+    </h1>
+    <h2>{{ env.short_desc }}</h2>
+  </div>
 </mat-card>
 <mat-tab-group class="ng-card" animationDuration="0ms" (selectedIndexChange)="tabChange($event)">
   <mat-tab label="New">

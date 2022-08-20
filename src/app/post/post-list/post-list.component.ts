@@ -53,6 +53,7 @@ export class PostListComponent implements OnInit, OnDestroy {
     private seo: SeoService,
     @Inject(DOCUMENT) private doc: Document
   ) {
+    this.ns.openLeftNav();
     // reset posts input obj
     this.input = {};
     this.env = environment;

@@ -22,9 +22,15 @@
       "dom"
     ],
     "paths": {
-      "@shared/*": ["src/app/shared/*"],
-      "@env/*": ["src/environments/*"],
-      "@db/*": ["src/app/platform/firebase/*"]
+      "@shared/*": [
+        "src/app/shared/*"
+      ],
+      "@env/*": [
+        "src/environments/*"
+      ],
+      "@db/*": [
+        "src/app/platform/firebase/*"
+      ]
     }
   },
   "angularCompilerOptions": {
