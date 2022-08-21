@@ -4,10 +4,10 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
+import { CoreModule } from '@core/core.module';
 import { DbModule } from '@db/db.module';
 import { SharedModule } from '@shared/shared.module';
 import { MarkdownModule } from 'ngx-markdown';
-import { CoreModule } from 'src/app/core/core.module';
 import { ReLoginComponent } from './re-login.component';
 
 describe('ReLoginComponent', () => {

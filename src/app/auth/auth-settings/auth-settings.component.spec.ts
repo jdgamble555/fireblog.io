@@ -5,10 +5,9 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
+import { CoreModule } from '@core/core.module';
 import { DbModule } from '@db/db.module';
 import { MarkdownModule } from 'ngx-markdown';
-import { CoreModule } from 'src/app/core/core.module';
-
 import { AuthComponent } from '../auth.component';
 
 import { AuthSettingsComponent } from './auth-settings.component';

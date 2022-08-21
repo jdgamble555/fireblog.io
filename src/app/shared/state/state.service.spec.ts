@@ -1,7 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { BrowserTransferStateModule } from '@angular/platform-browser';
-import { ServerTransferStateModule } from '@angular/platform-server';
-
 import { StateService } from './state.service';
 
 describe('StateService', () => {
@@ -9,7 +6,7 @@ describe('StateService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports:[BrowserTransferStateModule]
+      imports: []
     });
     service = TestBed.inject(StateService);
   });

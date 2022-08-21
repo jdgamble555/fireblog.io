@@ -4,10 +4,10 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
+import { CoreModule } from '@core/core.module';
 import { AuthService } from '@db/auth.service';
 import { DbModule } from '@db/db.module';
 import { MarkdownModule } from 'ngx-markdown';
-import { CoreModule } from '../core/core.module';
 
 
 

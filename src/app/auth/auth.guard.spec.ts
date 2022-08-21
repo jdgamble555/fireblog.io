@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { RouterModule } from '@angular/router';
+import { CoreModule } from '@core/core.module';
 import { DbModule } from '@db/db.module';
 import { MarkdownModule } from 'ngx-markdown';
-import { CoreModule } from '../core/core.module';
 
 
 import { LoginGuard } from './auth.guard';

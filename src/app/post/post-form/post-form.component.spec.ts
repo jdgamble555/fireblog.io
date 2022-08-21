@@ -5,11 +5,10 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
+import { CoreModule } from '@core/core.module';
 import { AuthService } from '@db/auth.service';
 import { DbModule } from '@db/db.module';
 import { MarkdownModule } from 'ngx-markdown';
-import { CoreModule } from 'src/app/core/core.module';
-
 
 import { PostFormComponent } from './post-form.component';
 import { PostFormModule } from './post-form.module';

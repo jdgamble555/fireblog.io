@@ -1,7 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { BrowserTransferStateModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
-
 import { DarkModeService } from './dark-mode.service';
 
 describe('DarkModeService', () => {
@@ -9,7 +7,7 @@ describe('DarkModeService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [BrowserTransferStateModule, RouterModule.forRoot([])]
+      imports: [RouterModule.forRoot([])]
     });
     service = TestBed.inject(DarkModeService);
   });

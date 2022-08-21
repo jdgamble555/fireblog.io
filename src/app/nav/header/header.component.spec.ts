@@ -1,11 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterModule } from '@angular/router';
+import { CoreModule } from '@core/core.module';
 import { AuthService } from '@db/auth.service';
 import { DbModule } from '@db/db.module';
 import { MarkdownModule, MarkdownService } from 'ngx-markdown';
-import { CoreModule } from 'src/app/core/core.module';
-
-
 import { HeaderComponent } from './header.component';
 
 describe('HeaderComponent', () => {

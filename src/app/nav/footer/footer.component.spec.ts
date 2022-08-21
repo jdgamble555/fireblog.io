@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserTransferStateModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
+import { CoreModule } from '@core/core.module';
 import { MarkdownModule } from 'ngx-markdown';
-import { CoreModule } from 'src/app/core/core.module';
 
 import { FooterComponent } from './footer.component';
 
@@ -13,7 +12,7 @@ describe('FooterComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [FooterComponent],
-      imports: [CoreModule, BrowserTransferStateModule, RouterModule.forRoot([]), MarkdownModule.forRoot()]
+      imports: [CoreModule, RouterModule.forRoot([]), MarkdownModule.forRoot()]
     })
       .compileComponents();
   });
