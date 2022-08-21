@@ -88,8 +88,10 @@ export class PostListComponent implements OnInit, OnDestroy {
     // get uid for user
     if (this.ns.isBrowser) {
       this.input.uid = (await firstValueFrom(this.read.userRec))?.uid || undefined;
-      if (!this.input.uid) {
-        this.router.navigate(['login']);
+      if (this.type === 'bookmarks' || this.type === 'drafts' || this.type === 'user') {
+        if (!this.input.uid) {
+          this.router.navigate(['login']);
+        }
       }
     }
 
