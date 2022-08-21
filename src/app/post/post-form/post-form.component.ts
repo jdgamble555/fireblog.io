@@ -4,14 +4,14 @@ import { MatChipList } from '@angular/material/chips';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
-import { NavService } from 'src/app/nav/nav.service';
-import { SnackbarService } from 'src/app/shared/snack-bar/snack-bar.service';
-import { TagService } from 'src/app/shared/tag/tag.service';
-import { Post } from '../post.model';
-import { DialogService } from 'src/app/shared/confirm-dialog/dialog.service';
 import { ImageUploadService } from '@db/image-upload.service';
 import { AuthService } from '@db/auth.service';
 import { DbService } from '@db/db.service';
+import { TagService } from '@shared/tag/tag.service';
+import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
+import { DialogService } from '@shared/confirm-dialog/dialog.service';
+import { Post } from '@post/post.model';
+import { NavService } from '@nav/nav.service';
 
 
 

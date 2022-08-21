@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { Role, UserRec } from '@auth/user.model';
 import { AuthService } from '@db/auth.service';
 import { DbService } from '@db/db.service';
 import { ReadService } from '@db/read.service';
+import { NavService } from '@nav/nav.service';
 import { firstValueFrom } from 'rxjs';
-import { Role, UserRec } from '../auth/user.model';
-import { NavService } from '../nav/nav.service';
+
 
 
 @Component({

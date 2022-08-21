@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { environment } from '@env/environment';
+import { NavService } from '@nav/nav.service';
 import { DarkModeService } from '@shared/dark-mode/dark-mode.service';
-import { NavService } from '../nav/nav.service';
-import { SeoService } from '../shared/seo/seo.service';
+import { SeoService } from '@shared/seo/seo.service';
 
 @Component({
   selector: 'app-home',

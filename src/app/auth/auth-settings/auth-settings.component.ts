@@ -9,18 +9,19 @@ import {
 } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
-import { NavService } from 'src/app/nav/nav.service';
-import { DialogService } from 'src/app/shared/confirm-dialog/dialog.service';
-import { SnackbarService } from 'src/app/shared/snack-bar/snack-bar.service';
-import { matchValidator, MyErrorStateMatcher } from 'src/app/shared/form-validators';
-import { ReLoginComponent } from 'src/app/auth/auth-settings/re-login/re-login.component';
+
 import { debounceTime, map, take } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { UserRec } from '../user.model';
 import { AuthService } from '@db/auth.service';
 import { ImageUploadService } from '@db/image-upload.service';
 import { ReadService } from '@db/read.service';
 import { DbService } from '@db/db.service';
+import { ReLoginComponent } from './re-login/re-login.component';
+import { UserRec } from '@auth/user.model';
+import { DialogService } from '@shared/confirm-dialog/dialog.service';
+import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
+import { matchValidator, MyErrorStateMatcher } from '@shared/form-validators';
+import { NavService } from '@nav/nav.service';
 
 @Component({
   selector: 'app-auth-settings',

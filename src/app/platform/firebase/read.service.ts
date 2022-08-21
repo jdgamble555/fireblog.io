@@ -17,10 +17,10 @@ import {
   DocumentSnapshot,
   docSnapshots
 } from '@angular/fire/firestore';
+import { UserRec } from '@auth/user.model';
+import { Post, Tag } from '@post/post.model';
 import { combineLatest, Observable, of } from 'rxjs';
 import { debounceTime, map, switchMap, take } from 'rxjs/operators';
-import { UserRec } from 'src/app/auth/user.model';
-import { Post, Tag } from 'src/app/post/post.model';
 import { AuthService } from './auth.service';
 import {
   deleteWithCounter,
@@ -179,6 +179,7 @@ export class ReadService {
     sortField = 'createdAt',
     sortDirection = 'desc',
     pageSize = 5,
+    authorId,
     page = 1,
     tag,
     uid,
@@ -189,6 +190,7 @@ export class ReadService {
     sortDirection?: 'desc' | 'asc',
     tag?: string,
     uid?: string,
+    authorId?: string,
     field?: string,
     page?: number,
     pageSize?: number,
@@ -208,9 +210,9 @@ export class ReadService {
         where('tags', 'array-contains', tag)
       );
     }
-    if (uid && !field) {
+    if (authorId && !field) {
       filters.push(
-        where('authorId', '==', uid)
+        where('authorId', '==', authorId)
       );
     }
     if (uid && field) {
@@ -252,6 +254,41 @@ export class ReadService {
           // offset is only okay here because of caching
           map((l: Post[]) => l.slice(_offset))
         ), ['authorDoc']);
+    }
+
+    // get user likes and bookmarks
+    if (uid) {
+      let _posts: Post[] = [];
+      posts = posts.pipe(
+        switchMap((r: Post[] | null) => {
+          if (r && r.length > 0) {
+            _posts = r;
+            const actions: any[] = [];
+            _posts.map((_p: Post) => {
+              if (_p.id && uid) {
+                actions.push(
+                  this.getAction(_p.id, uid, 'hearts'),
+                  this.getAction(_p.id, uid, 'bookmarks')
+                );
+              }
+            });
+            if (actions.length > 0) {
+              return combineLatest(actions);
+            }
+          }
+          return of(null);
+        }),
+        map((s: any[] | null) => {
+          if (s && s.length > 0) {
+            _posts.map((p: Post) => {
+              p.liked = s.shift();
+              p.saved = s.shift();
+              return p;
+            });
+          }
+          return _posts;
+        })
+      );
     }
 
     // count

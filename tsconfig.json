@@ -30,6 +30,15 @@
       ],
       "@db/*": [
         "src/app/platform/firebase/*"
+      ],
+      "@post/*": [
+        "src/app/post/*"
+      ],
+      "@auth/*": [
+        "src/app/auth/*"
+      ],
+      "@nav/*": [
+        "src/app/nav/*"
       ]
     }
   },

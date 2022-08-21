@@ -1,21 +1,22 @@
 import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
-import { combineLatest, firstValueFrom, Observable, of, Subscription } from 'rxjs';
-import { map, switchMap, take } from 'rxjs/operators';
-import { NavService } from 'src/app/nav/nav.service';
-import { SeoService } from 'src/app/shared/seo/seo.service';
-import { Post } from '../post.model';
-import { UserRec } from '../../auth/user.model';
+import { firstValueFrom, Observable, Subscription } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { DOCUMENT } from '@angular/common';
 import { environment } from '@env/environment';
 import { ReadService } from '@db/read.service';
+import { UserRec } from '@auth/user.model';
+import { Post } from '@post/post.model';
+import { SeoService } from '@shared/seo/seo.service';
+import { NavService } from '@nav/nav.service';
 
 interface postInput {
   sortField?: string,
   sortDirection?: 'desc' | 'asc',
   tag?: string,
   uid?: string,
+  authorId?: string,
   field?: string,
   page?: number,
   pageSize?: number,
@@ -77,15 +78,15 @@ export class PostListComponent implements OnInit, OnDestroy {
   async loadPage(r: ParamMap): Promise<void> {
 
     const tag = r.get('tag');
-    const uid = r.get('uid');
+    const authorId = r.get('uid');
     if (tag) {
       this.input.tag = tag;
-    } else if (uid) {
-      this.input.uid = uid;
+    } else if (authorId) {
+      this.input.authorId = authorId;
     }
 
     // get uid for user
-    if (this.type === 'bookmarks' || this.type === 'drafts' || this.type === 'user') {
+    if (this.ns.isBrowser) {
       this.input.uid = (await firstValueFrom(this.read.userRec))?.uid || undefined;
       if (!this.input.uid) {
         this.router.navigate(['login']);
@@ -139,8 +140,6 @@ export class PostListComponent implements OnInit, OnDestroy {
 
   async createPost(posts: Observable<Post[] | null>) {
 
-    posts = this.postPipe(posts);
-
     // unsubscribe to existing subscription
     if (this.postsSub) {
       this.postsSub.unsubscribe();
@@ -151,49 +150,6 @@ export class PostListComponent implements OnInit, OnDestroy {
     if (this.ns.isBrowser) {
       this.postsSub = posts.subscribe((p: Post[] | null) => this.posts = p);
     }
-  }
-
-  postPipe(p: Observable<Post[] | null>): Observable<Post[] | null> {
-    // pipe in likes and bookmarks
-    let posts: Post[] = [];
-    return p.pipe(
-      switchMap((r: Post[] | null) => {
-        if (posts) {
-          posts = [];
-        }
-        if (r && r.length > 0) {
-          posts = r;
-        }
-        const user = this.user;
-        if (user) {
-          if (posts) {
-            const actions: any[] = [];
-            posts.map((_p: Post) => {
-              if (_p.id && user.uid) {
-                actions.push(
-                  this.read.getAction(_p.id, user.uid, 'hearts'),
-                  this.read.getAction(_p.id, user.uid, 'bookmarks')
-                );
-              }
-            });
-            if (actions.length > 0) {
-              return combineLatest(actions);
-            }
-          }
-        }
-        return of(null);
-      }),
-      map((s: any[] | null) => {
-        if (s && s.length > 0) {
-          posts.map((p: Post) => {
-            p.liked = s.shift();
-            p.saved = s.shift();
-            return p;
-          });
-        }
-        return posts;
-      })
-    );
   }
 
   async pageChange(event: PageEvent): Promise<void> {

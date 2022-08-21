@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { environment } from '@env/environment';
-import { DarkModeService } from '@shared/dark-mode/dark-mode.service';
 
 
 @Component({

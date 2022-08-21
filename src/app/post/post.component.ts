@@ -1,12 +1,12 @@
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { UserRec } from '@auth/user.model';
 import { ReadService } from '@db/read.service';
 import { environment } from '@env/environment';
+import { NavService } from '@nav/nav.service';
+import { SeoService } from '@shared/seo/seo.service';
 import { Subscription } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
-import { UserRec } from '../auth/user.model';
-import { NavService } from '../nav/nav.service';
-import { SeoService } from '../shared/seo/seo.service';
 import { Post } from './post.model';
 
 
@@ -133,5 +133,6 @@ export class PostComponent implements OnDestroy {
   ngOnDestroy(): void {
     if (this.paramSub) this.paramSub.unsubscribe();
     if (this.postSub) this.postSub.unsubscribe();
+    if (this.userSub) this.userSub.unsubscribe();
   }
 }

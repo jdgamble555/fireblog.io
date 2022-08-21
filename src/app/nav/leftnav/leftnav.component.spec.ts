@@ -2,10 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterModule } from '@angular/router';
 import { DbModule } from '@db/db.module';
 import { ReadService } from '@db/read.service';
+import { TagListComponent } from '@post/tag-list/tag-list.component';
 import { MarkdownModule} from 'ngx-markdown';
 import { CoreModule } from 'src/app/core/core.module';
-
-import { TagListComponent } from 'src/app/post/tag-list/tag-list.component';
 
 import { LeftnavComponent } from './leftnav.component';
 

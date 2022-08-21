@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ReadService } from '@db/read.service';
+import { NavService } from '@nav/nav.service';
 import { Subscription } from 'rxjs';
-import { NavService } from 'src/app/nav/nav.service';
 
 import { Tag } from '../post.model';
 

@@ -16,11 +16,13 @@ import {
   writeBatch,
   increment
 } from '@angular/fire/firestore';
+import { UserRec } from '@auth/user.model';
+import { Post } from '@post/post.model';
 import { MarkdownService } from 'ngx-markdown';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { UserRec } from 'src/app/auth/user.model';
-import { Post } from 'src/app/post/post.model';
+
+
 import {
   deleteWithCounter,
   searchIndex,

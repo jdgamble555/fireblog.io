@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Output, Input } from '@angular/core';
+import { UserRec } from '@auth/user.model';
 import { AuthService } from '@db/auth.service';
 import { ReadService } from '@db/read.service';
 import { environment } from '@env/environment';
+import { NavService } from '@nav/nav.service';
+import { Post } from '@post/post.model';
 import { DarkModeService } from '@shared/dark-mode/dark-mode.service';
 import { Observable, of } from 'rxjs';
-import { UserRec } from 'src/app/auth/user.model';
-import { Post } from 'src/app/post/post.model';
-import { NavService } from '../nav.service';
 
 
 @Component({

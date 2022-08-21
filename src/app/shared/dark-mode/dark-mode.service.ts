@@ -1,7 +1,8 @@
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { Injectable } from '@angular/core';
 import { environment } from '@env/environment';
-import { NavService } from 'src/app/nav/nav.service';
+import { NavService } from '@nav/nav.service';
+
 
 @Injectable({
   providedIn: 'root'

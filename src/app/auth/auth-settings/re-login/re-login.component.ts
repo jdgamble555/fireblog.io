@@ -2,9 +2,7 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { AuthService } from '@db/auth.service';
-
-
-import { SnackbarService } from '../../../shared/snack-bar/snack-bar.service';
+import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 
 @Component({
   selector: 'app-re-login',

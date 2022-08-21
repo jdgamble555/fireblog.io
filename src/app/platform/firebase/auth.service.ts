@@ -22,8 +22,8 @@ import {
   isSignInWithEmailLink,
   signInWithEmailLink
 } from '@angular/fire/auth';
+import { Role } from '@auth/user.model';
 import { firstValueFrom, Observable } from 'rxjs';
-import { Role } from 'src/app/auth/user.model';
 import { DbService } from './db.service';
 
 

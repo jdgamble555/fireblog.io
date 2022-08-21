@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
-import { HeaderComponent } from '../nav/header/header.component';
-import { FooterComponent } from '../nav/footer/footer.component';
-import { LeftnavComponent } from '../nav/leftnav/leftnav.component';
-import { RightnavComponent } from '../nav/rightnav/rightnav.component';
-
-import { NavComponent } from '../nav/nav.component';
+import { HeaderComponent } from './header/header.component';
+import { FooterComponent } from './footer/footer.component';
+import { LeftnavComponent } from './leftnav/leftnav.component';
+import { RightnavComponent } from './rightnav/rightnav.component';
 import { CoreModule } from '../core/core.module';
-import { TagListComponent } from '../post/tag-list/tag-list.component';
+import { NavComponent } from './nav.component';
+import { TagListComponent } from '@post/tag-list/tag-list.component';
+
 
 const components = [
   NavComponent,

@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { BrowserTransferStateModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 
 import { NavService } from './nav.service';
@@ -9,7 +8,7 @@ describe('NavService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [BrowserTransferStateModule, RouterModule.forRoot([])]
+      imports: [RouterModule.forRoot([])]
     });
     service = TestBed.inject(NavService);
   });

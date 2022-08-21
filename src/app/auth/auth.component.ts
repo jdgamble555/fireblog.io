@@ -11,12 +11,11 @@ import { ActivatedRoute, Router, UrlSegment } from '@angular/router';
 import { AuthService } from '@db/auth.service';
 import { DbService } from '@db/db.service';
 import { ReadService } from '@db/read.service';
+import { NavService } from '@nav/nav.service';
+import { matchValidator, MyErrorStateMatcher } from '@shared/form-validators';
+import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { firstValueFrom, of, Subscription } from 'rxjs';
 import { debounceTime, map, take } from 'rxjs/operators';
-import { matchValidator, MyErrorStateMatcher } from 'src/app/shared/form-validators';
-import { NavService } from '../nav/nav.service';
-
-import { SnackbarService } from '../shared/snack-bar/snack-bar.service';
 import { UserRec } from './user.model';
 
 
