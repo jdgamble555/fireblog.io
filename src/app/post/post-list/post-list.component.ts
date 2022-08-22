@@ -118,7 +118,7 @@ export class PostListComponent implements OnInit, OnDestroy {
       });
     } else if (this.type === 'drafts') {
       this.input.drafts = true;
-    } else if (this.input?.uid) {
+    } else if (this.input?.authorId) {
       // meta
       this.ns.addTitle('User');
     } else {
