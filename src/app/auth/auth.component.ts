@@ -14,7 +14,7 @@ import { ReadService } from '@db/read.service';
 import { NavService } from '@nav/nav.service';
 import { matchValidator, MyErrorStateMatcher } from '@shared/form-validators';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
-import { firstValueFrom, of, Subscription } from 'rxjs';
+import { of, Subscription } from 'rxjs';
 import { debounceTime, map, take } from 'rxjs/operators';
 import { UserRec } from './user.model';
 
@@ -111,7 +111,7 @@ export class AuthComponent implements OnInit, OnDestroy {
       this.title = 'Verify Email Address';
     } else if (this.type === 'username') {
       // see if there is already a username
-      await firstValueFrom(this.read.userRec)
+      await this.read.getUser()
         .then((user: UserRec | null) => {
           if (user && user.username) {
             this.router.navigate(['/dashboard']);

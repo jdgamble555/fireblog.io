@@ -43,63 +43,41 @@ export class ReadService {
   ) {
 
     // get user doc if logged in
-    this.userRec = this.auth.user$.pipe(
-      switchMap((user: User | null) =>
-        user
-          ? this.getUser(user.uid)
-          : of(null)
-      )
-    );
+    this.userRec = this.userSub();
   }
-  /**
-   * Get a total count for the collection
-   * @param col - Collection Path
-   * @returns - total count
-   */
-  getTotal(col: string): Observable<string> {
-    return docData<any>(
-      doc(this.afs, '_counters', col)
-    ).pipe(
-      map((r: any) => r ? r.count : null)
-    );
-  }
-  /**
-   * Get all tags and their count
-   * @returns tags
-   */
-  getTags(): Observable<Tag[]> {
-    return collectionData<Tag>(
-      query<Tag>(
-        collection(this.afs, 'tags')
-      ), { idField: 'name' }
-    );
-  }
-  /**
-   * Get tag count from tag doc
-   * @param t - tag
-   * @returns
-   */
-  getTagTotal(t: string): Observable<string> {
-    return docData<any>(
-      doc(this.afs, 'tags', t)
-    ).pipe(
-      map((r: any) => r ? r.count : null)
-    );
-  }
+
   //
   // User
   //
 
-  /**
-   * Get user document
-   * @param id
-   * @returns
-   */
-  getUser(id: string): Observable<User> {
-    return docData<User>(
-      doc(this.afs, 'users', id) as DocumentReference<User>,
+  userSub(): Observable<UserRec | null> {
+    return this.auth.user$.pipe(
+      switchMap((user: User | null) =>
+        user
+          ? this.subUser(user.uid)
+          : of(null)
+      )
+    );
+  }
+
+  subUser(id: string): Observable<UserRec> {
+    return docData<UserRec>(
+      doc(this.afs, 'users', id) as DocumentReference<UserRec>,
       { idField: 'uid' }
     );
+  }
+
+  async getUser(): Promise<UserRec | null> {
+    const id = (await this.auth.getUser())?.uid;
+    if (id) {
+      const docSnap = await getDoc<UserRec>(
+        doc(this.afs, 'users', id) as DocumentReference<UserRec>
+      );
+      if (docSnap.exists()) {
+        return docSnap.data();
+      }
+    }
+    return null;
   }
 
   /**
@@ -115,6 +93,42 @@ export class ReadService {
       map((r: any) => r ? r[col + 'Count'] : null)
     );
   }
+
+    /**
+   * Get a total count for the collection
+   * @param col - Collection Path
+   * @returns - total count
+   */
+     getTotal(col: string): Observable<string> {
+      return docData<any>(
+        doc(this.afs, '_counters', col)
+      ).pipe(
+        map((r: any) => r ? r.count : null)
+      );
+    }
+    /**
+     * Get all tags and their count
+     * @returns tags
+     */
+    getTags(): Observable<Tag[]> {
+      return collectionData<Tag>(
+        query<Tag>(
+          collection(this.afs, 'tags')
+        ), { idField: 'name' }
+      );
+    }
+    /**
+     * Get tag count from tag doc
+     * @param t - tag
+     * @returns
+     */
+    getTagTotal(t: string): Observable<string> {
+      return docData<any>(
+        doc(this.afs, 'tags', t)
+      ).pipe(
+        map((r: any) => r ? r.count : null)
+      );
+    }
 
   //
   // Hearts and Bookmarks

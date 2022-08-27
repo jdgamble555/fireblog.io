@@ -5,7 +5,6 @@ import { AuthService } from '@db/auth.service';
 import { DbService } from '@db/db.service';
 import { ReadService } from '@db/read.service';
 import { NavService } from '@nav/nav.service';
-import { firstValueFrom } from 'rxjs';
 
 
 
@@ -38,15 +37,15 @@ export class DashboardComponent {
       .then((user) => {
         if (user) {
           // see if user is in db
-          firstValueFrom(this.read.getUser(user?.uid))
-            .then((userDoc: UserRec) => {
-              if (userDoc) {
-                if (userDoc.username) {
+          this.read.getUser()
+            .then((userRec: UserRec | null) => {
+              if (userRec) {
+                if (userRec.username) {
                   // update count views
-                  this.user = userDoc;
-                  this.pCount = userDoc.postsCount;
-                  this.bCount = userDoc.bookmarksCount;
-                  this.dCount = userDoc.draftsCount;
+                  this.user = userRec;
+                  this.pCount = userRec.postsCount;
+                  this.bCount = userRec.bookmarksCount;
+                  this.dCount = userRec.draftsCount;
                   if (user.displayName) {
                     this.displayName = user.displayName;
                   }

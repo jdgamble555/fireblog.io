@@ -1,7 +1,7 @@
 import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
-import { firstValueFrom, Observable, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { DOCUMENT } from '@angular/common';
 import { environment } from '@env/environment';
@@ -10,6 +10,7 @@ import { UserRec } from '@auth/user.model';
 import { Post } from '@post/post.model';
 import { SeoService } from '@shared/seo/seo.service';
 import { NavService } from '@nav/nav.service';
+import { AuthService } from '@db/auth.service';
 
 interface postInput {
   sortField?: string,
@@ -48,6 +49,7 @@ export class PostListComponent implements OnInit, OnDestroy {
 
   constructor(
     public read: ReadService,
+    private auth: AuthService,
     private route: ActivatedRoute,
     private router: Router,
     public ns: NavService,
@@ -87,7 +89,7 @@ export class PostListComponent implements OnInit, OnDestroy {
 
     // get uid for user
     if (this.ns.isBrowser) {
-      this.input.uid = (await firstValueFrom(this.read.userRec))?.uid || undefined;
+      this.input.uid = (await this.auth.getUser())?.uid || undefined;
       if (this.type === 'bookmarks' || this.type === 'drafts' || this.type === 'user') {
         if (!this.input.uid) {
           this.router.navigate(['login']);
