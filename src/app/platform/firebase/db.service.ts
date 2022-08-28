@@ -86,10 +86,18 @@ export class DbService {
   }
 
   async createUser(user: UserRec, id: string): Promise<void> {
-    await setWithCounter(
-      doc(this.afs, 'users', id),
-      user
+
+    // create user only if DNE
+    const docSnap = await getDoc<UserRec>(
+      doc(this.afs, 'users', id) as DocumentReference<UserRec>
     );
+    if (!docSnap.exists()) {
+      await setWithCounter(
+        doc(this.afs, 'users', id),
+        user
+      );
+    }
+    return;
   }
 
   async updateUser(user: any, id: string): Promise<void> {

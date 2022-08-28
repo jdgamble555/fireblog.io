@@ -68,7 +68,15 @@ export class AuthService {
   //
 
   async emailLogin(email: string, password: string): Promise<any> {
-    return await signInWithEmailAndPassword(this.auth, email, password);
+    const credential = await signInWithEmailAndPassword(this.auth, email, password);
+
+    const userData = {
+      email,
+      role: Role.Author
+    };
+
+    // create user in db
+    await this.db.createUser(userData, credential.user.uid);
   }
 
   async emailSignUp(email: string, password: string): Promise<void> {
@@ -146,18 +154,16 @@ export class AuthService {
     const additionalInfo = getAdditionalUserInfo(credential);
 
     // create user in db
-    if (additionalInfo?.isNewUser) {
-      const userData = {
-        displayName: credential.user.displayName,
-        email: credential.user.email,
-        phoneNumber: credential.user.phoneNumber,
-        photoURL: credential.user.photoURL,
-        role: Role.Author
-      };
-      await this.db.createUser(userData, credential.user.uid);
-      return true;
-    }
-    return false;
+    const userData = {
+      displayName: credential.user.displayName,
+      email: credential.user.email,
+      phoneNumber: credential.user.phoneNumber,
+      photoURL: credential.user.photoURL,
+      role: Role.Author
+    };
+    await this.db.createUser(userData, credential.user.uid);
+
+    return !!additionalInfo?.isNewUser;
   }
 
   async oAuthReLogin(p: string): Promise<any> {

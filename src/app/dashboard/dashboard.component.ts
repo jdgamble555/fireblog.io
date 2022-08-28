@@ -1,11 +1,9 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { Role, UserRec } from '@auth/user.model';
+import { UserRec } from '@auth/user.model';
 import { AuthService } from '@db/auth.service';
-import { DbService } from '@db/db.service';
 import { ReadService } from '@db/read.service';
 import { NavService } from '@nav/nav.service';
-
 
 
 @Component({
@@ -27,7 +25,6 @@ export class DashboardComponent {
 
   constructor(
     public read: ReadService,
-    private db: DbService,
     private auth: AuthService,
     private router: Router,
     private ns: NavService
@@ -51,19 +48,6 @@ export class DashboardComponent {
                   }
                 } else {
                   this.router.navigate(['/username']);
-                }
-              } else {
-                // add user to db
-                try {
-                  this.db.createUser({
-                    displayName: user.displayName,
-                    email: user.email,
-                    phoneNumber: user.phoneNumber,
-                    photoURL: user.photoURL,
-                    role: Role.Author
-                  }, user.uid);
-                } catch (e: any) {
-                  console.error(e);
                 }
               }
             });
