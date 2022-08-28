@@ -34,7 +34,8 @@
               "src/assets",
               "src/manifest.webmanifest",
               "src/ads.txt",
-              "src/robots.txt"
+              "src/robots.txt",
+              "src/sitemap.xsl"
             ],
             "styles": [
               "node_modules/prismjs/themes/prism-tomorrow.css",
@@ -117,7 +118,8 @@
               "src/assets",
               "src/manifest.webmanifest",
               "src/ads.txt",
-              "src/robots.txt"
+              "src/robots.txt",
+              "src/sitemap.xsl"
             ],
             "styles": [
               "node_modules/prismjs/themes/prism-tomorrow.css",

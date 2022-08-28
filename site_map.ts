@@ -19,7 +19,7 @@ export const site_map = async ({ }, res: any) => {
         image: true,
         video: false
       },
-      xslUrl: 'https://gitcdn.xyz/repo/pedroborges/xml-sitemap-stylesheet/master/sitemap.xsl'
+      xslUrl: 'https://fireblog.io/sitemap.xsl'
     });
     const pipeline = sitemapStream.pipe(createGzip());
 
