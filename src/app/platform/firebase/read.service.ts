@@ -238,9 +238,9 @@ export class ReadService {
       limit(_limit)
     );
 
-    filters.push(
+    /*filters.push(
       where('createdAt', '<', Timestamp.fromDate(new Date()))
-    );
+    );*/
 
     let posts: Observable<Post[]>;
     let count: Observable<string>;

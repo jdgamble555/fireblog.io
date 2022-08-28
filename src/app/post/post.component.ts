@@ -126,7 +126,7 @@ export class PostComponent implements OnDestroy {
       author: environment.author,
       image: r.image || undefined,
       description,
-      keywords: r.tags.join(','),
+      keywords: r.tags.join(', '),
       createdAt: new Date(r.createdAt).toISOString(),
       updatedAt: new Date(r.updatedAt).toISOString()
     });
