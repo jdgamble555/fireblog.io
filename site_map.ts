@@ -19,7 +19,7 @@ export const site_map = async ({ }, res: any) => {
         image: true,
         video: false
       },
-      xslUrl: 'https://fireblog.io/sitemap.xsl'
+      xslUrl: '/sitemap.xsl'
     });
     const pipeline = sitemapStream.pipe(createGzip());
 
