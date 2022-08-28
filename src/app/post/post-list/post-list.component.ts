@@ -2,7 +2,7 @@ import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { take, tap } from 'rxjs/operators';
 import { DOCUMENT } from '@angular/common';
 import { environment } from '@env/environment';
 import { ReadService } from '@db/read.service';
@@ -129,7 +129,7 @@ export class PostListComponent implements OnInit, OnDestroy {
       this.ns.resetBC();
     }
 
-    const { count, posts } = this.read.getPosts(this.input);
+    let { count, posts } = this.read.getPosts(this.input);
 
     if (count) {
       this.total = await this.ns.load('count', count);
@@ -138,6 +138,18 @@ export class PostListComponent implements OnInit, OnDestroy {
       }
     }
     if (posts) {
+
+      // generate summary schema
+      posts = posts.pipe(
+        tap((p: Post[]) => {
+          const urls: string[] = [];
+          p.forEach((x: Post) => {
+            urls.push(`${environment.site}/post/${x.id}/${x.slug}`);
+          });
+          this.seo.setSummarySchema(urls);
+        })
+      );
+
       this.createPost(posts);
     }
   }

@@ -72,7 +72,7 @@ export class SeoService {
     });
   }
 
-  setSchema({
+  setBlogSchema({
     title = '',
     author = '',
     description = '',
@@ -95,6 +95,27 @@ export class SeoService {
       "description": description,
       "image": image,
       "keywords": keywords
+    };
+
+    this.generateSchema(s);
+  }
+
+  setSummarySchema(urls: string[]): void {
+
+    const list = [];
+
+    for (let [i, url] of urls.entries()) {
+      list.push({
+        "@type": "ListItem",
+        "position": i + 1,
+        "url": url
+      });
+    }
+
+    const s = {
+      "@context": "https://schema.org/",
+      "@type": "ItemList",
+      "itemListElement": list
     };
 
     this.generateSchema(s);

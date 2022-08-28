@@ -121,7 +121,7 @@ export class PostComponent implements OnDestroy {
       user: environment.author
     });
     // generate schema
-    this.seo.setSchema({
+    this.seo.setBlogSchema({
       title: r.title,
       author: environment.author,
       image: r.image || undefined,
