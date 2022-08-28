@@ -79,7 +79,8 @@ export class SeoService {
     image = '',
     keywords = '',
     createdAt = '',
-    updatedAt = ''
+    updatedAt = '',
+    time = ''
   }): void {
 
     const s = {
@@ -94,7 +95,8 @@ export class SeoService {
       "dateModified": !!updatedAt ? updatedAt : createdAt,
       "description": description,
       "image": image,
-      "keywords": keywords
+      "keywords": keywords,
+      "timeRequired": time + 'M'
     };
 
     this.generateSchema(s);

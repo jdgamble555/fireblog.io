@@ -19,7 +19,7 @@
   <br />
   <div class="mat-chip-area">
     <mat-chip-list aria-label="Tags" *ngFor="let tag of post.tags" class="tags">
-      <mat-chip [routerLink]="['/t', tag]"># {{ tag }}</mat-chip>
+      <mat-chip [routerLink]="['/t', tag]">{{ tag }}</mat-chip>
     </mat-chip-list>
   </div>
   <br />

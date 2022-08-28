@@ -128,7 +128,8 @@ export class PostComponent implements OnDestroy {
       description,
       keywords: r.tags.join(', '),
       createdAt: new Date(r.createdAt).toISOString(),
-      updatedAt: new Date(r.updatedAt).toISOString()
+      updatedAt: new Date(r.updatedAt).toISOString(),
+      time: r.minutes
     });
   }
 
