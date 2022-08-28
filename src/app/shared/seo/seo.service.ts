@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 
@@ -12,7 +13,8 @@ export class SeoService {
   constructor(
     private title: Title,
     private meta: Meta,
-    private router: Router
+    private router: Router,
+    @Inject(DOCUMENT) private doc: Document
   ) { }
 
   generateTags({
@@ -56,6 +58,7 @@ export class SeoService {
     if (locale) {
       this.setTags([{ name: 'og:locale', content: locale }]);
     }
+
   }
   private setTags(tags: any): void {
     tags.forEach((tag: any) => {
@@ -68,4 +71,37 @@ export class SeoService {
       }
     });
   }
+
+  setSchema({
+    title = '',
+    author = '',
+    description = '',
+    image = '',
+    keywords = '',
+    createdAt = '',
+    updatedAt = ''
+  }): void {
+
+    const s = {
+      "@context": "https://schema.org/",
+      "@type": "BlogPosting",
+      "headline": title,
+      "author": {
+        "@type": "Person",
+        "name": author
+      },
+      "datePublished": createdAt,
+      "dateModified": !!updatedAt ? updatedAt : createdAt,
+      "description": description,
+      "image": image,
+      "keywords": keywords
+    };
+
+    const element: HTMLScriptElement = this.doc.createElement('script') as HTMLScriptElement;
+    element.type = "application/ld+json";
+    element.innerHTML = JSON.stringify(s);
+    const head = this.doc.getElementsByTagName('head')[0];
+    head.appendChild(element);
+  }
+
 }

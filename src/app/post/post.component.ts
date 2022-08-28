@@ -5,6 +5,7 @@ import { ReadService } from '@db/read.service';
 import { environment } from '@env/environment';
 import { NavService } from '@nav/nav.service';
 import { SeoService } from '@shared/seo/seo.service';
+import { MarkdownService } from 'ngx-markdown';
 import { Subscription } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
 import { Post } from './post.model';
@@ -33,7 +34,8 @@ export class PostComponent implements OnDestroy {
     private router: Router,
     public read: ReadService,
     private seo: SeoService,
-    public ns: NavService
+    public ns: NavService,
+    private ms: MarkdownService
   ) {
     this.env = environment;
     this.ns.openLeftNav();
@@ -108,13 +110,25 @@ export class PostComponent implements OnDestroy {
 
     // add bread crumbs
     this.ns.setBC(r.title as string);
+    let description = this.ms.parse(r.content as string);
+    description = description.substring(0, 125).replace(/(\r\n|\n|\r)/gm, "");
     // generate seo tags
     this.seo.generateTags({
       title: r.title + ' - ' + this.env.title,
       domain: this.env.title,
       image: r.image || undefined,
-      description: r.content?.substring(0, 125).replace(/(\r\n|\n|\r)/gm, ""),
+      description,
       user: environment.author
+    });
+    // generate schema
+    this.seo.setSchema({
+      title: r.title,
+      author: environment.author,
+      image: r.image || undefined,
+      description,
+      keywords: r.tags.join(','),
+      createdAt: new Date(r.createdAt).toISOString(),
+      updatedAt: new Date(r.updatedAt).toISOString()
     });
   }
 

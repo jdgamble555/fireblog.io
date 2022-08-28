@@ -15,6 +15,10 @@ export const sitemap = async ({ }, res: any) => {
   <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd http://www.google.com/schemas/sitemap-image/1.1 http://www.google.com/schemas/sitemap-image/1.1/sitemap-image.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   `;
 
+  // todo
+  // only show post after before createdAt date of today
+  // show home page with latest mod date
+
   const querySnap = await getDocs<Post>(collection(firestore, 'posts') as CollectionReference<Post>);
   querySnap.forEach((doc: QueryDocumentSnapshot<Post>) => {
     r += '  <url>\n';
