@@ -37,6 +37,7 @@
     "ngx-markdown": "^14.0.1",
     "rxfire": "^6.0.0",
     "rxjs": "~7.5.0",
+    "sitemap": "^7.1.1",
     "zone.js": "~0.11.4"
   },
   "devDependencies": {

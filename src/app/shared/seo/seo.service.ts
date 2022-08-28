@@ -97,11 +97,23 @@ export class SeoService {
       "keywords": keywords
     };
 
-    const element: HTMLScriptElement = this.doc.createElement('script') as HTMLScriptElement;
-    element.type = "application/ld+json";
-    element.innerHTML = JSON.stringify(s);
-    const head = this.doc.getElementsByTagName('head')[0];
-    head.appendChild(element);
+    this.generateSchema(s);
+  }
+
+  generateSchema(s: any) {
+
+    // Generate or Update existing json-ld script tag
+    const type = 'application/ld+json';
+    const script = this.doc.querySelector(`script[type="${type}"]`) as HTMLScriptElement;
+    if (script) {
+      script.innerHTML = JSON.stringify(s);
+    } else {
+      const element = this.doc.createElement('script') as HTMLScriptElement;
+      element.type = type;
+      element.innerHTML = JSON.stringify(s);
+      const head = this.doc.getElementsByTagName('head')[0];
+      head.appendChild(element);
+    }
   }
 
 }
