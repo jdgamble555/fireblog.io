@@ -13,6 +13,13 @@ export const site_map = async ({ }, res: any) => {
   try {
     const sitemapStream = new SitemapStream({
       hostname: environment.site,
+      xmlns: {
+        news: false,
+        xhtml: true,
+        image: true,
+        video: false
+      },
+      xslUrl: 'https://gitcdn.xyz/repo/pedroborges/xml-sitemap-stylesheet/master/sitemap.xsl'
     });
     const pipeline = sitemapStream.pipe(createGzip());
 
