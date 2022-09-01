@@ -34,7 +34,6 @@ export interface AuthAction {
   message: string | null;
 }
 
-
 @Injectable({
   providedIn: 'root'
 })
@@ -66,12 +65,12 @@ export class AuthService {
     private db: DbService,
     @Inject(DOCUMENT) private doc: Document
   ) {
-    this.user$ = this._user()
+    this.user$ = this._user();
   }
 
   private _user(): Observable<UserAuth | null> {
     return user(this.auth).pipe(
-      map((u) => {
+      map((u: User | null) => {
         return u
           ? ({
             uid: u?.uid,
@@ -223,6 +222,7 @@ export class AuthService {
         role: Role.Author
       };
       await this.db.createUser(userData, credential.user.uid);
+      message = this.messages.loginSuccess;
 
     } catch (e: any) {
       error = e;
