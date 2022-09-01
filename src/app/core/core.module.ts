@@ -4,7 +4,6 @@ import { MaterialModule } from './material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
-import { AuthComponent } from '@auth/auth.component';
 
 
 const modules = [
@@ -16,9 +15,7 @@ const modules = [
   HttpClientModule
 ];
 
-const components = [
-  AuthComponent
-];
+const components: any[] = [];
 
 @NgModule({
   imports: [

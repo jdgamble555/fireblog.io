@@ -16,11 +16,13 @@ import { CommentComponent } from '@post/comment/comment.component';
 import { PostComponent } from '@post/post.component';
 import { PostListComponent } from '@post/post-list/post-list.component';
 import { NavModule } from '@nav/nav.module';
+import { AuthComponent } from '@auth/auth.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
+    AuthComponent,
     HomeComponent,
     PostComponent,
     PostListComponent,
