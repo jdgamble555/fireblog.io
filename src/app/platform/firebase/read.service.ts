@@ -17,7 +17,7 @@ import {
   DocumentSnapshot,
   docSnapshots
 } from '@angular/fire/firestore';
-import { UserRec } from '@auth/user.model';
+import { UserAuth, UserRec } from '@auth/user.model';
 import { Post, Tag } from '@post/post.model';
 import { combineLatest, Observable, of } from 'rxjs';
 import { debounceTime, map, switchMap, take } from 'rxjs/operators';
@@ -52,7 +52,7 @@ export class ReadService {
 
   userSub(): Observable<UserRec | null> {
     return this.auth.user$.pipe(
-      switchMap((user: User | null) =>
+      switchMap((user: UserAuth | null) =>
         user
           ? this.subUser(user.uid)
           : of(null)

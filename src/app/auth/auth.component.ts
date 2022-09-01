@@ -8,7 +8,7 @@ import {
   ValidatorFn
 } from '@angular/forms';
 import { ActivatedRoute, Router, UrlSegment } from '@angular/router';
-import { AuthService } from '@db/auth.service';
+import { AuthAction, AuthService } from '@db/auth.service';
 import { DbService } from '@db/db.service';
 import { ReadService } from '@db/read.service';
 import { NavService } from '@nav/nav.service';
@@ -47,10 +47,6 @@ export class AuthComponent implements OnInit, OnDestroy {
   isReturnLogin = false;
 
   title!: string;
-
-  messages: any = {
-    email_sent: 'Your confirmation email has been sent!'
-  };
 
   validationMessages: any = {
     email: {
@@ -125,11 +121,16 @@ export class AuthComponent implements OnInit, OnDestroy {
     } else if (this.type === '_login') {
       const url = this.router.url;
       // signin with link
-      await this.auth.confirmSignIn(url)
-        .then((r: boolean) => r
-          ? this.router.navigate(['/dashboard'])
-          : null
-        );
+      const { isConfirmed, error, message } = await this.auth.confirmSignIn(url)
+      isConfirmed
+        ? this.router.navigate(['/dashboard'])
+        : null;
+      if (error) {
+        this.sb.showError(error);
+      }
+      if (message) {
+        this.sb.showMsg(message);
+      }
       this.isReturnLogin = true;
       this.title = 'Passwordless Login';
     }
@@ -180,12 +181,12 @@ export class AuthComponent implements OnInit, OnDestroy {
   }
 
   // get field
-  getField(field: string) {
+  getField(field: string): AbstractControl<any, any> | null {
     return this.userForm.get(field);
   }
 
   // get error
-  getError(field: string) {
+  getError(field: string): any {
     const errors = this.validationMessages[field];
     for (const e of Object.keys(errors)) {
       if (this.userForm.get(field)?.hasError(e)) {
@@ -194,72 +195,76 @@ export class AuthComponent implements OnInit, OnDestroy {
     }
   }
 
-  async onSubmit() {
+  async onSubmit(): Promise<void> {
 
     this.loading = true;
+    let r: AuthAction | null = null;
 
-    try {
-      if (this.isLogin) {
-        await this.auth.emailLogin(
-          this.getField('email')?.value,
-          this.getField('password')?.value
-        ).then(() => {
+    if (this.isLogin) {
+      r = await this.auth.emailLogin(
+        this.getField('email')?.value,
+        this.getField('password')?.value
+      );
+    } else if (this.isRegister) {
+      r = await this.auth.emailSignUp(
+        this.getField('email')?.value,
+        this.getField('password')?.value
+      );
+    } else if (this.isReset) {
+      r = await this.auth.resetPassword(
+        this.getField('email')?.value
+      );
+    } else if (this.isCreateUser) {
+      const username = (this.getField('username')?.value as string).toLowerCase();
+      r = await this.auth.updateUsername(username);
+    } else if (this.isPasswordless) {
+      r = await this.auth.sendEmailLink(
+        this.getField('email')?.value
+      );
+    } else if (this.isReturnLogin) {
+      const url = this.router.url;
+      r = await this.auth.confirmSignIn(
+        url,
+        this.getField('email')?.value,
+      );
+    }
+    if (r) {
+      if (r.error) {
+        this.sb.showError(r.error);
+      }
+      if (r.message) {
+        this.sb.showMsg(r.message);
+        if (this.isLogin || this.isRegister || this.isCreateUser || this.isReturnLogin) {
           this.router.navigate(['/dashboard']);
-        });
-      } else if (this.isRegister) {
-        await this.auth.emailSignUp(
-          this.getField('email')?.value,
-          this.getField('password')?.value
-        ).then(() => {
-          this.router.navigate(['/username']);
-        });;
-      } else if (this.isReset) {
-        const r = await this.auth.resetPassword(
-          this.getField('email')?.value
-        );
-        if (r.message) {
-          this.sb.showMsg(r.message);
-        }
-      } else if (this.isCreateUser) {
-        const username = (this.getField('username')?.value as string).toLowerCase();
-        const r = await this.auth.updateUsername(username);
-        if (r.message) {
-          this.sb.showMsg(r.message);
-          this.router.navigate(['/dashboard']);
-        }
-      } else if (this.isPasswordless) {
-        const r = await this.auth.sendEmailLink(
-          this.getField('email')?.value
-        );
-        if (r.message) {
-          this.sb.showMsg(r.message);
+        } else if (this.isPasswordless) {
           this.router.navigate(['/login']);
         }
-      } else if (this.isReturnLogin) {
-        const url = this.router.url;
-        this.auth.confirmSignIn(
-          url,
-          this.getField('email')?.value,
-        ).then(() => this.router.navigate(['/dashboard']));
       }
-    } catch (e: any) {
-      this.sb.showError(e);
     }
     this.loading = false;
   }
 
-  providerLogin(provider: string) {
-    this.auth.oAuthLogin(provider)
-      .then((isNew: boolean) => {
-        isNew
-          ? this.router.navigate(['/username'])
-          : this.router.navigate(['/dashboard']);
-      });
+  async providerLogin(provider: string): Promise<void> {
+    const { error, message, isNew } = await this.auth.oAuthLogin(provider);
+    isNew
+      ? this.router.navigate(['/username'])
+      : this.router.navigate(['/dashboard']);
+    if (error) {
+      this.sb.showError(error);
+    }
+    if (message) {
+      this.sb.showMsg(message);
+    }
   }
 
-  sendEmail() {
-    this.auth.sendVerificationEmail();
-    this.sb.showMsg(this.messages.email_sent);
+  async sendEmail(): Promise<void> {
+    const { error, message } = await this.auth.sendVerificationEmail();
+    if (error) {
+      this.sb.showError(error);
+    }
+    if (message) {
+      this.sb.showMsg(message);
+    }
   }
 
   isAvailable(current?: string): ValidatorFn {

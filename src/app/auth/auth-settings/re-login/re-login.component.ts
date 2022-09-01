@@ -31,11 +31,15 @@ export class ReLoginComponent implements OnInit {
     this.buildForm();
   }
 
-  providerLogin(provider: string) {
-    this.auth.oAuthReLogin(provider)
-      .then(() => {
-        this.d.close();
-      });
+  async providerLogin(provider: string) {
+    const { message, error } = await this.auth.oAuthReLogin(provider);
+    if (message) {
+      this.sb.showMsg(message);
+    }
+    if (error) {
+      this.sb.showError(error);
+    }
+    this.d.close();
   }
 
   login(): void {

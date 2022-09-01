@@ -18,3 +18,12 @@ export interface UserRec {
   postsCount?: number;
   bookmarksCount?: number;
 };
+
+export interface UserAuth {
+  uid: string;
+  email: string;
+  displayName?: string | null;
+  phoneNumber?: string | null;
+  photoURL?: string | null;
+  emailVerified: boolean | null;
+}

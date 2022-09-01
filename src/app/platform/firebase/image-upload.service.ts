@@ -147,7 +147,6 @@ export class ImageUploadService {
      * @returns - a resolved promise that image was deleted
      */
     async deleteImage(url: string): Promise<void> {
-
       try {
         // delete image
         return await deleteObject(
@@ -157,6 +156,8 @@ export class ImageUploadService {
         if (e.code === 'storage/invalid-argument') {
           // don't delete anything if no previous image
           return;
+        } else {
+          throw e;
         }
       }
     }

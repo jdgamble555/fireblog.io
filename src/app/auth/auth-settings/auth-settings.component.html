@@ -72,11 +72,11 @@
             <mat-panel-description>Change Your Email</mat-panel-description>
           </mat-expansion-panel-header>
           <mat-card class="ng-card mat-elevation-z0 ng-card-outline">
-            <mat-icon class="ng-icon-text {{ isVerified ? 'ng-green' : 'ng-warn' }}">
-              {{ isVerified ? 'verified_user' : 'error' }}
+            <mat-icon class="ng-icon-text {{ emailVerified ? 'ng-green' : 'ng-warn' }}">
+              {{ emailVerified ? 'verified_user' : 'error' }}
             </mat-icon>
-            Your Email is {{ isVerified ? '' : 'NOT' }} Verified.
-            <ng-container *ngIf="!isVerified">
+            Your Email is {{ emailVerified ? '' : 'NOT' }} Verified.
+            <ng-container *ngIf="!emailVerified">
               <div class="margin-spacer"></div>
               <button mat-raised-button color="accent" (click)="sendEmail()">
                 Resend verfication email
