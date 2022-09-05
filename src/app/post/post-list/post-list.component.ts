@@ -111,7 +111,10 @@ export class PostListComponent implements OnDestroy {
     }
 
     // requires login
-    if (type === 'bookmarks' || type === 'drafts' || type === 'user') {
+
+    const loggedInType = type === 'bookmarks' || type === 'drafts' || type === 'user';
+
+    if (this.ns.isBrowser && loggedInType) {
       const _user = await this.auth.getUser();
       this.input.uid = _user?.uid;
       if (!this.input.uid) {

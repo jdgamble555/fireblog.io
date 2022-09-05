@@ -43,26 +43,6 @@ export class PostComponent {
     this.user$ = this.read.userRec;
   }
 
-  /*
-    // browser version subscription
-    /*if (this.ns.isBrowser) {
-
-      this.userSub = this.read.userRec
-        .subscribe((user: UserRec | null) => {
-          if (this.postSub) {
-            this.postSub.unsubscribe();
-          }
-          this.user$ = user;
-          const post = user
-            ? this.read.getPostById(id, user)
-            : this.read.getPostById(id);
-
-          this.postSub = post
-            .subscribe((p: Post | null) => this.post = p);
-        });
-    }
-  }*/
-
   meta(r: Post) {
 
     // add bread crumbs
