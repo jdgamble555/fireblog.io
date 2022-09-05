@@ -28,7 +28,7 @@
   <mat-divider inset></mat-divider>
   <mat-card-actions>
     <div class="flex-container">
-      <ng-container *ngIf="this.user$ | async as user">
+      <ng-container *ngIf="this.user$ | async as user; else elseBlock">
         <div>
           <app-save [postId]="post.id" [userId]="user.uid">
           </app-save>
@@ -41,14 +41,14 @@
           </button>
         </ng-container>
       </ng-container>
-      <ng-container *ngIf="!this.user$">
+      <ng-template #elseBlock>
         <div>
           <app-save [postId]="post.id">
           </app-save>
           <app-heart [count]="post.heartsCount" [postId]="post.id">
           </app-heart>
         </div>
-      </ng-container>
+      </ng-template>
     </div>
   </mat-card-actions>
 </mat-card>
