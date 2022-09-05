@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { User } from '@angular/fire/auth';
 import {
   collection,
   collectionData,
@@ -15,11 +14,13 @@ import {
   limit,
   getDoc,
   DocumentSnapshot,
-  docSnapshots
+  docSnapshots,
+  getDocs,
+  QuerySnapshot
 } from '@angular/fire/firestore';
 import { UserAuth, UserRec } from '@auth/user.model';
 import { Post, Tag } from '@post/post.model';
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, firstValueFrom, Observable, of } from 'rxjs';
 import { debounceTime, map, switchMap, take } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 import {
@@ -29,6 +30,18 @@ import {
   setWithCounter,
   soundex
 } from './fb-tools';
+
+export interface PostInput {
+  sortField?: string,
+  sortDirection?: 'desc' | 'asc',
+  tag?: string,
+  uid?: string,
+  authorId?: string,
+  field?: string,
+  page?: number,
+  pageSize?: number,
+  drafts?: boolean
+};
 
 @Injectable({
   providedIn: 'root'
@@ -54,13 +67,13 @@ export class ReadService {
     return this.auth.user$.pipe(
       switchMap((user: UserAuth | null) =>
         user
-          ? this.subUser(user.uid)
+          ? this.subUserRec(user.uid)
           : of(null)
       )
     );
   }
 
-  subUser(id: string): Observable<UserRec> {
+  subUserRec(id: string): Observable<UserRec> {
     return docData<UserRec>(
       doc(this.afs, 'users', id) as DocumentReference<UserRec>,
       { idField: 'uid' }
@@ -94,63 +107,110 @@ export class ReadService {
     );
   }
 
-    /**
-   * Get a total count for the collection
-   * @param col - Collection Path
-   * @returns - total count
+  /**
+ * Get a total count for the collection
+ * @param col - Collection Path
+ * @returns - total count
+ */
+  getTotal(col: string): Observable<string> {
+    return docData<any>(
+      doc(this.afs, '_counters', col)
+    ).pipe(
+      map((r: any) => r ? r.count : null)
+    );
+  }
+
+  async getTags(): Promise<Tag[]> {
+    return await getDocs<Tag>(
+      query<Tag>(
+        collection(this.afs, 'tags')
+      )
+    ).then((snap) => {
+      const docs = [];
+      for (const doc of snap.docs) {
+        docs.push({
+          name: doc.id,
+          ...doc.data()
+        });
+      }
+      return docs;
+    });
+  }
+
+  /**
+   * Get all tags and their count
+   * @returns tags
    */
-     getTotal(col: string): Observable<string> {
-      return docData<any>(
-        doc(this.afs, '_counters', col)
-      ).pipe(
-        map((r: any) => r ? r.count : null)
-      );
-    }
-    /**
-     * Get all tags and their count
-     * @returns tags
-     */
-    getTags(): Observable<Tag[]> {
-      return collectionData<Tag>(
-        query<Tag>(
-          collection(this.afs, 'tags')
-        ), { idField: 'name' }
-      );
-    }
-    /**
-     * Get tag count from tag doc
-     * @param t - tag
-     * @returns
-     */
-    getTagTotal(t: string): Observable<string> {
-      return docData<any>(
-        doc(this.afs, 'tags', t)
-      ).pipe(
-        map((r: any) => r ? r.count : null)
-      );
-    }
+  subTags(): Observable<Tag[]> {
+    return collectionData<Tag>(
+      query<Tag>(
+        collection(this.afs, 'tags')
+      ), { idField: 'name' }
+    );
+  }
+  /**
+   * Get tag count from tag doc
+   * @param t - tag
+   * @returns
+   */
+  getTagTotal(t: string): Observable<string> {
+    return docData<any>(
+      doc(this.afs, 'tags', t)
+    ).pipe(
+      map((r: any) => r ? r.count : null)
+    );
+  }
 
   //
   // Hearts and Bookmarks
   //
 
-  async actionPost(postId: string, userId: string, action: string): Promise<void> {
-    await setWithCounter(
-      doc(this.afs, action, `${postId}_${userId}`),
-      {
-        postDoc: doc(this.afs, 'posts', postId),
-        userDoc: doc(this.afs, 'users', userId)
-      },
-      { merge: true },
-      { paths: { posts: postId, users: userId } }
-    );
+  actionExists(postId: string, userId: string, action: string): { error: string | null, data: Observable<boolean | null> } {
+    let error = null;
+    let data: Observable<boolean | null>;
+    try {
+      data = docSnapshots(
+        doc(this.afs, action, `${postId}_${userId}`)
+      ).pipe(
+        map((snap: DocumentSnapshot) => snap.exists()),
+        take(1)
+      );
+    } catch (e: any) {
+      data = of(null);
+      error = e;
+    }
+    return { data, error };
   }
 
-  async unActionPost(postId: string, userId: string, action: string): Promise<void> {
-    await deleteWithCounter(
-      doc(this.afs, action, `${postId}_${userId}`),
-      { paths: { posts: postId, users: userId } }
-    );
+  async actionPost(postId: string, userId: string, action: string): Promise<{ error: string | null }> {
+    let error = null;
+    try {
+      await setWithCounter(
+        doc(this.afs, action, `${postId}_${userId}`),
+        {
+          postDoc: doc(this.afs, 'posts', postId),
+          userDoc: doc(this.afs, 'users', userId)
+        },
+        { merge: true },
+        { paths: { posts: postId, users: userId } }
+      );
+    } catch (e: any) {
+      error = e;
+    }
+    return { error };
+  }
+
+  async unActionPost(postId: string, userId: string, action: string): Promise<{ error: string | null }> {
+    let error = null;
+    try {
+      await deleteWithCounter(
+        doc(this.afs, action, `${postId}_${userId}`),
+        { paths: { posts: postId, users: userId } }
+      );
+    } catch (e: any) {
+      error = e;
+    }
+    return { error };
   }
 
   getAction(id: string, uid: string, action: string): Observable<boolean> {
@@ -185,11 +245,8 @@ export class ReadService {
       debounceTime(100)
     );
   }
-  /**
-   * Gets all posts
-   * @returns posts joined by authorDoc
-   */
-  getPosts({
+
+  async getPosts({
     sortField = 'createdAt',
     sortDirection = 'desc',
     pageSize = 5,
@@ -199,19 +256,46 @@ export class ReadService {
     uid,
     field,
     drafts = false
-  }: {
-    sortField?: string,
-    sortDirection?: 'desc' | 'asc',
-    tag?: string,
-    uid?: string,
-    authorId?: string,
-    field?: string,
-    page?: number,
-    pageSize?: number,
-    drafts?: boolean
-  } = {}): {
-    count: Observable<string>,
-    posts: Observable<Post[]>
+  }: PostInput = {}) {
+
+    const { error, posts, count } = this.subPosts({
+      sortField,
+      sortDirection,
+      pageSize,
+      authorId,
+      page,
+      tag,
+      uid,
+      field,
+      drafts
+    });
+
+    return {
+      error,
+      posts: await firstValueFrom(posts),
+      count: await firstValueFrom(count)
+    };
+
+  }
+
+  /**
+   * Gets all posts
+   * @returns posts joined by authorDoc
+   */
+  subPosts({
+    sortField = 'createdAt',
+    sortDirection = 'desc',
+    pageSize = 5,
+    authorId,
+    page = 1,
+    tag,
+    uid,
+    field,
+    drafts = false
+  }: PostInput = {}): {
+    count: Observable<string | null>,
+    posts: Observable<Post[] | null>,
+    error: string | null
   } {
 
     const _limit = page * pageSize;
@@ -238,75 +322,91 @@ export class ReadService {
       limit(_limit)
     );
 
-    /*filters.push(
-      where('createdAt', '<', Timestamp.fromDate(new Date()))
-    );*/
+    let posts: Observable<Post[] | null> = of(null);
+    let count = null;
+    let error = null;
 
-    let posts: Observable<Post[]>;
-    let count: Observable<string>;
+    try {
+      // if posts by hearts or bookmarks
+      if (field) {
+        posts = expandRefs<Post>(
+          expandRefs<Post>(
+            collectionData<any>(
+              query(
+                collection(this.afs, field),
+                ...filters
+              ), { idField: 'id' }
+            ), ['postDoc']).pipe(
+              map((p: any) => p.map((s: any) => s.postDoc)),
+              // offset is only okay here because of caching
+              map((l: Post[]) => l.slice(_offset))
+            ), ['authorDoc']);
+      } else {
 
-    // if posts by hearts or bookmarks
-    if (field) {
-      posts = expandRefs<Post>(
-        expandRefs<Post>(
-          collectionData<any>(
-            query(
-              collection(this.afs, field),
-              ...filters
+        // otherwise just posts
+        posts = expandRefs<Post>(
+          collectionData<Post>(
+            query<Post>(
+              collection(this.afs, drafts ? 'drafts' : 'posts') as CollectionReference<Post>,
+              ...filters,
             ), { idField: 'id' }
-          ), ['postDoc']).pipe(
-            map((p: any) => p.map((s: any) => s.postDoc)),
+          ).pipe(
             // offset is only okay here because of caching
             map((l: Post[]) => l.slice(_offset))
           ), ['authorDoc']);
-    } else {
+      }
 
-      // otherwise just posts
-      posts = expandRefs<Post>(
-        collectionData<Post>(
-          query<Post>(
-            collection(this.afs, drafts ? 'drafts' : 'posts') as CollectionReference<Post>,
-            ...filters,
-          ), { idField: 'id' }
-        ).pipe(
-          // offset is only okay here because of caching
-          map((l: Post[]) => l.slice(_offset))
-        ), ['authorDoc']);
+      // get user likes and bookmarks
+      if (uid) {
+        let _posts: Post[] = [];
+        posts = posts.pipe(
+          switchMap((r: Post[] | null) => {
+            if (r && r.length > 0) {
+              _posts = r;
+              const actions: any[] = [];
+              _posts.map((_p: Post) => {
+                if (_p.id && uid) {
+                  actions.push(
+                    this.getAction(_p.id, uid, 'hearts'),
+                    this.getAction(_p.id, uid, 'bookmarks')
+                  );
+                }
+              });
+              if (actions.length > 0) {
+                return combineLatest(actions);
+              }
+            }
+            return of(null);
+          }),
+          map((s: any[] | null) => {
+            if (s && s.length > 0) {
+              _posts.map((p: Post) => {
+                p.liked = s.shift();
+                p.saved = s.shift();
+                return p;
+              });
+            }
+            return _posts;
+          })
+        );
+      }
+
+      // convert date types for ssr
+      posts = posts.pipe(map((p: Post[] | null) => p
+        ? p.map((data: any) => ({
+          ...data,
+          createdAt: (data?.createdAt as Timestamp)?.toMillis() || 0,
+          updatedAt: (data?.updatedAt as Timestamp)?.toMillis() || 0,
+        }))
+        : null
+      ));
+
+    } catch (e: any) {
+      error = e;
     }
 
-    // get user likes and bookmarks
-    if (uid) {
-      let _posts: Post[] = [];
-      posts = posts.pipe(
-        switchMap((r: Post[] | null) => {
-          if (r && r.length > 0) {
-            _posts = r;
-            const actions: any[] = [];
-            _posts.map((_p: Post) => {
-              if (_p.id && uid) {
-                actions.push(
-                  this.getAction(_p.id, uid, 'hearts'),
-                  this.getAction(_p.id, uid, 'bookmarks')
-                );
-              }
-            });
-            if (actions.length > 0) {
-              return combineLatest(actions);
-            }
-          }
-          return of(null);
-        }),
-        map((s: any[] | null) => {
-          if (s && s.length > 0) {
-            _posts.map((p: Post) => {
-              p.liked = s.shift();
-              p.saved = s.shift();
-              return p;
-            });
-          }
-          return _posts;
-        })
-      );
+    if (drafts) {
+      field = 'drafts';
     }
 
     // count
@@ -318,13 +418,6 @@ export class ReadService {
       count = this.getTotal('posts');
     }
 
-    // convert date types for ssr
-    posts = posts.pipe(map((p: Post[]) => p.map((data: any) => ({
-      ...data,
-      createdAt: (data?.createdAt as Timestamp)?.toMillis() || 0,
-      updatedAt: (data?.updatedAt as Timestamp)?.toMillis() || 0,
-    }))));
-
     count = count.pipe(
       map((total: string) =>
         total == '0' || total === undefined
@@ -332,7 +425,25 @@ export class ReadService {
           : total
       ));
 
-    return { posts, count };
+    return {
+      posts,
+      count,
+      error
+    };
+  }
+
+  async getPostById(id: string, user?: UserRec): Promise<{ data: Post | null, error: string | null }> {
+
+    // todo - do without SubPostId
+
+    let data = null;
+    let error = null;
+    try {
+      data = await firstValueFrom(this.subPostById(id, user));
+    } catch (e: any) {
+      error = e;
+    }
+    return { data, error };
   }
 
   /**
@@ -340,7 +451,7 @@ export class ReadService {
    * @param id post id
    * @returns post observable joined by author doc
    */
-  getPostById(id: string, user?: UserRec): Observable<Post | null> {
+  subPostById(id: string, user?: UserRec): Observable<Post | null> {
     let _post: Post | null;
     return expandRef<Post>(
       docData<Post>(
@@ -388,15 +499,41 @@ export class ReadService {
    * @param slug
    * @returns
    */
-  getPostBySlug(slug: string): Observable<Post> {
-    return collectionData<Post>(
-      query<Post>(
-        collection(this.afs, 'posts') as CollectionReference<Post>,
-        where('slug', '==', slug),
-        limit(1)
-      ), { idField: 'id' }
-    ).pipe(
-      map((p: Post[]) => p ? p[0] : p)
-    );
+  async getPostBySlug(slug: string): Promise<{ error?: any, data: Post | null }> {
+    let error = null;
+    let data = null;
+    try {
+      data = await getDocs<Post>(
+        query<Post>(
+          collection(this.afs, 'posts') as CollectionReference<Post>,
+          where('slug', '==', slug),
+          limit(1)
+        )
+      ).then((snap: QuerySnapshot<Post>) => {
+        const doc = snap.docs[0];
+        return {
+          id: doc.id,
+          ...doc.data()
+        } as Post;
+      });
+    }
+    catch (e: any) {
+      error = e;
+    }
+    return { data, error };
+  }
+
+  async getUsernameFromId(id: string): Promise<{ error?: any, username: string | null }> {
+    let error = null;
+    let username = null;
+    try {
+      username = await getDoc<UserRec>(
+        doc(this.afs, 'users', id)
+      ).then((snap: DocumentSnapshot<UserRec>) => (snap.data())?.username) || null;
+    }
+    catch (e: any) {
+      error = e;
+    }
+    return { username, error };
   }
 }

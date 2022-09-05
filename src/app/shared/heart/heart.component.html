@@ -1,0 +1,6 @@
+<button mat-flat-button (click)="this.toggle()">
+  <mat-icon class="ng-heart">{{ this._state ? 'favorite' : 'favorite_border' }}</mat-icon>
+  <span class="ng-left">
+    {{ this._count || '0' }} like{{ this._count === 1 ? '' : 's' }}
+  </span>
+</button>

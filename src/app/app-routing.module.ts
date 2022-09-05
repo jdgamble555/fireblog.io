@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { PostListResolver } from '@post/post-list/post-list.resolver';
+import { PostResolver } from '@post/post.resolver';
 import { AuthComponent } from './auth/auth.component';
 import { LoginGuard, EmailGuard, NotLoginGuard, UsernameGuard } from './auth/auth.guard';
 import { DashboardComponent } from './dashboard/dashboard.component';
@@ -8,7 +10,7 @@ import { PostListComponent } from './post/post-list/post-list.component';
 import { PostComponent } from './post/post.component';
 
 const routes: Routes = [
-  { path: '', component: HomeComponent },
+  { path: '', component: HomeComponent, resolve: { posts: PostListResolver } },
 
   // auth
   { path: 'login', component: AuthComponent, canActivate: [NotLoginGuard] },
@@ -21,14 +23,15 @@ const routes: Routes = [
   { path: 'dashboard', component: DashboardComponent, canActivate: [LoginGuard] },
 
   // backwards compatible with old app, will be removed later
-  { path: 'blog/post/:slug', component: PostComponent },
+  { path: 'blog/post/:slug', component: PostComponent, resolve: { post: PostResolver } },
 
   // posts
-  { path: 'post/:id', component: PostComponent },
-  { path: 'post/:id/:slug', component: PostComponent },
-  { path: 't/:tag', component: PostListComponent },
-  { path: 'user/:uid', component: PostListComponent },
-  { path: 'bookmarks', component: PostListComponent, canActivate: [LoginGuard] },
+  { path: 'post/:id', component: PostComponent, resolve: { post: PostResolver } },
+  { path: 'post/:id/:slug', component: PostComponent, resolve: { post: PostResolver } },
+  { path: 't/:tag', component: PostListComponent, resolve: { posts: PostListResolver } },
+  { path: 'user/:uid', component: PostListComponent, resolve: { posts: PostListResolver } },
+  { path: 'user/:uid/:username', component: PostListComponent, resolve: { posts: PostListResolver } },
+  { path: 'bookmarks', component: PostListComponent, canActivate: [LoginGuard], data: { bookmarks: true } },
 
   // logged in
   { path: 'new', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [EmailGuard, LoginGuard, UsernameGuard] },

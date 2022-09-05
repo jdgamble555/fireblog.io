@@ -1,4 +1,4 @@
-<mat-card class="ng-card" *ngIf="post">
+<mat-card class="ng-card" *ngIf="post && post.id">
   <img *ngIf="post.image" mat-card-image src="{{ post.image }}" alt="{{ post.title }}" />
   <h1>
     <mat-icon color="primary" class="ng-icon-text">library_books</mat-icon>{{ post.title }}
@@ -8,10 +8,12 @@
     <img *ngIf="post.authorDoc?.photoURL" class="avatar" src="{{ post.authorDoc?.photoURL }}" />
     <mat-icon *ngIf="!post.authorDoc?.photoURL" class="ng-photo-icon">account_circle</mat-icon>
     <p><small><b>{{ post.authorDoc?.displayName }}</b>
-        <ng-container *ngIf="post.createdAt"> on
-          {{ post.createdAt | date: 'EEEE, MMMM d, yyyy' }}</ng-container>
-        <ng-container *ngIf="post.updatedAt"> (last modified on
-          {{ post.updatedAt | date: 'EEEE, MMMM d, yyyy' }})</ng-container>
+        <ng-container *ngIf="post.createdAt">
+          on {{ post.createdAt | date: 'EEEE, MMMM d, yyyy' }}
+        </ng-container>
+        <ng-container *ngIf="post.updatedAt">
+          (last modified on {{ post.updatedAt | date: 'EEEE, MMMM d, yyyy' }})
+        </ng-container>
       </small></p>
   </div>
   <br />
@@ -26,22 +28,26 @@
   <mat-divider inset></mat-divider>
   <mat-card-actions>
     <div class="flex-container">
-      <div>
-        <button mat-flat-button (click)="toggleAction('bookmarks', post.saved)">
-          <mat-icon color="primary">{{ post.saved ? 'bookmark' : 'bookmark_border' }}</mat-icon>
-          <span class="ng-left">Save</span>
-        </button>
-        <button mat-flat-button (click)="toggleAction('hearts', post.liked)">
-          <mat-icon class="ng-heart">{{ post.liked ? 'favorite' : 'favorite_border' }}</mat-icon>
-          <span class="ng-left">
-            {{ post.heartsCount || '0' }} like{{ post.heartsCount === 1 ? '' : 's' }}
-          </span>
-        </button>
-      </div>
-      <ng-container *ngIf="user$ && (post.authorId === user$.uid || user$.role === 'admin' || user$.role === 'editor')">
-        <button mat-icon-button [routerLink]="['/edit', post.id]">
-          <mat-icon>edit</mat-icon>
-        </button>
+      <ng-container *ngIf="this.user$ | async as user">
+        <div>
+          <app-save [postId]="post.id" [userId]="user.uid">
+          </app-save>
+          <app-heart [count]="post.heartsCount" [postId]="post.id" [userId]="user.uid">
+          </app-heart>
+        </div>
+        <ng-container *ngIf="post.authorId === user.uid || user.role === 'admin' || user.role === 'editor'">
+          <button mat-icon-button [routerLink]="['/edit', post.id]">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </ng-container>
+      </ng-container>
+      <ng-container *ngIf="!this.user$">
+        <div>
+          <app-save [postId]="post.id">
+          </app-save>
+          <app-heart [count]="post.heartsCount" [postId]="post.id">
+          </app-heart>
+        </div>
       </ng-container>
     </div>
   </mat-card-actions>

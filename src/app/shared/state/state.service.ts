@@ -14,11 +14,16 @@ export class StateService {
 
   getState<T>(key: string, defaultValue: any = []): T {
     const state = this.transferState.get<T>(makeStateKey(key), defaultValue);
-    this.transferState.remove(makeStateKey(key));
+    this.deleteState(key);
     return state;
   }
 
   hasState<T>(key: string) {
     return this.transferState.hasKey<T>(makeStateKey(key));
   }
+
+  deleteState<T>(key: string) {
+    this.transferState.remove<T>(makeStateKey(key));
+  }
+
 }

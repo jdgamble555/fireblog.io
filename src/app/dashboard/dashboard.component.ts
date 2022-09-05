@@ -1,9 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
+import { MatTabGroup } from '@angular/material/tabs';
 import { Router } from '@angular/router';
 import { UserRec } from '@auth/user.model';
-import { AuthService } from '@db/auth.service';
 import { ReadService } from '@db/read.service';
 import { NavService } from '@nav/nav.service';
+import { PostListService } from '@post/post-list/post-list.service';
+import { Observable, tap } from 'rxjs';
 
 
 @Component({
@@ -13,59 +15,41 @@ import { NavService } from '@nav/nav.service';
 })
 export class DashboardComponent {
 
-  displayName!: string;
+  @ViewChild("tabIndex", { static: false }) tabIndex!: MatTabGroup;
 
-  tabName = 'posts';
-
-  pCount: number | undefined = 0;
-  dCount: number | undefined = 0;
-  bCount: number | undefined = 0;
-
-  user!: UserRec | null;
+  user$: Observable<UserRec | null>;
 
   constructor(
     public read: ReadService,
-    private auth: AuthService,
     private router: Router,
-    private ns: NavService
+    private ns: NavService,
+    private pls: PostListService
   ) {
+
+    this.pls.type = 'bookmarks';
+
     // see if logged in
-    this.auth.getUser()
-      .then((user) => {
-        if (user) {
-          // see if user is in db
-          this.read.getUser()
-            .then((userRec: UserRec | null) => {
-              if (userRec) {
-                if (userRec.username) {
-                  // update count views
-                  this.user = userRec;
-                  this.pCount = userRec.postsCount;
-                  this.bCount = userRec.bookmarksCount;
-                  this.dCount = userRec.draftsCount;
-                  if (user.displayName) {
-                    this.displayName = user.displayName;
-                  }
-                } else {
-                  this.router.navigate(['/username']);
-                }
-              }
-            });
-        } else {
-          this.router.navigate(['/login']);
-        }
-      });
-    this.ns.closeLeftNav();
-    this.ns.addTitle('Dashboard');
+    this.user$ = this.read.userRec
+      .pipe(
+        tap((userRec: UserRec | null) => {
+          if (userRec) {
+            // see if user is in db
+            if (!userRec.username) {
+              this.router.navigate(['/username']);
+            }
+          } else {
+            this.router.navigate(['/login']);
+          }
+        }));
   }
 
   tabChange(index: number) {
-    if (index === 1) {
-      this.tabName = 'drafts';
-    } else if (index === 2) {
-      this.tabName = 'bookmarks';
+    if (index === 0) {
+      this.pls.type = 'bookmarks';
+    } else if (index === 1) {
+      this.pls.type = 'user';
     } else {
-      this.tabName = 'posts';
+      this.pls.type = 'drafts';
     }
   }
 }

@@ -67,7 +67,6 @@ export class NavService {
 
   // add bread crumb
   addBC(name: string, location?: string) {
-
     if (!location) {
       location = '';
     }
@@ -75,6 +74,7 @@ export class NavService {
       name,
       location
     };
+
     this.directories.push(data);
   }
 

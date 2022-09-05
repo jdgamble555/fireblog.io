@@ -1,27 +1,29 @@
-<mat-card class="ng-card">
-  <h1>
-    <mat-icon color="primary" class="ng-icon-text">comment</mat-icon>Welcome {{ displayName }}!
-  </h1>
-</mat-card>
-<mat-tab-group class="ng-card" animationDuration="0ms" (selectedIndexChange)="tabChange($event)">
-  <mat-tab label="Bookmarks{{ bCount ? ' (' + bCount + ')' : '' }}">
-    <ng-template matTabContent>
-      <br>
-      <app-post-list type="bookmarks"></app-post-list>
-    </ng-template>
-  </mat-tab>
-  <ng-container *ngIf="user?.role == 'admin' || user?.role == 'editor'">
-    <mat-tab label="Posts{{ pCount ? ' (' + pCount + ')' : '' }}">
+<ng-container *ngIf="user$ | async as user">
+  <mat-card class="ng-card">
+    <h1>
+      <mat-icon color="primary" class="ng-icon-text">comment</mat-icon>Welcome {{ user?.displayName }}!
+    </h1>
+  </mat-card>
+  <mat-tab-group class="ng-card" animationDuration="0ms" (selectedIndexChange)="tabChange($event)" #tabIndex>
+    <mat-tab label="Bookmarks{{ user?.bookmarksCount ? ' (' + user?.bookmarksCount + ')' : '' }}">
       <ng-template matTabContent>
         <br>
-        <app-post-list type="user"></app-post-list>
+        <app-post-list></app-post-list>
       </ng-template>
     </mat-tab>
-    <mat-tab label="Drafts{{ dCount ? ' (' + dCount + ')' : '' }}">
-      <ng-template matTabContent>
-        <br>
-        <app-post-list type="drafts"></app-post-list>
-      </ng-template>
-    </mat-tab>
-  </ng-container>
-</mat-tab-group>
+    <ng-container *ngIf="user?.role == 'admin' || user?.role == 'editor'">
+      <mat-tab label="Posts{{ user?.postsCount ? ' (' + user?.postsCount + ')' : '' }}">
+        <ng-template matTabContent>
+          <br>
+          <app-post-list></app-post-list>
+        </ng-template>
+      </mat-tab>
+      <mat-tab label="Drafts{{ user?.draftsCount ? ' (' + user?.draftsCount + ')' : '' }}">
+        <ng-template matTabContent>
+          <br>
+          <app-post-list></app-post-list>
+        </ng-template>
+      </mat-tab>
+    </ng-container>
+  </mat-tab-group>
+</ng-container>

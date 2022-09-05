@@ -17,11 +17,16 @@ import { PostComponent } from '@post/post.component';
 import { PostListComponent } from '@post/post-list/post-list.component';
 import { NavModule } from '@nav/nav.module';
 import { AuthComponent } from '@auth/auth.component';
+import { HeartComponent } from '@shared/heart/heart.component';
+import { SaveComponent } from '@shared/save/save.component';
+import { PostResolver } from '@post/post.resolver';
 
 
 @NgModule({
   declarations: [
     AppComponent,
+    HeartComponent,
+    SaveComponent,
     AuthComponent,
     HomeComponent,
     PostComponent,
@@ -46,7 +51,7 @@ import { AuthComponent } from '@auth/auth.component';
       sanitize: SecurityContext.NONE
     })
   ],
-  providers: [],
+  providers: [PostResolver],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

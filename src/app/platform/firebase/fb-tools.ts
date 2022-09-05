@@ -1,7 +1,7 @@
+import { docData } from "@angular/fire/firestore";
 import {
   deleteDoc,
   doc,
-  docData,
   DocumentData,
   DocumentReference,
   getDoc,
@@ -10,7 +10,7 @@ import {
   setDoc,
   SetOptions,
   writeBatch
-} from "@angular/fire/firestore";
+} from "@firebase/firestore";
 import {
   combineLatest,
   Observable,

@@ -1,8 +1,7 @@
-import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
-import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
-import { take, tap } from 'rxjs/operators';
 import { DOCUMENT } from '@angular/common';
 import { environment } from '@env/environment';
 import { ReadService } from '@db/read.service';
@@ -11,6 +10,7 @@ import { Post } from '@post/post.model';
 import { SeoService } from '@shared/seo/seo.service';
 import { NavService } from '@nav/nav.service';
 import { AuthService } from '@db/auth.service';
+import { PostListService, PostType } from './post-list.service';
 
 interface postInput {
   sortField?: string,
@@ -29,23 +29,14 @@ interface postInput {
   templateUrl: './post-list.component.html',
   styleUrls: ['./post-list.component.scss']
 })
-export class PostListComponent implements OnInit, OnDestroy {
+export class PostListComponent implements OnDestroy {
 
-  user!: UserRec | null;
+  user$!: Observable<UserRec | null>;
   posts!: Post[] | null;
   total!: string | null;
-  //posts!: Observable<Post[] | null> | Promise<Post[] | null>;
-  //total!: Observable<string | null> | Promise<string | null>;
-  private postsSub!: Subscription;
-  private userSub!: Subscription;
-  private paramSub!: Subscription;
-  private totalSub!: Subscription;
-
-  @Input() type!: 'bookmarks' | 'liked' | 'updated' | 'user' | 'drafts';
-
-  input!: postInput;
-
+  input: postInput = {};
   env: any;
+  private routeSub!: Subscription;
 
   constructor(
     public read: ReadService,
@@ -54,117 +45,89 @@ export class PostListComponent implements OnInit, OnDestroy {
     private router: Router,
     public ns: NavService,
     private seo: SeoService,
+    private pls: PostListService,
     @Inject(DOCUMENT) private doc: Document
   ) {
     this.ns.openLeftNav();
-    // reset posts input obj
-    this.input = {};
     this.env = environment;
+    this.user$ = this.read.userRec;
+    this.routeSub = this.route.data
+      .subscribe(async (p) => this.loadPage(p));
   }
 
-  async ngOnInit(): Promise<void> {
+  async loadPage(p: any): Promise<void> {
 
-    let paramSub = this.route.paramMap;
+    this.ns.resetBC();
 
-    if (this.ns.isBrowser) {
-      this.userSub = this.read.userRec
-        .subscribe((user: UserRec | null) => this.user = user);
-    } else {
-      // ssr
-      paramSub = paramSub.pipe(take(1));
+    let count: string | null = p.posts?.count;
+    let posts: Post[] | null = p.posts?.posts;
+    let bookmarks: boolean = p.bookmarks;
+
+    // dynamic routes
+    const tag = this.route.snapshot.params['tag'];
+    const authorId = this.route.snapshot.params['uid'];
+
+    // set dynamic types
+    const type: PostType = bookmarks
+      ? 'bookmarks'
+      : tag
+        ? 'tag'
+        : authorId
+          ? 'user'
+          : this.pls.type;
+
+    // handle re-routing cases
+    if (!posts && !type) {
+      return;
     }
-    this.paramSub = this.route.paramMap
-      .subscribe(async (r: ParamMap) => await this.loadPage(r));
-  }
 
-  async loadPage(r: ParamMap): Promise<void> {
-
-    const tag = r.get('tag');
-    const authorId = r.get('uid');
-    if (tag) {
-      this.input.tag = tag;
-    } else if (authorId) {
-      this.input.authorId = authorId;
+    // handle resolver router or new tab clicks
+    if (!type || type === 'new') {
+      this.total = count;
+      this.posts = posts;
+      return;
     }
 
-    // get uid for user
-    if (this.ns.isBrowser) {
-      this.input.uid = (await this.auth.getUser())?.uid || undefined;
-      if (this.type === 'bookmarks' || this.type === 'drafts' || this.type === 'user') {
-        if (!this.input.uid) {
-          this.router.navigate(['login']);
-        }
+    // handle input types
+    switch (type) {
+      case 'bookmarks':
+        this.input.field = 'bookmarks';
+        break;
+      case 'tag':
+        this.input.tag = tag;
+        break;
+      case 'user':
+        this.input.authorId = authorId;
+        break;
+      case 'liked':
+        this.input.sortField = 'heartsCount';
+        break;
+      case 'updated':
+        this.input.sortField = 'updatedAt';
+        break;
+      case 'drafts':
+        this.input.drafts = true;
+        break;
+    }
+
+    // requires login
+    if (type === 'bookmarks' || type === 'drafts' || type === 'user') {
+      const _user = await this.auth.getUser();
+      this.input.uid = _user?.uid;
+      if (!this.input.uid) {
+        this.router.navigate(['login']);
+        return;
       }
     }
 
-    if (this.router.url === '/bookmarks' || this.type === 'bookmarks') {
-      // meta
-      if (this.router.url === '/bookmarks') {
-        this.ns.openLeftNav();
-        this.ns.addTitle('Bookmarks');
-      }
-      this.input.field = 'bookmarks';
-    } else if (this.type === 'liked') {
-      // posts by hearts
-      this.input.sortField = 'heartsCount';
-    } else if (this.type === 'updated') {
-      // posts by updatedAt
-      this.input.sortField = 'updatedAt';
-    } else if (this.input?.tag) {
-      // meta
-      const tag = this.input.tag;
-      const uTag = tag.charAt(0).toUpperCase() + tag.slice(1);
-      this.ns.setBC('# ' + uTag);
-      this.seo.generateTags({
-        title: uTag + ' - ' + this.env.title
-      });
-    } else if (this.type === 'drafts') {
-      this.input.drafts = true;
-    } else if (this.input?.authorId) {
-      // meta
-      this.ns.addTitle('User');
-    } else {
-      // meta
-      this.seo.generateTags({ title: this.env.title });
-      this.ns.resetBC();
-    }
+    // grab posts
+    ({ count, posts } = await this.read.getPosts(this.input));
 
-    let { count, posts } = this.read.getPosts(this.input);
+    this.meta(type);
 
-    if (count) {
-      this.total = await this.ns.load('count', count);
-      if (this.ns.isBrowser) {
-        this.totalSub = count.subscribe((t: string) => this.total = t);
-      }
-    }
-    if (posts) {
-
-      // generate summary schema
-      posts = posts.pipe(
-        tap((p: Post[]) => {
-          const urls: string[] = [];
-          p.forEach((x: Post) => {
-            urls.push(`${environment.site}/post/${x.id}/${x.slug}`);
-          });
-          this.seo.setSummarySchema(urls);
-        })
-      );
-
-      this.createPost(posts);
-    }
-  }
-
-  async createPost(posts: Observable<Post[] | null>) {
-
-    // unsubscribe to existing subscription
-    if (this.postsSub) {
-      this.postsSub.unsubscribe();
-    }
-
-    // get promise posts, then subscribe
-    this.posts = await this.ns.load('posts', posts);
-    if (this.ns.isBrowser) {
-      this.postsSub = posts.subscribe((p: Post[] | null) => this.posts = p);
+    if (count && posts) {
+      this.total = count;
+      this.posts = posts;
     }
   }
 
@@ -176,33 +139,69 @@ export class PostListComponent implements OnInit, OnDestroy {
       pageSize: event.pageSize
     };
 
-    const { posts } = this.read.getPosts({
+    const { posts, count, error } = await this.read.getPosts({
       ...this.input,
       ...paging
     });
 
-    this.createPost(posts);
+    if (error) {
+      console.error(error);
+    }
+
+    this.total = count;
+    this.posts = posts;
 
     // scroll to top
     this.doc.defaultView?.scrollTo(0, 0);
   }
 
-  async toggleAction(id: string, action: string, toggle?: boolean) {
-    // toggle save and like
-    if (this.user && this.user.uid && toggle !== undefined) {
-      toggle
-        ? await this.read.unActionPost(id, this.user.uid, action)
-        : await this.read.actionPost(id, this.user.uid, action);
+  meta(type: PostType) {
+
+    const posts = this.posts;
+
+    // meta data
+    if (type === 'bookmarks') {
+      if (this.router.url === '/bookmarks') {
+        this.ns.addTitle('Bookmarks');
+      } else {
+        this.ns.addTitle('Dashboard');
+        this.ns.addBC('Bookmarks');
+      }
+    } else if (type === 'tag') {
+      const tag = this.input.tag;
+      const uTag = tag!.charAt(0).toUpperCase() + tag!.slice(1);
+      this.ns.setBC(uTag);
+      this.seo.generateTags({
+        title: uTag + ' - ' + this.env.title
+      });
+    } else if (type === 'user') {
+      if (this.router.url === '/dashboard') {
+        this.ns.addTitle('Dashboard');
+        this.ns.addBC('Posts');
+      } else {
+        this.ns.addTitle('User');
+      }
+    } else if (type === 'drafts') {
+      this.ns.addTitle('Dashboard');
+      this.ns.addBC('Drafts');
     } else {
-      this.router.navigate(['login']);
+      this.seo.generateTags({ title: this.env.title });
+      this.ns.resetBC();
+    }
+
+    if (posts && posts.length > 0) {
+
+      // generate summary schema
+      const urls: string[] = [];
+      for (const x of posts) {
+        urls.push(`${environment.site}/post/${x.id}/${x.slug}`);
+      }
+      this.seo.setSummarySchema(urls);
     }
   }
 
   ngOnDestroy(): void {
     // don't use template async for change detection after login
-    if (this.paramSub) this.paramSub.unsubscribe();
-    if (this.userSub) this.userSub.unsubscribe();
-    if (this.postsSub) this.postsSub.unsubscribe();
-    if (this.totalSub) this.totalSub.unsubscribe();
+    if (this.routeSub) this.routeSub.unsubscribe();
   }
 }
