@@ -24,7 +24,7 @@ export class HeaderComponent {
 
   isActiveSearch = false;
   terms!: Observable<Post[] | null>;
-  user$!: Observable<UserRec | null>;
+  user$: Observable<UserRec | null> = of(null);
 
   constructor(
     private auth: AuthService,

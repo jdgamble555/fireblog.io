@@ -1,7 +1,7 @@
 import { Component, Inject, OnDestroy } from '@angular/core';
 import { PageEvent } from '@angular/material/paginator';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { DOCUMENT } from '@angular/common';
 import { environment } from '@env/environment';
 import { ReadService } from '@db/read.service';
@@ -31,7 +31,7 @@ interface postInput {
 })
 export class PostListComponent implements OnDestroy {
 
-  user$!: Observable<UserRec | null>;
+  user$: Observable<UserRec | null> = of(null);
   posts!: Post[] | null;
   total!: string | null;
   input: postInput = {};

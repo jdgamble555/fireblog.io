@@ -6,7 +6,7 @@ import { environment } from '@env/environment';
 import { NavService } from '@nav/nav.service';
 import { SeoService } from '@shared/seo/seo.service';
 import { MarkdownService } from 'ngx-markdown';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { Post } from './post.model';
 
 
@@ -21,7 +21,7 @@ export class PostComponent {
   postSub!: Subscription;
   userSub!: Subscription;
   post!: Post | null;
-  user$!: Observable<UserRec | null>;
+  user$: Observable<UserRec | null> = of(null);
   postId!: string;
   slug!: string;
 
