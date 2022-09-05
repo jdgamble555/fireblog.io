@@ -50,7 +50,11 @@ export class PostListComponent implements OnDestroy {
   ) {
     this.ns.openLeftNav();
     this.env = environment;
-    this.user$ = this.read.userRec;
+
+    if (this.ns.isBrowser) {
+      this.user$ = this.read.userRec;
+    }
+
     this.routeSub = this.route.data
       .subscribe(async (p) => this.loadPage(p));
   }

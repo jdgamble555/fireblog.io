@@ -24,7 +24,7 @@ export class HeaderComponent {
 
   isActiveSearch = false;
   terms!: Observable<Post[] | null>;
-  user$: Observable<UserRec | null>;
+  user$!: Observable<UserRec | null>;
 
   constructor(
     private auth: AuthService,
@@ -32,7 +32,9 @@ export class HeaderComponent {
     public dm: DarkModeService,
     private read: ReadService
   ) {
-    this.user$ = this.read.userRec;
+    if (this.ns.isBrowser) {
+      this.user$ = this.read.userRec;
+    }
     this.dm.setTheme();
     this.env = environment;
   }
