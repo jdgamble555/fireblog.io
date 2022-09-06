@@ -1,4 +1,3 @@
-import { docData } from "@angular/fire/firestore";
 import {
   deleteDoc,
   doc,
@@ -11,6 +10,7 @@ import {
   SetOptions,
   writeBatch
 } from "@firebase/firestore";
+import { docData } from "rxfire/firestore";
 import {
   combineLatest,
   Observable,
@@ -20,6 +20,7 @@ import {
   map,
   switchMap
 } from "rxjs/operators";
+
 
 export async function setWithCounter(
   ref: DocumentReference<DocumentData>,

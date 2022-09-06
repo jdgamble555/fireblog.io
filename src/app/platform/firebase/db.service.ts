@@ -19,6 +19,7 @@ import {
 import { UserRec } from '@auth/user.model';
 import { Post } from '@post/post.model';
 import { MarkdownService } from 'ngx-markdown';
+import { DocumentData } from 'rxfire/firestore/interfaces';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
@@ -122,7 +123,7 @@ export class DbService {
     * @param id
     * @returns
     */
-  getPostData(id: string): Observable<Post> {
+  subPostData(id: string): Observable<Post> {
 
     // get doc refs
     const docRef = doc(this.afs, 'posts', id);
@@ -137,6 +138,24 @@ export class DbService {
       )
     );
   }
+
+  async getPostData(id: string): Promise<{ error?: string | null, data?: Post | null }> {
+    const docRef = doc(this.afs, 'posts', id);
+    const draftRef = doc(this.afs, 'drafts', id);
+
+    let error, data = null;
+    try {
+      data = await getDoc<Post>(draftRef)
+        .then((snap: DocumentSnapshot<Post>) => snap.exists()
+          ? getDoc(draftRef)
+          : getDoc(docRef))
+        .then((doc: DocumentSnapshot<DocumentData>) => ({ id: doc.id, ...doc.data() }));
+    } catch (e: any) {
+      error = e;
+    }
+    return { error, data };
+  }
+
   /**
    * Edit an existing post / create new post
    * @param id doc id

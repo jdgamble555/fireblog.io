@@ -95,7 +95,7 @@ export class PostFormComponent {
         return;
       }
 
-      this.patchPost = this.db.getPostData(this.id).pipe(
+      this.patchPost = this.db.subPostData(this.id).pipe(
         tap((post: Post) => {
           if (post) {
 

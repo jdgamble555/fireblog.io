@@ -15,7 +15,7 @@ import { Role } from './user.model';
 export class RoleGuard implements CanActivate {
   constructor(private read: ReadService, private router: Router) { }
   async canActivate(): Promise<boolean> {
-    const user = await this.read.getUser();
+    const user = await this.read.getUserRec();
     const isAdmin = !!(user && user.role === Role.Admin);
     if (!isAdmin) {
       this.router.navigate(['/home']);

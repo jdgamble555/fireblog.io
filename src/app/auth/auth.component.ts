@@ -107,7 +107,7 @@ export class AuthComponent implements OnInit, OnDestroy {
       this.title = 'Verify Email Address';
     } else if (this.type === 'username') {
       // see if there is already a username
-      await this.read.getUser()
+      await this.read.getUserRec()
         .then((user: UserRec | null) => {
           if (user && user.username) {
             this.router.navigate(['/dashboard']);

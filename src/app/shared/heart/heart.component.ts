@@ -21,7 +21,7 @@ export class HeartComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.userId) {
-      const { error, data } = this.read.actionExists(this.postId, this.userId, 'hearts');
+      const { error, data } = this.read.subActionExists(this.postId, this.userId, 'hearts');
       if (error) {
         console.error(error);
       }

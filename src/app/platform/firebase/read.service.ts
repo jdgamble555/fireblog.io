@@ -63,7 +63,7 @@ export class ReadService {
   // User
   //
 
-  userSub(): Observable<UserRec | null> {
+  private userSub(): Observable<UserRec | null> {
     return this.auth.user$.pipe(
       switchMap((user: UserAuth | null) =>
         user
@@ -73,14 +73,14 @@ export class ReadService {
     );
   }
 
-  subUserRec(id: string): Observable<UserRec> {
+  private subUserRec(id: string): Observable<UserRec> {
     return docData<UserRec>(
       doc(this.afs, 'users', id) as DocumentReference<UserRec>,
       { idField: 'uid' }
     );
   }
 
-  async getUser(): Promise<UserRec | null> {
+  async getUserRec(): Promise<UserRec | null> {
     const id = (await this.auth.getUser())?.uid;
     if (id) {
       const docSnap = await getDoc<UserRec>(
@@ -99,7 +99,7 @@ export class ReadService {
    * @param col - column
    * @returns
    */
-  getUserTotal(uid: string, col: string): Observable<string> {
+  subUserTotal(uid: string, col: string): Observable<string> {
     return docData<any>(
       doc(this.afs, 'users', uid)
     ).pipe(
@@ -112,7 +112,7 @@ export class ReadService {
  * @param col - Collection Path
  * @returns - total count
  */
-  getTotal(col: string): Observable<string> {
+  subTotal(col: string): Observable<string> {
     return docData<any>(
       doc(this.afs, '_counters', col)
     ).pipe(
@@ -153,7 +153,7 @@ export class ReadService {
    * @param t - tag
    * @returns
    */
-  getTagTotal(t: string): Observable<string> {
+  subTagTotal(t: string): Observable<string> {
     return docData<any>(
       doc(this.afs, 'tags', t)
     ).pipe(
@@ -165,7 +165,15 @@ export class ReadService {
   // Hearts and Bookmarks
   //
 
-  actionExists(postId: string, userId: string, action: string): { error: string | null, data: Observable<boolean | null> } {
+  subAction(id: string, uid: string, action: string): Observable<boolean> {
+    return docSnapshots(
+      doc(this.afs, action, `${id}_${uid}`)
+    ).pipe(
+      map((snap: DocumentSnapshot<any>) => snap.exists())
+    );
+  }
+
+  subActionExists(postId: string, userId: string, action: string): { error: string | null, data: Observable<boolean | null> } {
     let error = null;
     let data: Observable<boolean | null>;
     try {
@@ -213,13 +221,6 @@ export class ReadService {
     return { error };
   }
 
-  getAction(id: string, uid: string, action: string): Observable<boolean> {
-    return docSnapshots(
-      doc(this.afs, action, `${id}_${uid}`)
-    ).pipe(
-      map((snap: DocumentSnapshot<any>) => snap.exists())
-    );
-  }
   //
   // Posts
   //
@@ -367,8 +368,8 @@ export class ReadService {
               _posts.map((_p: Post) => {
                 if (_p.id && uid) {
                   actions.push(
-                    this.getAction(_p.id, uid, 'hearts'),
-                    this.getAction(_p.id, uid, 'bookmarks')
+                    this.subAction(_p.id, uid, 'hearts'),
+                    this.subAction(_p.id, uid, 'bookmarks')
                   );
                 }
               });
@@ -411,11 +412,11 @@ export class ReadService {
 
     // count
     if (uid && field) {
-      count = this.getUserTotal(uid, field);
+      count = this.subUserTotal(uid, field);
     } else if (tag) {
-      count = this.getTagTotal(tag);
+      count = this.subTagTotal(tag);
     } else {
-      count = this.getTotal('posts');
+      count = this.subTotal('posts');
     }
 
     count = count.pipe(
@@ -469,8 +470,8 @@ export class ReadService {
           _post = p;
           if (user && user.uid) {
             return combineLatest([
-              this.getAction(id, user.uid, 'hearts'),
-              this.getAction(id, user.uid, 'bookmarks')
+              this.subAction(id, user.uid, 'hearts'),
+              this.subAction(id, user.uid, 'bookmarks')
             ]);
           }
           return of(null);

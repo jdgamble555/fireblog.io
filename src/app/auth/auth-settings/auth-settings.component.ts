@@ -105,7 +105,7 @@ export class AuthSettingsComponent implements OnInit {
     this.buildAccountForm();
 
     // get user info
-    this.read.getUser()
+    this.read.getUserRec()
       .then(async (user: UserRec | null) => {
         if (user) {
           const username = user?.username;

@@ -18,7 +18,7 @@ export class SaveComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.userId) {
-      const { error, data } = this.read.actionExists(this.postId, this.userId, 'bookmarks');
+      const { error, data } = this.read.subActionExists(this.postId, this.userId, 'bookmarks');
       if (error) {
         console.error(error);
       }
