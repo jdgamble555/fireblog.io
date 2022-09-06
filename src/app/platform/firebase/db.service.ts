@@ -123,7 +123,7 @@ export class DbService {
     * @param id
     * @returns
     */
-  subPostData(id: string): Observable<Post> {
+  private subPostData(id: string): Observable<Post> {
 
     // get doc refs
     const docRef = doc(this.afs, 'posts', id);
@@ -139,7 +139,7 @@ export class DbService {
     );
   }
 
-  async getPostData(id: string): Promise<{ error?: string | null, data?: Post | null }> {
+  async getPostData(id: string): Promise<{ error: string | null, data: Post | null }> {
     const docRef = doc(this.afs, 'posts', id);
     const draftRef = doc(this.afs, 'drafts', id);
 

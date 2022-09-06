@@ -11,7 +11,7 @@
         <mat-icon>close</mat-icon>
       </button>
       <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption>
-        <mat-option style="white-space: pre" *ngFor="let term of terms | async"
+        <mat-option style="white-space: pre" *ngFor="let term of terms"
           [routerLink]="['/post', term.id, term.slug]" (click)="this.isActiveSearch = !this.isActiveSearch">
           {{ term.title }}
         </mat-option>

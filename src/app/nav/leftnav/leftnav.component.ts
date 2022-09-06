@@ -11,7 +11,7 @@ import { NavService } from '@nav/nav.service';
 })
 export class LeftnavComponent implements OnInit {
 
-  total!: string;
+  total!: string | null;
 
   isDev: boolean;
 
@@ -23,7 +23,10 @@ export class LeftnavComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    this.total = await this.ns.load('total', this.read.subTotal('posts'));
+    const { data, error } = await this.ns.load('total', this.read.getTotal('posts'));
+    if (error) {
+      console.error(error);
+    }
+    this.total = data;
   }
-
 }

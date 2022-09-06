@@ -23,7 +23,7 @@ export class HeaderComponent {
   env: any;
 
   isActiveSearch = false;
-  terms!: Observable<Post[] | null>;
+  terms!: Post[] | null;
   user$: Observable<UserRec | null> = of(null);
 
   constructor(
@@ -48,8 +48,16 @@ export class HeaderComponent {
     this.ns.home();
   }
 
-  search(event: Event) {
+  async search(event: Event): Promise<void> {
     const term = (<HTMLInputElement>event.target).value;
-    this.terms = term ? this.read.searchPost(term) : of(null);
+    let data = null;
+    let error = null;
+    if (term) {
+      ({ data, error } = await this.read.searchPost(term));
+      if (error) {
+        console.error(error);
+      }
+    }
+    this.terms = data ? data : null;
   }
 }

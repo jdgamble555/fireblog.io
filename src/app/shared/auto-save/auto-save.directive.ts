@@ -1,7 +1,7 @@
 import { Directive, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { Observable, Subscription } from 'rxjs';
-import { debounceTime, take, tap } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+import { debounceTime, tap } from 'rxjs/operators';
 
 @Directive({
   selector: '[appAutoSave]'
@@ -10,7 +10,7 @@ export class AutoSaveDirective implements OnInit, OnDestroy {
 
   // Inputs
   @Input() formGroup!: FormGroup;
-  @Input() getData!: Observable<any>;
+  @Input() getData!: Promise<any>;
   @Input() setData = async () => { };
 
   // Internal state
@@ -33,16 +33,13 @@ export class AutoSaveDirective implements OnInit, OnDestroy {
     this._state = 'loading';
     if (this.getData) {
       this.getData
-        .pipe(
-          tap((data: T) => {
-            if (data) {
-              this.formGroup.patchValue(data);
-              this.formGroup.markAsPristine();
-              this.state = 'loaded';
-            }
-          }),
-          take(1)
-        ).subscribe();
+        .then((data) => {
+          if (data) {
+            this.formGroup.patchValue(data);
+            this.formGroup.markAsPristine();
+            this.state = 'loaded';
+          }
+        });
     }
   }
 

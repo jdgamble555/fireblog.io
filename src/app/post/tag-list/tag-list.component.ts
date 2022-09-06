@@ -10,7 +10,7 @@ import { Tag } from '../post.model';
 })
 export class TagListComponent implements OnInit {
 
-  tags!: Tag[];
+  tags!: Tag[] | null;
 
   constructor(
     private read: ReadService,
@@ -18,7 +18,12 @@ export class TagListComponent implements OnInit {
   ) { }
 
   async ngOnInit(): Promise<void> {
+
     // get tags
-    this.tags = await this.ns.load('tags', this.read.subTags());
+    const { data, error } = await this.ns.load('total', this.read.getTags());
+    if (error) {
+      console.error(error);
+    }
+    this.tags = data;
   }
 }

@@ -99,7 +99,7 @@ export class ReadService {
    * @param col - column
    * @returns
    */
-  subUserTotal(uid: string, col: string): Observable<string> {
+  private subUserTotal(uid: string, col: string): Observable<string> {
     return docData<any>(
       doc(this.afs, 'users', uid)
     ).pipe(
@@ -112,7 +112,20 @@ export class ReadService {
  * @param col - Collection Path
  * @returns - total count
  */
-  subTotal(col: string): Observable<string> {
+  async getTotal(col: string): Promise<{ data: string | null, error: string | null }> {
+    let error, data = null;
+    try {
+      data = await getDoc(
+        doc(this.afs, '_counters', col)
+      ).then((r) => r.exists() ? r.data()?.count : null);
+    } catch (e: any) {
+      error = e;
+    }
+    return { error, data };
+  }
+
+
+  private subTotal(col: string): Observable<string> {
     return docData<any>(
       doc(this.afs, '_counters', col)
     ).pipe(
@@ -120,40 +133,47 @@ export class ReadService {
     );
   }
 
-  async getTags(): Promise<Tag[]> {
-    return await getDocs<Tag>(
-      query<Tag>(
-        collection(this.afs, 'tags')
-      )
-    ).then((snap) => {
-      const docs = [];
-      for (const doc of snap.docs) {
-        docs.push({
-          name: doc.id,
-          ...doc.data()
-        });
-      }
-      return docs;
-    });
+  async getTags(): Promise<{ data: Tag[] | null, error: string | null }> {
+    let error, data = null;
+    try {
+      data = await getDocs<Tag>(
+        query<Tag>(
+          collection(this.afs, 'tags')
+        )
+      ).then((snap) => {
+        const docs = [];
+        for (const doc of snap.docs) {
+          docs.push({
+            name: doc.id,
+            ...doc.data()
+          });
+        }
+        return docs;
+      });
+    } catch (e: any) {
+      error = e;
+    }
+    return { data, error };
   }
 
   /**
    * Get all tags and their count
    * @returns tags
    */
-  subTags(): Observable<Tag[]> {
+  private subTags(): Observable<Tag[]> {
     return collectionData<Tag>(
       query<Tag>(
         collection(this.afs, 'tags')
       ), { idField: 'name' }
     );
   }
+
   /**
    * Get tag count from tag doc
    * @param t - tag
    * @returns
    */
-  subTagTotal(t: string): Observable<string> {
+  private subTagTotal(t: string): Observable<string> {
     return docData<any>(
       doc(this.afs, 'tags', t)
     ).pipe(
@@ -230,21 +250,35 @@ export class ReadService {
   * @param term
   * @returns Observable of search
   */
-  searchPost(term: string): Observable<Post[]> {
+  async searchPost(term: string): Promise<{ data: Post[] | null, error: string | null }> {
     term = term.split(' ')
       .map(
         (v: string) => soundex(v)
       ).join(' ');
-    return collectionData(
-      query(
-        collection(this.afs, '_search/posts/_all'),
-        orderBy('_term.' + term),
-      ),
-      { idField: 'id' }
-    ).pipe(
-      take(1),
-      debounceTime(100)
-    );
+    let data = null;
+    let error = null;
+    try {
+      data = await getDocs<Post>(
+        query<Post>(
+          collection(this.afs, '_search/posts/_all'),
+          orderBy('_term.' + term)
+        )
+      ).then((data) => {
+        if (!data.empty) {
+          const docs: Post[] = [];
+          for (const doc of data.docs) {
+            docs.push({ id: doc.id, ...doc.data() });
+          }
+          if (docs.length > 0) {
+            return docs;
+          }
+        }
+        return null;
+      });
+    } catch (e: any) {
+      error = e;
+    }
+    return { data, error };
   }
 
   async getPosts({
@@ -283,7 +317,7 @@ export class ReadService {
    * Gets all posts
    * @returns posts joined by authorDoc
    */
-  subPosts({
+  private subPosts({
     sortField = 'createdAt',
     sortDirection = 'desc',
     pageSize = 5,
@@ -436,7 +470,6 @@ export class ReadService {
   async getPostById(id: string, user?: UserRec): Promise<{ data: Post | null, error: string | null }> {
 
     // todo - do without SubPostId
-
     let data = null;
     let error = null;
     try {
@@ -452,7 +485,7 @@ export class ReadService {
    * @param id post id
    * @returns post observable joined by author doc
    */
-  subPostById(id: string, user?: UserRec): Observable<Post | null> {
+  private subPostById(id: string, user?: UserRec): Observable<Post | null> {
     let _post: Post | null;
     return expandRef<Post>(
       docData<Post>(

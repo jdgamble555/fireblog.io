@@ -2,8 +2,6 @@ import { Component, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatChipList } from '@angular/material/chips';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
 import { ImageUploadService } from '@db/image-upload.service';
 import { AuthService } from '@db/auth.service';
 import { DbService } from '@db/db.service';
@@ -61,7 +59,7 @@ export class PostFormComponent {
 
   postSaving = false;
   title!: string;
-  patchPost!: Observable<Post>;
+  patchPost!: any;
   state!: string;
 
   constructor(
@@ -95,9 +93,15 @@ export class PostFormComponent {
         return;
       }
 
-      this.patchPost = this.db.subPostData(this.id).pipe(
-        tap((post: Post) => {
-          if (post) {
+      this.patchPost = this.db.getPostData(this.id)
+        .then(({ error, data }: { data: Post | null, error: string | null }) => {
+
+          if (error) {
+            console.error(error);
+          }
+          if (data) {
+
+            const post = data;
 
             // add cover image
             this.image = post.image || null;
@@ -110,26 +114,26 @@ export class PostFormComponent {
             // add tags
             this.ts.addTags(post.tags, this.tagsField);
 
+            const { tags, ...rest } = post;
+            return rest;
+
           } else {
             // error, id does not exist in db
             this.router.navigate(['home']);
+            return;
           }
-        }),
-        map((r: Post) => {
-          const { tags, ...rest } = r;
-          return rest;
-        }));
+        });
+
+      // add title
+      this.title = (this.isNewPage ? 'New' : 'Edit') + ' Post';
+
+      // nav bar
+      this.ns.addTitle(this.title);
+      this.ns.closeLeftNav();
     }
-
-    // add title
-    this.title = (this.isNewPage ? 'New' : 'Edit') + ' Post';
-
-    // nav bar
-    this.ns.addTitle(this.title);
-    this.ns.closeLeftNav();
   }
 
-  get contentControl(){
+  get contentControl() {
     return this.postForm.get('content') as FormControl;
   }
 

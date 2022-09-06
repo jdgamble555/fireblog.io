@@ -40,10 +40,16 @@ export class NavService {
     this.directories = [];
   }
 
-  load<T>(key: string, obs: Observable<T>): Promise<T> {
+  loadSub<T>(key: string, obs: Observable<T>): Promise<T> {
     return this.isServer
       ? this.waitFor(obs.pipe(tap((data: T) => this.state.saveState(key, data))))
       : this.state.hasState(key) ? Promise.resolve(this.state.getState(key)) : firstValueFrom(obs);
+  }
+
+  async load<T>(key: string, prom: Promise<T>): Promise<T> {
+    return this.isServer
+      ? this.waitFor(prom.then((data: T) => { this.state.saveState(key, data); return data; }))
+      : this.state.hasState(key) ? await Promise.resolve(this.state.getState(key)) : await prom;
   }
 
   // add title
