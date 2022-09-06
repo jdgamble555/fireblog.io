@@ -98,7 +98,7 @@ export class SeoService {
       "image": image,
       "keywords": keywords,
       "timeRequired": time + 'M',
-      "identifer": id
+      "identifier": id
     };
 
     this.generateSchema(s);
