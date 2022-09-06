@@ -70,7 +70,8 @@ export class PostComponent {
       keywords: r.tags.join(', '),
       createdAt: new Date(r.createdAt).toISOString(),
       updatedAt: new Date(r.updatedAt).toISOString(),
-      time: r.minutes
+      time: r.minutes,
+      id: r.id
     });
   }
 }

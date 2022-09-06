@@ -80,7 +80,8 @@ export class SeoService {
     keywords = '',
     createdAt = '',
     updatedAt = '',
-    time = ''
+    time = '',
+    id = ''
   }): void {
 
     const s = {
@@ -96,7 +97,8 @@ export class SeoService {
       "description": description,
       "image": image,
       "keywords": keywords,
-      "timeRequired": time + 'M'
+      "timeRequired": time + 'M',
+      "identifer": id
     };
 
     this.generateSchema(s);
