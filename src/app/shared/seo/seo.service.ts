@@ -2,6 +2,8 @@ import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { Router } from '@angular/router';
+import { environment } from '@env/environment';
+import { Post } from '@post/post.model';
 
 @Injectable({
   providedIn: 'root'
@@ -81,7 +83,8 @@ export class SeoService {
     createdAt = '',
     updatedAt = '',
     time = '',
-    id = ''
+    id = '',
+    url = ''
   }): void {
 
     const s = {
@@ -98,13 +101,20 @@ export class SeoService {
       "image": image,
       "keywords": keywords,
       "timeRequired": time + 'M',
-      "identifier": id
+      "identifier": id,
+      "url": url
     };
 
     this.generateSchema(s);
   }
 
-  setSummarySchema(urls: string[]): void {
+  setSummarySchema(posts: Post[]): void {
+
+    // generate summary schema
+    const urls: string[] = [];
+    for (const x of posts) {
+      urls.push(`${environment.site}/post/${x.id}/${x.slug}`);
+    }
 
     const list = [];
 

@@ -197,13 +197,7 @@ export class PostListComponent implements OnDestroy {
     }
 
     if (posts && posts.length > 0) {
-
-      // generate summary schema
-      const urls: string[] = [];
-      for (const x of posts) {
-        urls.push(`${environment.site}/post/${x.id}/${x.slug}`);
-      }
-      this.seo.setSummarySchema(urls);
+      this.seo.setSummarySchema(posts);
     }
   }
 

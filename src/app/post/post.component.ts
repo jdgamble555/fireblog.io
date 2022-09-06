@@ -71,7 +71,8 @@ export class PostComponent {
       createdAt: new Date(r.createdAt).toISOString(),
       updatedAt: new Date(r.updatedAt).toISOString(),
       time: r.minutes,
-      id: r.id
+      id: r.id,
+      url: `${environment.site}/post/${r.id}/${r.slug}`
     });
   }
 }
