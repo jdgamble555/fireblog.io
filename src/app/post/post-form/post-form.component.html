@@ -1,6 +1,6 @@
 <form [formGroup]="postForm" appAutoSave [getData]="patchPost" [setData]="onSubmit.bind(this)"
   (stateChange)="updateState($event)">
-  <mat-card class="ng-card">
+  <mat-card class="ng-card centered ng-edit">
     <mat-card-title>{{ title }}</mat-card-title>
     <br />
     <mat-card-content>
@@ -41,12 +41,13 @@
           <br />
           <button mat-button color="accent"><a href="https://www.markdownguide.org/basic-syntax/" target="_new">Markdown
               Guide</a></button>
-          <mat-form-field appearance="outline">
+          <app-markdown-editor [form]="postForm" controlName="content"></app-markdown-editor>
+          <!--<mat-form-field appearance="outline">
             <textarea matInput rows="10" formControlName="content" placeholder="Content" required></textarea>
             <mat-error *ngIf="getField('content')?.invalid">
               {{ getError('content') }}
             </mat-error>
-          </mat-form-field>
+          </mat-form-field>-->
         </mat-tab>
         <mat-tab label="Preview">
           <mat-card>

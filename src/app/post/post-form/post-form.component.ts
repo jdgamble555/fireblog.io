@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatChipList } from '@angular/material/chips';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -127,6 +127,10 @@ export class PostFormComponent {
     // nav bar
     this.ns.addTitle(this.title);
     this.ns.closeLeftNav();
+  }
+
+  get contentControl(){
+    return this.postForm.get('content') as FormControl;
   }
 
   // get tags field as form array
