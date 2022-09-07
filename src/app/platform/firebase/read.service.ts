@@ -21,7 +21,7 @@ import {
 import { UserAuth, UserRec } from '@auth/user.model';
 import { Post, Tag } from '@post/post.model';
 import { combineLatest, firstValueFrom, Observable, of } from 'rxjs';
-import { debounceTime, map, switchMap, take } from 'rxjs/operators';
+import { map, switchMap, take } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 import {
   deleteWithCounter,
@@ -185,7 +185,20 @@ export class ReadService {
   // Hearts and Bookmarks
   //
 
-  subAction(id: string, uid: string, action: string): Observable<boolean> {
+  async getAction(id: string, uid: string, action: string): Promise<{ error: string | null, data: boolean | null }> {
+    let error = null;
+    let data = null;
+    try {
+      data = await getDoc(
+        doc(this.afs, action, `${id}_${uid}`)
+      ).then((doc: DocumentSnapshot<any>) => doc.exists());
+    } catch (e: any) {
+      error = e;
+    }
+    return { data, error };
+  }
+
+  private subAction(id: string, uid: string, action: string): Observable<boolean> {
     return docSnapshots(
       doc(this.afs, action, `${id}_${uid}`)
     ).pipe(
@@ -193,7 +206,20 @@ export class ReadService {
     );
   }
 
-  subActionExists(postId: string, userId: string, action: string): { error: string | null, data: Observable<boolean | null> } {
+  async getActionExists(postId: string, userId: string, action: string): Promise<{ data: boolean | null, error: string | null }> {
+    let error = null;
+    let data = null;
+    try {
+      data = await getDoc(
+        doc(this.afs, action, `${postId}_${userId}`)
+      ).then((snap: DocumentSnapshot) => snap.exists());
+    } catch (e: any) {
+      error = e;
+    }
+    return { data, error };
+  }
+
+  private subActionExists(postId: string, userId: string, action: string): { error: string | null, data: Observable<boolean | null> } {
     let error = null;
     let data: Observable<boolean | null>;
     try {

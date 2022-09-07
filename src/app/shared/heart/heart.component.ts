@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ReadService } from '@db/read.service';
-import { Subscription } from 'rxjs';
+import { from, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-heart',
@@ -21,10 +21,7 @@ export class HeartComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.userId) {
-      const { error, data } = this.read.subActionExists(this.postId, this.userId, 'hearts');
-      if (error) {
-        console.error(error);
-      }
+      const data = from(this.actionExists(this.userId));
       this.actionSub = data.subscribe((state: boolean | null) => {
         if (state) {
           this._state = state;
@@ -32,6 +29,14 @@ export class HeartComponent implements OnInit, OnDestroy {
       });
     }
     this._count = this.count !== undefined ? this.count : this._count;
+  }
+
+  private async actionExists(uid: string) {
+    const { data, error } = await this.read.getActionExists(this.postId, uid, 'hearts');
+    if (error) {
+      console.error(error);
+    }
+    return data;
   }
 
   constructor(

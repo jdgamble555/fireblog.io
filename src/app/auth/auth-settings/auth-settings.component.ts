@@ -8,7 +8,7 @@ import {
   ValidatorFn
 } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable, of, Subscription } from 'rxjs';
+import { from, Observable, of, Subscription } from 'rxjs';
 
 import { debounceTime, map, take } from 'rxjs/operators';
 import { Router } from '@angular/router';
@@ -287,15 +287,19 @@ export class AuthSettingsComponent implements OnInit {
       if (field === this.currentUsername) {
         return of(null);
       }
-      return this.db.validUsername(field).pipe(
+      return from(this.usernameTest(field)).pipe(
         debounceTime(500),
-        take(1),
-        map((f: any) => f
-          ? { 'unavailable': true }
-          : null
-        )
+        take(1)
       );
     }
+  }
+
+  async usernameTest(field: string) {
+    const { data, error } = await this.db.validUsername(field);
+    if (error) {
+      console.error(error);
+    }
+    return data ? { 'unavailable': true } : null;
   }
 
   /**

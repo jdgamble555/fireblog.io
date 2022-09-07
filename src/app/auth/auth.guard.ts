@@ -82,11 +82,16 @@ export class UsernameGuard implements CanActivate {
     // make sure logged in first...
     const user = await this.auth.getUser();
     if (user) {
-      const hasUsername = await firstValueFrom(this.db.hasUsername(user?.uid));
+      const { data, error } = await this.db.hasUsername(user?.uid);
+      if (error) {
+        console.error(error);
+      }
+      const hasUsername = data;
+
       if (!hasUsername) {
         this.router.navigate(['/username']);
       }
-      return hasUsername;
+      return hasUsername || false;
     } else {
       this.router.navigate(['/login']);
       return false;

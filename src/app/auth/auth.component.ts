@@ -14,7 +14,7 @@ import { ReadService } from '@db/read.service';
 import { NavService } from '@nav/nav.service';
 import { matchValidator, MyErrorStateMatcher } from '@shared/form-validators';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
-import { of, Subscription } from 'rxjs';
+import { from, of, Subscription } from 'rxjs';
 import { debounceTime, map, take } from 'rxjs/operators';
 import { UserRec } from './user.model';
 
@@ -162,7 +162,7 @@ export class AuthComponent implements OnInit, OnDestroy {
           Validators.required,
           Validators.minLength(3),
           Validators.maxLength(25),
-        ], this.isAvailable('jdgamble555')]
+        ], this.isAvailable()]
       });
     }
 
@@ -274,15 +274,19 @@ export class AuthComponent implements OnInit, OnDestroy {
       if (field === current) {
         return of(null);
       }
-      return this.db.validUsername(field).pipe(
+      return from(this.usernameTest(field)).pipe(
         debounceTime(500),
-        take(1),
-        map((f: any) => f
-          ? { 'unavailable': true }
-          : null
-        )
+        take(1)
       );
     }
+  }
+
+  async usernameTest(field: string) {
+    const { data, error } = await this.db.validUsername(field);
+    if (error) {
+      console.error(error);
+    }
+    return data ? { 'unavailable': true } : null;
   }
 
   ngOnDestroy(): void {

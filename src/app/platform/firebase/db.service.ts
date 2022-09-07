@@ -44,7 +44,7 @@ export class DbService {
   // User
   //
 
-  getUsername(uid: string): Observable<string | null> {
+  private getUsername(uid: string): Observable<string | null> {
     return docData<UserRec>(
       doc(this.afs, 'users', uid)
     ).pipe(
@@ -52,7 +52,26 @@ export class DbService {
     );
   }
 
-  hasUsername(uid: string): Observable<boolean> {
+  async hasUsername(uid: string): Promise<{ error: string | null, data: boolean | null }> {
+    let error = null;
+    let data = null;
+    try {
+      data = await getDoc<UserRec>(
+        doc(this.afs, 'users', uid)
+      ).then((doc) => {
+        if (doc.exists()) {
+          const r = doc.data();
+          return 'username' in r;
+        }
+        return null;
+      })
+    } catch (e: any) {
+      e = error;
+    }
+    return { error, data };
+  }
+
+  private subHasUsername(uid: string): Observable<boolean> {
     return docData<UserRec>(
       doc(this.afs, 'users', uid)
     ).pipe(
@@ -60,7 +79,20 @@ export class DbService {
     );
   }
 
-  validUsername(name: string): Observable<boolean> {
+  async validUsername(name: string): Promise<{ error: string | null, data: boolean | null }> {
+    let data = null;
+    let error = null;
+    try {
+      data = await getDoc(
+        doc(this.afs, 'usernames', name)
+      ).then((doc: DocumentSnapshot<any>) => doc.exists());
+    } catch (e: any) {
+      error = e;
+    }
+    return { data, error };
+  }
+
+  private subValidUsername(name: string): Observable<boolean> {
     return docSnapshots(
       doc(this.afs, 'usernames', name)
     ).pipe(
