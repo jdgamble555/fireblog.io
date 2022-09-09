@@ -3,6 +3,7 @@ import { Inject, Injectable } from '@angular/core';
 import { UserAuth } from '@auth/user.model';
 import { Provider, User } from '@supabase/supabase-js';
 import { firstValueFrom, map, Observable, tap } from 'rxjs';
+import { DbModule } from './db.module';
 import { DbService } from './db.service';
 import { sb_User, SupabaseService } from './supabase.service';
 
@@ -15,7 +16,7 @@ export interface AuthAction {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: DbModule
 })
 export class AuthService {
 

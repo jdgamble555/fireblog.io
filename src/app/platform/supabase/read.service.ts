@@ -4,13 +4,12 @@ import { Post, Tag } from '@post/post.model';
 import { Observable, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { AuthService } from './auth.service';
+import { DbModule } from './db.module';
 import { sb_User, SupabaseService } from './supabase.service';
 
 
-
-
 @Injectable({
-  providedIn: 'root'
+  providedIn: DbModule
 })
 export class ReadService {
 

@@ -23,6 +23,7 @@ import { Post, Tag } from '@post/post.model';
 import { combineLatest, firstValueFrom, Observable, of } from 'rxjs';
 import { map, switchMap, take } from 'rxjs/operators';
 import { AuthService } from './auth.service';
+import { DbModule } from './db.module';
 import {
   deleteWithCounter,
   expandRef,
@@ -44,7 +45,7 @@ export interface PostInput {
 };
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: DbModule
 })
 export class ReadService {
 

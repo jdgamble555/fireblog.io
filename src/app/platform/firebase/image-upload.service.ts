@@ -9,6 +9,7 @@ import {
   getDownloadURL
 } from '@angular/fire/storage';
 import { Observable } from 'rxjs';
+import { DbModule } from './db.module';
 
 interface Preview {
   blob: Blob;
@@ -16,7 +17,7 @@ interface Preview {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: DbModule
 })
 export class ImageUploadService {
 

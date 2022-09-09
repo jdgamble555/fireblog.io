@@ -22,6 +22,7 @@ import { MarkdownService } from 'ngx-markdown';
 import { DocumentData } from 'rxfire/firestore/interfaces';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
+import { DbModule } from './db.module';
 
 
 import {
@@ -31,7 +32,7 @@ import {
 } from './fb-tools';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: DbModule
 })
 export class DbService {
 

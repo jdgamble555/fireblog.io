@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { DbModule } from '@db/db.module';
 import { environment } from '@env/environment';
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { Observable, Subscriber } from 'rxjs';
@@ -13,7 +14,7 @@ export interface sb_User {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: DbModule
 })
 export class SupabaseService {
 

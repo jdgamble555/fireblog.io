@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { DbModule } from './db.module';
 
 interface Preview {
   blob: Blob;
@@ -8,7 +9,7 @@ interface Preview {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: DbModule
 })
 export class ImageUploadService {
 

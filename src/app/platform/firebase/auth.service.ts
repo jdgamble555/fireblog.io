@@ -24,6 +24,7 @@ import {
 } from '@angular/fire/auth';
 import { Role, UserAuth } from '@auth/user.model';
 import { firstValueFrom, map, Observable } from 'rxjs';
+import { DbModule } from './db.module';
 import { DbService } from './db.service';
 
 export interface AuthAction {
@@ -35,7 +36,7 @@ export interface AuthAction {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: DbModule
 })
 export class AuthService {
 

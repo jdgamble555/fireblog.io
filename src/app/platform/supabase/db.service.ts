@@ -4,11 +4,12 @@ import { UserRec } from '@auth/user.model';
 import { Post } from '@post/post.model';
 import { MarkdownService } from 'ngx-markdown';
 import { Observable, of } from 'rxjs';
+import { DbModule } from './db.module';
 import { SupabaseService } from './supabase.service';
 
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: DbModule
 })
 export class DbService {
 
