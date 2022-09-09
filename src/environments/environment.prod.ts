@@ -9,9 +9,9 @@ export const environment = {
   storage: 'fireblog',
   author: 'Jonathan Gamble',
   icon: 'whatshot',
-  icon_class: '',
+  icon_class: 'ng-fire',
   icon_dark_class: 'ng-fire',
-  back: 'ng-fire'
+  back: ''
 };
 
 /*export const environment = {
