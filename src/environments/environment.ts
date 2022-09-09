@@ -11,7 +11,11 @@ export const environment = {
   short_desc: 'Advanced Techniques for Firebase and Firestore!',
   site: "https://fireblog.io",
   storage: 'fireblog',
-  author: 'Jonathan Gamble'
+  author: 'Jonathan Gamble',
+  icon: 'whatshot',
+  icon_class: 'ng-fire',
+  icon_dark_class: 'ng-fire',
+  back: ''
 };
 
 /*

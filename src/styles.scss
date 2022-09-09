@@ -17,8 +17,8 @@ $custom-typography: mat.define-typography-config(
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
-$app-primary: mat.define-palette(mat.$blue-palette, 800);
-$app-accent: mat.define-palette(mat.$gray-palette, 700);
+$app-primary: mat.define-palette(mat.$light-blue-palette, 800);
+$app-accent: mat.define-palette(mat.$light-blue-palette, 700);
 $app-background: #fff;
 
 // Create the theme object. A theme consists of configurations for individual
@@ -41,7 +41,7 @@ $app-theme: mat.define-light-theme(
   background-color: white;
 }
 
-$dark-primary: mat.define-palette(mat.$light-blue-palette, 800);
+$dark-primary: mat.define-palette(mat.$light-blue-palette, 700);
 $dark-accent: mat.define-palette(mat.$blue-gray-palette, 100);
 $dark-theme-background: mat.define-palette(mat.$gray-palette, 600);
 $dark-theme: mat.define-dark-theme(
@@ -120,11 +120,6 @@ h3 {
   padding: 15px;
 }
 
-.ng-blue-back {
-  background-color: #1565c0 !important;
-  color: #fff !important;
-}
-
 .ng-toolbar {
   font-size: 1.25rem;
   line-height: 2rem !important;
@@ -163,6 +158,24 @@ h3 {
   //position: relative;
   //top: 3px;
   padding-right: 15px;
+}
+
+.ng-black-back {
+  background-color: #000 !important;
+}
+
+.ng-black {
+  color: #000 !important;
+  font-weight: bold;
+}
+
+.ng-blue {
+  color: #40b3ff !important;
+}
+
+.ng-blue-back {
+  background-color: #0277bd !important;
+  color: #fff !important;
 }
 
 .ng-close-icon.mat-button {
@@ -731,6 +744,10 @@ mat-paginator .mat-form-field {
 
 .ng-fire {
   color: #f9a825 !important;
+}
+
+.ng-white {
+  color: #fff !important;
 }
 
 .text-left {

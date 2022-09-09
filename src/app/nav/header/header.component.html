@@ -11,16 +11,19 @@
         <mat-icon>close</mat-icon>
       </button>
       <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption>
-        <mat-option style="white-space: pre" *ngFor="let term of terms"
-          [routerLink]="['/post', term.id, term.slug]" (click)="this.isActiveSearch = !this.isActiveSearch">
+        <mat-option style="white-space: pre" *ngFor="let term of terms" [routerLink]="['/post', term.id, term.slug]"
+          (click)="this.isActiveSearch = !this.isActiveSearch">
           {{ term.title }}
         </mat-option>
       </mat-autocomplete>
     </div>
   </mat-toolbar-row>
-  <mat-toolbar-row *ngIf="!isActiveSearch" class="flex-container">
+  <mat-toolbar-row *ngIf="!isActiveSearch" class="flex-container {{ this.dm.isDarkMode ? this.env.back : '' }}">
     <button mat-button (click)='ns.home();' class="ng-toolbar">
-      <mat-icon class="ng-button-icon ng-home-icon ng-fire">whatshot</mat-icon>
+      <mat-icon
+        class="ng-button-icon ng-home-icon {{ this.dm.isDarkMode ? this.env.icon_dark_class : this.env.icon_class }}">
+        {{ env.icon }}
+      </mat-icon>
       {{ env.title }}
     </button>
     <span class="ng-spacer"></span>

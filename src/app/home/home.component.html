@@ -1,7 +1,8 @@
 <mat-card class="ng-card {{ this.dm.isDarkMode ? '' : 'ng-blue-back' }}">
   <div class="ng-center">
     <h1>
-      <mat-icon color="primary" class="ng-icon-text ng-fire">whatshot</mat-icon>{{ env.title }}!
+      <mat-icon color="primary" class="ng-icon-text {{ this.dm.isDarkMode ? this.env.icon_dark_class : this.env.icon_class }}">{{ env.icon }}</mat-icon>
+      {{ env.title }}
     </h1>
     <h2>{{ env.short_desc }}</h2>
   </div>

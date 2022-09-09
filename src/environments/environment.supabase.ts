@@ -8,5 +8,9 @@ export const environment = {
   short_desc: 'An easier way to code',
   site: "https://code.build",
   storage: 'code-build',
-  author: 'Jonathan Gamble'
+  author: 'Jonathan Gamble',
+  icon: 'code',
+  icon_class: 'ng-black',
+  icon_dark_class: 'ng-blue',
+  back: 'ng-black-back'
 };
