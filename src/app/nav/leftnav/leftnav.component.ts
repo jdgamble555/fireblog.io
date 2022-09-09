@@ -23,7 +23,7 @@ export class LeftnavComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    const { data, error } = await this.ns.load('total', this.read.getTotal('posts'));
+    const { data, error } = await this.ns.load('post-total', this.read.getTotal('posts'));
     if (error) {
       console.error(error);
     }

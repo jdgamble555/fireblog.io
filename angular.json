@@ -20,14 +20,10 @@
         "build": {
           "builder": "@angular-builders/custom-webpack:browser",
           "options": {
-            "customWebpackConfig": {
-              "path": "./custom-webpack.config.ts"
-            },
             "outputPath": "dist/fireblog/browser",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
-            "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/favicon.ico",
@@ -49,7 +45,8 @@
               "node_modules/prismjs/components/prism-xml-doc.min.js"
             ],
             "serviceWorker": true,
-            "ngswConfigPath": "ngsw-config.json"
+            "ngswConfigPath": "ngsw-config.json",
+            "allowedCommonJsDependencies": ["cross-fetch", "websocket"]
           },
           "configurations": {
             "production": {
@@ -65,13 +62,17 @@
                   "maximumError": "4kb"
                 }
               ],
+              "customWebpackConfig": {
+                "path": "./webpack.config.ts"
+              },
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "tsConfig": "tsconfig.app.json"
             },
             "development": {
               "buildOptimizer": false,
@@ -79,7 +80,36 @@
               "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
-              "namedChunks": true
+              "namedChunks": true,
+              "customWebpackConfig": {
+                "path": "./webpack.config.ts"
+              },
+              "tsConfig": "tsconfig.app.json"
+            },
+            "supabase": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kb",
+                  "maximumError": "2mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "2kb",
+                  "maximumError": "4kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.supabase.ts"
+                }
+              ],
+              "outputHashing": "all",
+              "customWebpackConfig": {
+                "path": "./supabase-webpack.config.ts"
+              },
+              "tsConfig": "tsconfig.supa.json"
             }
           },
           "defaultConfiguration": "production"
@@ -92,6 +122,9 @@
             },
             "development": {
               "browserTarget": "fireblog:build:development"
+            },
+            "supabase": {
+              "browserTarget": "fireblog:build:supabase"
             }
           },
           "defaultConfiguration": "development"
@@ -106,7 +139,7 @@
           "builder": "@angular-builders/custom-webpack:karma",
           "options": {
             "customWebpackConfig": {
-              "path": "./custom-webpack.config.ts"
+              "path": "./webpack.config.ts"
             },
             "main": "src/test.ts",
             "polyfills": "src/polyfills.ts",
@@ -145,11 +178,7 @@
           "builder": "@angular-builders/custom-webpack:server",
           "options": {
             "outputPath": "dist/fireblog/server",
-            "customWebpackConfig": {
-              "path": "./custom-webpack.config.ts"
-            },
             "main": "server.ts",
-            "tsConfig": "tsconfig.server.json",
             "inlineStyleLanguage": "scss",
             "externalDependencies": [
               "firebase",
@@ -176,12 +205,33 @@
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.prod.ts"
                 }
-              ]
+              ],
+              "customWebpackConfig": {
+                "path": "./webpack.config.ts"
+              },
+              "tsConfig": "tsconfig.server.json"
             },
             "development": {
               "optimization": false,
               "sourceMap": true,
-              "extractLicenses": false
+              "extractLicenses": false,
+              "customWebpackConfig": {
+                "path": "./webpack.config.ts"
+              },
+              "tsConfig": "tsconfig.server.json"
+            },
+            "supabase": {
+              "outputHashing": "media",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.supabase.ts"
+                }
+              ],
+              "customWebpackConfig": {
+                "path": "./supabase-webpack.config.ts"
+              },
+              "tsConfig": "tsconfig.server.supa.json"
             }
           },
           "defaultConfiguration": "production"
@@ -196,6 +246,10 @@
             "production": {
               "browserTarget": "fireblog:build:production",
               "serverTarget": "fireblog:server:production"
+            },
+            "supabase": {
+              "browserTarget": "fireblog:build:supabase",
+              "serverTarget": "fireblog:server:supabase"
             }
           },
           "defaultConfiguration": "development"
@@ -215,6 +269,10 @@
             "development": {
               "browserTarget": "fireblog:build:development",
               "serverTarget": "fireblog:server:development"
+            },
+            "supabase": {
+              "browserTarget": "fireblog:build:supabase",
+              "serverTarget": "fireblog:server:supabase"
             }
           },
           "defaultConfiguration": "production"

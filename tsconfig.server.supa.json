@@ -1,0 +1,29 @@
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
+{
+  "extends": "./tsconfig.server.json",
+  "compilerOptions": {
+    "paths": {
+      "@core/*": [
+        "src/app/core/*"
+      ],
+      "@shared/*": [
+        "src/app/shared/*"
+      ],
+      "@env/*": [
+        "src/environments/*"
+      ],
+      "@db/*": [
+        "src/app/platform/supabase/*"
+      ],
+      "@post/*": [
+        "src/app/post/*"
+      ],
+      "@auth/*": [
+        "src/app/auth/*"
+      ],
+      "@nav/*": [
+        "src/app/nav/*"
+      ]
+    }
+  }
+}

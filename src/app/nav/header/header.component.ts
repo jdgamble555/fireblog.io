@@ -37,6 +37,7 @@ export class HeaderComponent {
     }
     this.dm.setTheme();
     this.env = environment;
+    this.env.ReadService
   }
 
   toggle() {

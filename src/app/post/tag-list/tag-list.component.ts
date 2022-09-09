@@ -20,7 +20,7 @@ export class TagListComponent implements OnInit {
   async ngOnInit(): Promise<void> {
 
     // get tags
-    const { data, error } = await this.ns.load('total', this.read.getTags());
+    const { data, error } = await this.ns.load('tags', this.read.getTags());
     if (error) {
       console.error(error);
     }

@@ -17,6 +17,8 @@ export interface UserRec {
   draftsCount?: number;
   postsCount?: number;
   bookmarksCount?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 export interface UserAuth {
