@@ -1,4 +1,3 @@
-
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import {
   FormGroup,
@@ -8,15 +7,16 @@ import {
   ValidatorFn
 } from '@angular/forms';
 import { ActivatedRoute, Router, UrlSegment } from '@angular/router';
-import { AuthAction, AuthService } from '@db/auth.service';
+import { AuthService } from '@db/auth/auth.service';
 import { DbService } from '@db/db.service';
 import { ReadService } from '@db/read.service';
 import { NavService } from '@nav/nav.service';
 import { matchValidator, MyErrorStateMatcher } from '@shared/form-validators';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { from, of, Subscription } from 'rxjs';
-import { debounceTime, map, take } from 'rxjs/operators';
-import { UserRec } from './user.model';
+import { debounceTime, take } from 'rxjs/operators';
+import { auth_validation_messages } from './auth.messages';
+import { AuthAction, UserRec } from './user.model';
 
 
 @Component({
@@ -27,6 +27,8 @@ import { UserRec } from './user.model';
 export class AuthComponent implements OnInit, OnDestroy {
 
   matcher = new MyErrorStateMatcher();
+
+  validationMessages = auth_validation_messages;
 
   userForm!: FormGroup;
 
@@ -47,29 +49,6 @@ export class AuthComponent implements OnInit, OnDestroy {
   isReturnLogin = false;
 
   title!: string;
-
-  validationMessages: any = {
-    email: {
-      required: 'Email is required.',
-      email: 'Email must be a valid email address.'
-    },
-    password: {
-      required: 'Password is required.',
-      pattern: 'Password must include at least one letter and one number.',
-      minlength: 'Password must be at least 6 characters long.',
-      maxlength: 'Password cannot be more than 25 characters long.'
-    },
-    confirmPassword: {
-      required: 'Confirm password is required.',
-      matching: 'Passwords must match.'
-    },
-    username: {
-      required: 'A valid username is required.',
-      minlength: 'Username must be at least 3 characters long.',
-      maxlength: 'Username cannot be more than 25 characters long.',
-      unavailable: 'That username is taken.'
-    }
-  };
 
   constructor(
     private auth: AuthService,
@@ -216,7 +195,7 @@ export class AuthComponent implements OnInit, OnDestroy {
       );
     } else if (this.isCreateUser) {
       const username = (this.getField('username')?.value as string).toLowerCase();
-      r = await this.auth.updateUsername(username);
+      r = await this.db.updateUsername(username);
     } else if (this.isPasswordless) {
       r = await this.auth.sendEmailLink(
         this.getField('email')?.value

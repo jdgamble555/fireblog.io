@@ -29,3 +29,11 @@ export interface UserAuth {
   photoURL?: string | null;
   emailVerified: boolean | null;
 }
+
+export interface AuthAction {
+  reAuth?: boolean | null;
+  isNew?: boolean | null;
+  isConfirmed?: boolean | null;
+  error: string | null;
+  message: string | null;
+}

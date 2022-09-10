@@ -10,9 +10,9 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { from, Observable, of, Subscription } from 'rxjs';
 
-import { debounceTime, map, take } from 'rxjs/operators';
+import { debounceTime, take } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { AuthService } from '@db/auth.service';
+import { AuthService } from '@db/auth/auth.service';
 import { ImageUploadService } from '@db/image-upload.service';
 import { ReadService } from '@db/read.service';
 import { DbService } from '@db/db.service';
@@ -22,6 +22,8 @@ import { DialogService } from '@shared/confirm-dialog/dialog.service';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { matchValidator, MyErrorStateMatcher } from '@shared/form-validators';
 import { NavService } from '@nav/nav.service';
+import { AuthAccessService } from '@db/auth/auth-access.service';
+import { auth_settings_messages, auth_settings_validation_messages } from './auth-settings.messages';
 
 @Component({
   selector: 'app-auth-settings',
@@ -31,6 +33,9 @@ import { NavService } from '@nav/nav.service';
 export class AuthSettingsComponent implements OnInit {
 
   @ViewChild(FormGroupDirective) private passFormDirective!: FormGroupDirective;
+
+  messages = auth_settings_messages;
+  validationMessages = auth_settings_validation_messages;
 
   matcher = new MyErrorStateMatcher();
 
@@ -47,46 +52,14 @@ export class AuthSettingsComponent implements OnInit {
   emailVerified!: boolean | null;
 
   passSub!: Subscription;
-
   providers!: any;
-
-  messages: any = {
-    deleteAccount: 'Are you sure you want to delete your account?',
-    selectImage: 'You must choose an image file type.'
-  }
-
-  validationMessages: any = {
-    email: {
-      required: 'Email is required.',
-      email: 'Email must be a valid email address.'
-    },
-    password: {
-      required: 'New Password is required.',
-      pattern: 'New Password must include at least one letter and one number.',
-      minlength: 'New Password must be at least 6 characters long.',
-      maxlength: 'New Password cannot be more than 25 characters long.'
-    },
-    confirmPassword: {
-      required: 'Confirm New Password is required.',
-      matching: 'Passwords must match.'
-    },
-    displayName: {
-      required: 'Name is required.'
-    },
-    username: {
-      required: 'A valid username is required.',
-      minlength: 'Username must be at least 3 characters long.',
-      maxlength: 'Username cannot be more than 25 characters long.',
-      unavailable: 'That username is taken.'
-    }
-  };
-
   accountForm!: FormGroup;
 
   constructor(
     private fb: FormBuilder,
     private sb: SnackbarService,
     public auth: AuthService,
+    private aas: AuthAccessService,
     private dialog: DialogService,
     private d: MatDialog,
     private nav: NavService,
@@ -204,7 +177,7 @@ export class AuthSettingsComponent implements OnInit {
 
     // update displayName
     const displayName = this.getField('displayName').value;
-    const r = await this.auth.updateProfile({
+    const r = await this.aas.updateProfile({
       displayName
     });
     this.currentDisplayName = displayName;
@@ -220,7 +193,7 @@ export class AuthSettingsComponent implements OnInit {
 
     const username = this.getField('username').value;
     // update username
-    const r = await this.auth.updateUsername(username, this.currentUsername);
+    const r = await this.db.updateUsername(username, this.currentUsername);
     if (r.message) {
       this.currentUsername = username;
       this.sb.showMsg(r.message);
@@ -234,7 +207,7 @@ export class AuthSettingsComponent implements OnInit {
 
     // update email
     const email = this.getField('email').value;
-    const { reAuth, error, message } = await this.auth.updateEmail(email);
+    const { reAuth, error, message } = await this.aas.updateEmail(email);
     this.currentEmail = email;
     if (message) {
       this.sb.showMsg(message);
@@ -259,7 +232,7 @@ export class AuthSettingsComponent implements OnInit {
    */
   async updatePass() {
 
-    const { reAuth, message, error } = await this.auth.updatePass(this.accountForm.value.password);
+    const { reAuth, message, error } = await this.aas.updatePass(this.accountForm.value.password);
     if (message) {
       this.sb.showMsg(message);
     }
@@ -310,9 +283,9 @@ export class AuthSettingsComponent implements OnInit {
   async updateProvider(e: any, p: any): Promise<void> {
     let r = null;
     if (e.checked) {
-      r = await this.auth.addProvider(p);
+      r = await this.aas.addProvider(p);
     } else {
-      r = await this.auth.removeProvider(p);
+      r = await this.aas.removeProvider(p);
     }
     if (r.message) {
       this.sb.showMsg(r.message);
@@ -342,7 +315,7 @@ export class AuthSettingsComponent implements OnInit {
 
     // delete profile image
     await this.deleteImage();
-    const { reAuth, error, message } = await this.auth.deleteUser();
+    const { reAuth, error, message } = await this.aas.deleteUser();
     if (message) {
       this.sb.showMsg(message);
     }
@@ -395,7 +368,7 @@ export class AuthSettingsComponent implements OnInit {
     // delete the image from url
     try {
       await this.is.deleteImage(url);
-      await this.auth.updateProfile({ photoURL: null });
+      await this.aas.updateProfile({ photoURL: null });
     } catch (e: any) {
       this.sb.showError(e);
     }
@@ -430,7 +403,7 @@ export class AuthSettingsComponent implements OnInit {
         console.error(e);
       }
       // upload new image and save it to photoURL in user db
-      await this.auth.updateProfile({ photoURL: imageURL });
+      await this.aas.updateProfile({ photoURL: imageURL });
     }
   }
 

@@ -3,7 +3,7 @@ import {
   CanActivate,
   Router
 } from '@angular/router';
-import { AuthService } from '@db/auth.service';
+import { AuthService } from '@db/auth/auth.service';
 import { DbService } from '@db/db.service';
 import { ReadService } from '@db/read.service';
 import { firstValueFrom } from 'rxjs';

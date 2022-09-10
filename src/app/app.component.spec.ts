@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { AuthService } from '@db/auth.service';
+import { AuthService } from '@db/auth/auth.service';
 import { DbModule } from '@db/db.module';
 import { MarkdownModule, MarkdownService } from 'ngx-markdown';
 import { AppComponent } from './app.component';

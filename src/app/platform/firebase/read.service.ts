@@ -22,7 +22,7 @@ import { UserAuth, UserRec } from '@auth/user.model';
 import { Post, Tag } from '@post/post.model';
 import { combineLatest, firstValueFrom, Observable, of } from 'rxjs';
 import { map, switchMap, take } from 'rxjs/operators';
-import { AuthService } from './auth.service';
+import { AuthService } from './auth/auth.service';
 import { DbModule } from './db.module';
 import {
   deleteWithCounter,

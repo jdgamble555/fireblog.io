@@ -3,7 +3,7 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
 import { MatChipList } from '@angular/material/chips';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ImageUploadService } from '@db/image-upload.service';
-import { AuthService } from '@db/auth.service';
+import { AuthService } from '@db/auth/auth.service';
 import { DbService } from '@db/db.service';
 import { TagService } from '@shared/tag/tag.service';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';

@@ -9,7 +9,7 @@ import { UserRec } from '@auth/user.model';
 import { Post } from '@post/post.model';
 import { SeoService } from '@shared/seo/seo.service';
 import { NavService } from '@nav/nav.service';
-import { AuthService } from '@db/auth.service';
+import { AuthService } from '@db/auth/auth.service';
 import { PostListService, PostType } from './post-list.service';
 
 interface postInput {

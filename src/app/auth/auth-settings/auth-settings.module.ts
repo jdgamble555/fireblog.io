@@ -5,6 +5,7 @@ import { AuthSettingsComponent } from './auth-settings.component';
 import { ReLoginComponent } from './re-login/re-login.component';
 import { SharedModule } from '@shared/shared.module';
 import { CoreModule } from '@core/core.module';
+import { AuthAccessModule } from '@db/auth/auth-access.module';
 
 
 @NgModule({
@@ -15,7 +16,8 @@ import { CoreModule } from '@core/core.module';
   imports: [
     AuthSettingsRoutingModule,
     CoreModule,
-    SharedModule
+    SharedModule,
+    AuthAccessModule
   ]
 })
 export class AuthSettingsModule { }

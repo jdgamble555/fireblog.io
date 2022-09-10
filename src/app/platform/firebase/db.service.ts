@@ -1,5 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
+import { Auth, user } from '@angular/fire/auth';
 import {
   doc,
   Firestore,
@@ -20,7 +21,7 @@ import { UserRec } from '@auth/user.model';
 import { Post } from '@post/post.model';
 import { MarkdownService } from 'ngx-markdown';
 import { DocumentData } from 'rxfire/firestore/interfaces';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { DbModule } from './db.module';
 
@@ -38,6 +39,7 @@ export class DbService {
 
   constructor(
     private afs: Firestore,
+    private auth: Auth,
     private markdownService: MarkdownService,
     @Inject(DOCUMENT) private document: Document
   ) { }
@@ -45,7 +47,7 @@ export class DbService {
   // User
   //
 
-  private getUsername(uid: string): Observable<string | null> {
+  private subUsername(uid: string): Observable<string | null> {
     return docData<UserRec>(
       doc(this.afs, 'users', uid)
     ).pipe(
@@ -101,22 +103,25 @@ export class DbService {
     );
   }
 
-  async updateUsername(username: string, uid: string, currentUsername?: string): Promise<any> {
-    const batch = writeBatch(this.afs);
-    if (currentUsername) {
-      batch.delete(
-        doc(this.afs, 'usernames', currentUsername)
+  async updateUsername(username: string, currentUsername?: string): Promise<any> {
+    const uid = (await firstValueFrom(user(this.auth)))?.uid;
+    if (uid) {
+      const batch = writeBatch(this.afs);
+      if (currentUsername) {
+        batch.delete(
+          doc(this.afs, 'usernames', currentUsername)
+        );
+      }
+      batch.update(
+        doc(this.afs, 'users', uid),
+        { username }
       );
+      batch.set(
+        doc(this.afs, 'usernames', username),
+        { uid }
+      );
+      return batch.commit();
     }
-    batch.update(
-      doc(this.afs, 'users', uid),
-      { username }
-    );
-    batch.set(
-      doc(this.afs, 'usernames', username),
-      { uid }
-    );
-    return batch.commit();
   }
 
   async createUser(user: UserRec, id: string): Promise<void> {
