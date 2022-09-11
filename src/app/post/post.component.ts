@@ -40,6 +40,8 @@ export class PostComponent {
     const post = this.route.snapshot.data.post;
     this.meta(post);
     this.post = post;
+
+    // todo - fix this
     if (this.ns.isBrowser) {
       this.user$ = this.us.userRec;
     }

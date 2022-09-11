@@ -1,9 +1,7 @@
 import { DOCUMENT, isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Router } from '@angular/router';
-import { firstValueFrom, isObservable, Observable, tap } from 'rxjs';
 import { environment } from '@env/environment';
-import { StateService } from '@shared/state/state.service';
 import { SeoService } from '@shared/seo/seo.service';
 
 
@@ -29,7 +27,6 @@ export class NavService {
   constructor(
     @Inject(PLATFORM_ID) platformId: Object,
     @Inject(DOCUMENT) private document: Document,
-    private state: StateService,
     private router: Router,
     private seo: SeoService
   ) {
@@ -38,18 +35,6 @@ export class NavService {
     this.isServer = isPlatformServer(platformId);
     this.doc = this.document;
     this.directories = [];
-  }
-
-  loadSub<T>(key: string, obs: Observable<T>): Promise<T> {
-    return this.isServer
-      ? this.waitFor(obs.pipe(tap((data: T) => this.state.saveState(key, data))))
-      : this.state.hasState(key) ? Promise.resolve(this.state.getState(key)) : firstValueFrom(obs);
-  }
-
-  async load<T>(key: string, prom: Promise<T>): Promise<T> {
-    return this.isServer
-      ? this.waitFor(prom.then((data: T) => { this.state.saveState(key, data); return data; }))
-      : this.state.hasState(key) ? await Promise.resolve(this.state.getState(key)) : await prom;
   }
 
   // add title
@@ -94,22 +79,5 @@ export class NavService {
 
   home(): void {
     this.router.navigate(['/']);
-  }
-
-  async waitFor<T>(prom: Promise<T> | Observable<T>): Promise<T> {
-    if (isObservable(prom)) {
-      prom = firstValueFrom(prom);
-    }
-    const macroTask = Zone.current
-      .scheduleMacroTask(
-        `WAITFOR-${Math.random()}`,
-        () => { },
-        {},
-        () => { }
-      );
-    return prom.then((p: T) => {
-      macroTask.invoke();
-      return p;
-    });
   }
 }

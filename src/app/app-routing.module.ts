@@ -27,10 +27,10 @@ const routes: Routes = [
 
   // posts
   // todo - p instead of post
-  { path: 'post/:id', component: PostComponent, resolve: { post: PostResolver } },
-  { path: 'post/:id/:slug', component: PostComponent, resolve: { post: PostResolver } },
+  { path: 'post/:id', component: PostComponent, canActivate: [PostGuard] },
+  { path: 'post/:id/:slug', component: PostComponent, canActivate: [PostGuard], resolve: { post: PostResolver } },
   { path: 't/:tag', component: PostListComponent, resolve: { posts: PostListResolver } },
-  { path: 'u/:uid', component: PostListComponent, canActivate: [UserPostGuard], resolve: { posts: PostListResolver } },
+  { path: 'u/:uid', component: PostListComponent, canActivate: [UserPostGuard] },
   { path: 'u/:uid/:username', component: PostListComponent, canActivate: [UserPostGuard], resolve: { posts: PostListResolver } },
   { path: 'bookmarks', component: PostListComponent, canActivate: [LoginGuard] },
 
