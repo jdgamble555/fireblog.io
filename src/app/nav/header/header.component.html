@@ -70,7 +70,7 @@
       <a mat-icon-button [matMenuTriggerFor]="appMenu">
         <img class="avatar" *ngIf="user.photoURL" [src]="user.photoURL" />
         <!-- todo - fix this account circle css problem -->
-        <mat-icon *ngIf="!user.photoURL" class="avatar avatar-account">account_circle</mat-icon>
+        <mat-icon *ngIf="!user.photoURL">account_circle</mat-icon>
       </a>
     </div>
     <ng-template #guest>

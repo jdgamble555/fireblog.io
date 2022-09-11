@@ -49,9 +49,7 @@ export class AuthService {
     )
   }
 
-  private async _userCheck(u: UserAuth) {
-
-    // todo - fix exports to data, error type
+  private async _userCheck(u: UserAuth): Promise<void> {
 
     // create user if DNE
     const user = await this.us.getUserRec();

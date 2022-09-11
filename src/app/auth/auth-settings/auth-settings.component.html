@@ -1,6 +1,5 @@
 <div *ngIf="auth.user$ | async as user">
-  <!-- todo add max width here -->
-  <mat-card class="ng-card-outline">
+  <mat-card class="ng-card-outline centered ng-edit">
     <form [formGroup]="accountForm">
       <h1>Settings</h1>
       <mat-accordion>

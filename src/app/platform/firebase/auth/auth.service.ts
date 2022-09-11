@@ -76,6 +76,7 @@ export class AuthService {
       };
 
       // create user in db
+      // todo - fix this error checking
       await this.us.createUser(userData, credential.user.uid);
       message = this.messages.loginSuccess;
     } catch (e: any) {

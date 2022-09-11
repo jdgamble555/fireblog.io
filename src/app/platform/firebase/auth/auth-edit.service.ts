@@ -14,7 +14,6 @@ import {
 } from '@angular/fire/auth';
 import { AuthAction } from '@auth/user.model';
 import { firstValueFrom } from 'rxjs';
-
 import { AuthService } from './auth.service';
 import { auth_messages, auth_errors, replaceMsg } from './auth.messages';
 import { AuthEditModule } from '@db/auth-edit.module';
@@ -40,7 +39,7 @@ export class AuthEditService {
 
   // Auth
 
-  async oAuthReLogin(p: string): Promise<any> {
+  async oAuthReLogin(p: string): Promise<AuthAction> {
     let error = null;
     let message = null;
     try {
