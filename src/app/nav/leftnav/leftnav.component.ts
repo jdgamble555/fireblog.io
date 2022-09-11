@@ -1,5 +1,5 @@
 import { Component, isDevMode, OnInit } from '@angular/core';
-import { ReadService } from '@db/read.service';
+import { PostDbService } from '@db/post/post-db.service';
 import { NavService } from '@nav/nav.service';
 
 
@@ -16,14 +16,14 @@ export class LeftnavComponent implements OnInit {
   isDev: boolean;
 
   constructor(
-    private read: ReadService,
+    private ps: PostDbService,
     private ns: NavService
   ) {
     this.isDev = isDevMode();
   }
 
   async ngOnInit(): Promise<void> {
-    const { data, error } = await this.ns.load('post-total', this.read.getTotal('posts'));
+    const { data, error } = await this.ns.load('post-total', this.ps.getTotal('posts'));
     if (error) {
       console.error(error);
     }

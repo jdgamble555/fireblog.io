@@ -3,21 +3,25 @@ import {
   Resolve,
   ActivatedRouteSnapshot
 } from '@angular/router';
+import { PostDbService } from '@db/post/post-db.service';
 import { NavService } from '@nav/nav.service';
-import { Post } from '@post/post.model';
+import { Post, PostType } from '@post/post.model';
 import { StateService } from '@shared/state/state.service';
-import { PostListService } from './post-list.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PostListResolver implements Resolve<{ posts: Post[] | null, count: string | null }> {
 
+  type: PostType;
+
   constructor(
-    private pls: PostListService,
     private state: StateService,
-    private ns: NavService
-  ) { }
+    private ns: NavService,
+    private ps: PostDbService
+  ) {
+    this.type = null;
+  }
 
   resolve(route: ActivatedRouteSnapshot): Promise<{ posts: Post[] | null, count: string | null }> {
     return this.load(route);
@@ -25,12 +29,12 @@ export class PostListResolver implements Resolve<{ posts: Post[] | null, count: 
 
   async load(route: ActivatedRouteSnapshot) {
 
-    this.pls.type = null;
-
     const hasPostsState = this.state.hasState<Post[]>('posts');
     const hasCountState = this.state.hasState<string>('count');
 
-    let posts, count = null;
+    let posts = null;
+    let count = null;
+    let error = null;
 
     // load server state if exists
     if (this.ns.isBrowser && hasPostsState && hasCountState) {
@@ -40,12 +44,14 @@ export class PostListResolver implements Resolve<{ posts: Post[] | null, count: 
     } else {
 
       // preloads post component from routes only
-      const username = route.paramMap.get('username') || undefined;
       const uid = route.paramMap.get('uid') || undefined;
       const tag = route.paramMap.get('tag') || undefined;
 
       // fetch data
-      ({ count, posts } = await this.pls.getPosts({ uid, tag, username }));
+      ({ count, posts, error } = await this.ps.getPosts({ uid, tag }));
+      if (error) {
+        console.error(error);
+      }
 
       // save state
       if (this.ns.isServer) {

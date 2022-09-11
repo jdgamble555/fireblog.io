@@ -5,7 +5,6 @@
         <ng-container *ngIf="isRegister">Register</ng-container>
         <ng-container *ngIf="isLogin">Login</ng-container>
         <ng-container *ngIf="isReset">Reset Password</ng-container>
-        <ng-container *ngIf="isCreateUser">Create Username</ng-container>
         <ng-container *ngIf="isPasswordless">Login with a Magic Link</ng-container>
         <ng-container *ngIf="isReturnLogin">Confirm Your Email</ng-container>
         <ng-container *ngIf="isVerify">
@@ -25,22 +24,12 @@
 
       <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
         <mat-form-field [color]="getField('email')?.valid && 'accent'" appearance="outline"
-          *ngIf="!isVerify && !isCreateUser">
+          *ngIf="!isVerify">
           <mat-icon matPrefix color="primary" class="ng-form-icon">email</mat-icon>
           <input matInput formControlName="email" type="email" placeholder="Email" autocomplete="off" />
           <mat-error *ngIf="getField('email')?.invalid">
             {{ getError('email') }}
           </mat-error>
-        </mat-form-field>
-
-        <mat-form-field [color]="getField('username')?.valid && 'accent'" appearance="outline" *ngIf="isCreateUser">
-          <mat-icon matPrefix color="primary" class="ng-form-icon">person</mat-icon>
-          <input matInput formControlName="username" type="text" placeholder="Username" autocomplete="off"
-            [errorStateMatcher]="matcher" />
-          <mat-error *ngIf="getField('username')?.invalid">
-            {{ getError('username') }}
-          </mat-error>
-          <mat-hint *ngIf="getField('username')?.valid">{{ userForm.value.username }} is available!</mat-hint>
         </mat-form-field>
 
         <mat-form-field [color]="getField('email')?.valid && 'accent'" *ngIf="isLogin || isRegister"
@@ -70,14 +59,13 @@
 
         <button mat-raised-button color="primary" type="submit" [disabled]="userForm.invalid || loading">
           <ng-container *ngIf="isReset">Send Reset Email</ng-container>
-          <ng-container *ngIf="isCreateUser">Create</ng-container>
           <ng-container *ngIf="isLogin || isReturnLogin">Login</ng-container>
           <ng-container *ngIf="isPasswordless">Send Link</ng-container>
           <ng-container *ngIf="isRegister">Register</ng-container>
         </button>
       </form>
     </mat-card-content>
-    <mat-card-footer class="ng-card-footer" *ngIf="!isVerify && !isCreateUser && !isReturnLogin">
+    <mat-card-footer class="ng-card-footer" *ngIf="!isVerify && !isReturnLogin">
       <button mat-button color="primary" *ngIf="isLogin" routerLink="/reset">
         Forgot password?
       </button>

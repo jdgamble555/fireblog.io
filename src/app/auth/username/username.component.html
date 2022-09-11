@@ -1,0 +1,23 @@
+<div class="ng-login-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Create Username</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+        <mat-form-field [color]="getField('username')?.valid && 'accent'" appearance="outline" *ngIf="isCreateUser">
+          <mat-icon matPrefix color="primary" class="ng-form-icon">person</mat-icon>
+          <input matInput formControlName="username" type="text" placeholder="Username" autocomplete="off"
+            [errorStateMatcher]="matcher" />
+          <mat-error *ngIf="getField('username')?.invalid">
+            {{ getError('username') }}
+          </mat-error>
+          <mat-hint *ngIf="getField('username')?.valid">{{ userForm.value.username }} is available!</mat-hint>
+        </mat-form-field>
+        <button mat-raised-button color="primary" type="submit" [disabled]="userForm.invalid || loading">
+          Create
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

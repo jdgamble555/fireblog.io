@@ -1,5 +1,7 @@
 import { UserRec } from '../auth/user.model';
 
+export type PostType = 'bookmarks' | 'liked' | 'updated' | 'user' | 'drafts' | 'new' | 'tag' | null;
+
 export interface Post {
   id?: string;
   title?: string;
@@ -27,4 +29,16 @@ export interface Tag {
   name?: string;
   count?: number;
 }
+
+export interface PostInput {
+  sortField?: string,
+  sortDirection?: 'desc' | 'asc',
+  tag?: string,
+  uid?: string,
+  authorId?: string,
+  field?: string,
+  page?: number,
+  pageSize?: number,
+  drafts?: boolean
+};
 

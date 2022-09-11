@@ -13,16 +13,17 @@ import {
   user
 } from '@angular/fire/auth';
 import { AuthAction } from '@auth/user.model';
-import { DbService } from '@db/db.service';
 import { firstValueFrom } from 'rxjs';
-import { AuthAccessModule } from './auth-access.module';
+
 import { AuthService } from './auth.service';
 import { auth_messages, auth_errors, replaceMsg } from './auth.messages';
+import { AuthEditModule } from '@db/auth-edit.module';
+import { UserEditService } from '@db/user/user-edit.service';
 
 @Injectable({
-  providedIn: AuthAccessModule
+  providedIn: AuthEditModule
 })
-export class AuthAccessService {
+export class AuthEditService {
 
   messages = auth_messages;
   errors = auth_errors;
@@ -30,7 +31,7 @@ export class AuthAccessService {
   constructor(
     private auth: Auth,
     private as: AuthService,
-    private db: DbService
+    private ues: UserEditService
   ) { }
 
   private async _fbUser(): Promise<User | null> {
@@ -77,7 +78,7 @@ export class AuthAccessService {
         const phoneNumber = credential.user!.phoneNumber || newProvider!.phoneNumber;
 
         // update db
-        await this.db.updateUser({ phoneNumber, photoURL }, credential.user.uid);
+        await this.ues.updateUser({ phoneNumber, photoURL });
       }
     } catch (e: any) {
       error = e;
@@ -119,7 +120,7 @@ export class AuthAccessService {
       try {
         await updateEmail(user, email);
         // todo - fix error checking here
-        await this.db.updateUser({ email }, user.uid);
+        await this.ues.updateUser({ email });
         await sendEmailVerification(user);
         message = this.messages.emailUpdated;
       } catch (e: any) {
@@ -166,7 +167,7 @@ export class AuthAccessService {
       const user = await this._fbUser();
       if (user) {
         await updateProfile(user, profile);
-        await this.db.updateUser(profile, user.uid);
+        await this.ues.updateUser(profile);
         message = this.messages.profileUpdated;
       };
     } catch (e: any) {
@@ -184,7 +185,7 @@ export class AuthAccessService {
     if (user) {
       try {
         await user.delete();
-        await this.db.deleteUser(user.uid);
+        await this.ues.deleteUser();
         message = this.messages.accountRemoved;
       } catch (e: any) {
         if (e.code === 'auth/requires-recent-login') {

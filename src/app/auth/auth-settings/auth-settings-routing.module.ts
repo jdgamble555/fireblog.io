@@ -3,9 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthSettingsComponent } from './auth-settings.component';
 
 const routes: Routes = [
-  {
-    path: '', component: AuthSettingsComponent
-  }
+  { path: '', component: AuthSettingsComponent }
 ];
 
 @NgModule({

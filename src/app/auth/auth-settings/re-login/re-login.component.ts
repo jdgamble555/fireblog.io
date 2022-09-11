@@ -1,7 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
-import { AuthAccessService } from '@db/auth/auth-access.service';
+import { AuthEditService } from '@db/auth/auth-edit.service';
 import { AuthService } from '@db/auth/auth.service';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 
@@ -23,7 +23,7 @@ export class ReLoginComponent implements OnInit {
     public auth: AuthService,
     private d: MatDialogRef<ReLoginComponent>,
     private sb: SnackbarService,
-    private aas: AuthAccessService,
+    private aes: AuthEditService,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.providers = data.providers;
@@ -34,7 +34,7 @@ export class ReLoginComponent implements OnInit {
   }
 
   async providerLogin(provider: string) {
-    const { message, error } = await this.aas.oAuthReLogin(provider);
+    const { message, error } = await this.aes.oAuthReLogin(provider);
     if (message) {
       this.sb.showMsg(message);
     }

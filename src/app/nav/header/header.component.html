@@ -51,7 +51,7 @@
         </button>
         <mat-divider></mat-divider>
         <ng-container *ngIf="user.role === 'admin'">
-          <button mat-menu-item [routerLink]="['/user', user.uid]">
+          <button mat-menu-item [routerLink]="['/u', user.uid]">
             <mat-icon class="ng-menu-icon">account_box</mat-icon>
             <span>My Posts</span>
           </button>

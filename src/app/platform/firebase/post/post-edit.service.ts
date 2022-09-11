@@ -1,166 +1,42 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
-import { Auth, user } from '@angular/fire/auth';
 import {
-  doc,
-  Firestore,
-  setDoc,
-  arrayUnion,
   arrayRemove,
-  getDoc,
+  arrayUnion,
+  collection,
+  doc,
   docData,
   docSnapshots,
-  DocumentSnapshot,
-  updateDoc,
-  collection,
   DocumentReference,
-  writeBatch,
-  increment
+  DocumentSnapshot,
+  Firestore,
+  getDoc,
+  increment,
+  updateDoc,
+  writeBatch
 } from '@angular/fire/firestore';
-import { UserRec } from '@auth/user.model';
+import { deleteWithCounter, searchIndex, setWithCounter } from '@db/fb-tools';
+import { PostEditModule } from '@db/post-edit.module';
 import { Post } from '@post/post.model';
 import { MarkdownService } from 'ngx-markdown';
-import { DocumentData } from 'rxfire/firestore/interfaces';
-import { firstValueFrom, Observable } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
-import { DbModule } from './db.module';
-
-
-import {
-  deleteWithCounter,
-  searchIndex,
-  setWithCounter
-} from './fb-tools';
+import { Observable, switchMap } from 'rxjs';
 
 @Injectable({
-  providedIn: DbModule
+  providedIn: PostEditModule
 })
-export class DbService {
+export class PostEditService {
 
   constructor(
     private afs: Firestore,
-    private auth: Auth,
     private markdownService: MarkdownService,
     @Inject(DOCUMENT) private document: Document
   ) { }
-  //
-  // User
-  //
-
-  private subUsername(uid: string): Observable<string | null> {
-    return docData<UserRec>(
-      doc(this.afs, 'users', uid)
-    ).pipe(
-      map((r: any) => r ? r.username : null)
-    );
-  }
-
-  async hasUsername(uid: string): Promise<{ error: string | null, data: boolean | null }> {
-    let error = null;
-    let data = null;
-    try {
-      data = await getDoc<UserRec>(
-        doc(this.afs, 'users', uid)
-      ).then((doc) => {
-        if (doc.exists()) {
-          const r = doc.data();
-          return 'username' in r;
-        }
-        return null;
-      })
-    } catch (e: any) {
-      e = error;
-    }
-    return { error, data };
-  }
-
-  private subHasUsername(uid: string): Observable<boolean> {
-    return docData<UserRec>(
-      doc(this.afs, 'users', uid)
-    ).pipe(
-      map((r: any) => r && 'username' in r)
-    );
-  }
-
-  async validUsername(name: string): Promise<{ error: string | null, data: boolean | null }> {
-    let data = null;
-    let error = null;
-    try {
-      data = await getDoc(
-        doc(this.afs, 'usernames', name)
-      ).then((doc: DocumentSnapshot<any>) => doc.exists());
-    } catch (e: any) {
-      error = e;
-    }
-    return { data, error };
-  }
-
-  private subValidUsername(name: string): Observable<boolean> {
-    return docSnapshots(
-      doc(this.afs, 'usernames', name)
-    ).pipe(
-      map((snap: DocumentSnapshot<any>) => snap.exists())
-    );
-  }
-
-  async updateUsername(username: string, currentUsername?: string): Promise<any> {
-    const uid = (await firstValueFrom(user(this.auth)))?.uid;
-    if (uid) {
-      const batch = writeBatch(this.afs);
-      if (currentUsername) {
-        batch.delete(
-          doc(this.afs, 'usernames', currentUsername)
-        );
-      }
-      batch.update(
-        doc(this.afs, 'users', uid),
-        { username }
-      );
-      batch.set(
-        doc(this.afs, 'usernames', username),
-        { uid }
-      );
-      return batch.commit();
-    }
-  }
-
-  async createUser(user: UserRec, id: string): Promise<void> {
-
-    // create user only if DNE
-    const docSnap = await getDoc<UserRec>(
-      doc(this.afs, 'users', id) as DocumentReference<UserRec>
-    );
-    if (!docSnap.exists()) {
-      await setWithCounter(
-        doc(this.afs, 'users', id),
-        user
-      );
-    }
-    return;
-  }
-
-  async updateUser(user: any, id: string): Promise<void> {
-    await setDoc(
-      doc(this.afs, 'users', id),
-      user,
-      { merge: true }
-    );
-  }
-
-  async deleteUser(id: string): Promise<void> {
-    await deleteWithCounter(
-      doc(this.afs, 'users', id)
-    );
-  }
-  //
-  // Posts
-  //
 
   /**
-    * Get latest version of post
-    * @param id
-    * @returns
-    */
+  * Get latest version of post
+  * @param id
+  * @returns
+  */
   private subPostData(id: string): Observable<Post> {
 
     // get doc refs
@@ -177,22 +53,7 @@ export class DbService {
     );
   }
 
-  async getPostData(id: string): Promise<{ error: string | null, data: Post | null }> {
-    const docRef = doc(this.afs, 'posts', id);
-    const draftRef = doc(this.afs, 'drafts', id);
 
-    let error, data = null;
-    try {
-      data = await getDoc<Post>(draftRef)
-        .then((snap: DocumentSnapshot<Post>) => snap.exists()
-          ? getDoc(draftRef)
-          : getDoc(docRef))
-        .then((doc: DocumentSnapshot<DocumentData>) => ({ id: doc.id, ...doc.data() }));
-    } catch (e: any) {
-      error = e;
-    }
-    return { error, data };
-  }
 
   /**
    * Edit an existing post / create new post

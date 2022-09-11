@@ -4,8 +4,7 @@ import { AuthSettingsRoutingModule } from './auth-settings-routing.module';
 import { AuthSettingsComponent } from './auth-settings.component';
 import { ReLoginComponent } from './re-login/re-login.component';
 import { SharedModule } from '@shared/shared.module';
-import { CoreModule } from '@core/core.module';
-import { AuthAccessModule } from '@db/auth/auth-access.module';
+import { AuthEditModule } from '@db/auth-edit.module';
 
 
 @NgModule({
@@ -15,9 +14,8 @@ import { AuthAccessModule } from '@db/auth/auth-access.module';
   ],
   imports: [
     AuthSettingsRoutingModule,
-    CoreModule,
     SharedModule,
-    AuthAccessModule
+    AuthEditModule
   ]
 })
 export class AuthSettingsModule { }

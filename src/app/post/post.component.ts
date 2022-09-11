@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { UserRec } from '@auth/user.model';
-import { ReadService } from '@db/read.service';
+import { UserDbService } from '@db/user/user-db.service';
 import { environment } from '@env/environment';
 import { NavService } from '@nav/nav.service';
 import { SeoService } from '@shared/seo/seo.service';
@@ -30,7 +30,7 @@ export class PostComponent {
 
   constructor(
     private route: ActivatedRoute,
-    public read: ReadService,
+    private us: UserDbService,
     private seo: SeoService,
     public ns: NavService,
     private ms: MarkdownService
@@ -41,7 +41,7 @@ export class PostComponent {
     this.meta(post);
     this.post = post;
     if (this.ns.isBrowser) {
-      this.user$ = this.read.userRec;
+      this.user$ = this.us.userRec;
     }
   }
 

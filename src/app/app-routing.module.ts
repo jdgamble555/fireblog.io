@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { UserPostGuard } from '@post/post-list/post-list.guard';
 import { PostListResolver } from '@post/post-list/post-list.resolver';
 import { PostResolver } from '@post/post.resolver';
 import { AuthComponent } from './auth/auth.component';
-import { LoginGuard, EmailGuard, NotLoginGuard, UsernameGuard } from './auth/auth.guard';
-import { DashboardComponent } from './dashboard/dashboard.component';
+import { LoginGuard, EmailGuard, NotLoginGuard } from './auth/auth.guard';
 import { HomeComponent } from './home/home.component';
 import { PostListComponent } from './post/post-list/post-list.component';
 import { PostComponent } from './post/post.component';
@@ -19,25 +19,26 @@ const routes: Routes = [
   { path: 'register', component: AuthComponent, canActivate: [NotLoginGuard] },
   { path: 'reset', component: AuthComponent, canActivate: [NotLoginGuard] },
   { path: 'verify', component: AuthComponent, canActivate: [LoginGuard] },
-  { path: 'username', component: AuthComponent, canActivate: [LoginGuard] },
-  { path: 'dashboard', component: DashboardComponent, canActivate: [LoginGuard] },
 
   // backwards compatible with old app, will be removed later
   { path: 'blog/post/:slug', component: PostComponent, resolve: { post: PostResolver } },
 
   // posts
+  // todo - p instead of post
   { path: 'post/:id', component: PostComponent, resolve: { post: PostResolver } },
   { path: 'post/:id/:slug', component: PostComponent, resolve: { post: PostResolver } },
   { path: 't/:tag', component: PostListComponent, resolve: { posts: PostListResolver } },
-  { path: 'user/:uid', component: PostListComponent, resolve: { posts: PostListResolver } },
-  { path: 'user/:uid/:username', component: PostListComponent, resolve: { posts: PostListResolver } },
+  { path: 'u/:uid', component: PostListComponent, canActivate: [UserPostGuard], resolve: { posts: PostListResolver } },
+  { path: 'u/:uid/:username', component: PostListComponent, canActivate: [UserPostGuard], resolve: { posts: PostListResolver } },
   { path: 'bookmarks', component: PostListComponent, canActivate: [LoginGuard], data: { bookmarks: true } },
 
   // logged in
-  { path: 'new', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [EmailGuard, LoginGuard, UsernameGuard] },
-  { path: 'edit/:id', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [EmailGuard, LoginGuard, UsernameGuard] },
+  { path: 'new', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [EmailGuard, LoginGuard] },
+  { path: 'edit/:id', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [EmailGuard, LoginGuard] },
   { path: 'settings', loadChildren: () => import('./auth/auth-settings/auth-settings.module').then(m => m.AuthSettingsModule), canActivate: [LoginGuard] },
-  { path: '**', redirectTo: '/' },
+  { path: 'username', loadChildren: () => import('./auth/username/username.module').then(m => m.UsernameModule), /*canActivate: [LoginGuard]*/ },
+  { path: 'dashboard', loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule), /*canActivate: [LoginGuard]*/ },
+  { path: '**', redirectTo: '/' }
 ];
 
 @NgModule({

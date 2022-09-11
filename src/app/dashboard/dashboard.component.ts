@@ -1,11 +1,9 @@
 import { Component, ViewChild } from '@angular/core';
 import { MatTabGroup } from '@angular/material/tabs';
-import { Router } from '@angular/router';
 import { UserRec } from '@auth/user.model';
-import { ReadService } from '@db/read.service';
-import { NavService } from '@nav/nav.service';
+import { UserDbService } from '@db/user/user-db.service';
 import { PostListService } from '@post/post-list/post-list.service';
-import { Observable, tap } from 'rxjs';
+import { Observable } from 'rxjs';
 
 
 @Component({
@@ -20,27 +18,14 @@ export class DashboardComponent {
   user$: Observable<UserRec | null>;
 
   constructor(
-    public read: ReadService,
-    private router: Router,
-    private ns: NavService,
+    public us: UserDbService,
     private pls: PostListService
   ) {
 
     this.pls.type = 'bookmarks';
 
     // see if logged in
-    this.user$ = this.read.userRec
-      .pipe(
-        tap((userRec: UserRec | null) => {
-          if (userRec) {
-            // see if user is in db
-            if (!userRec.username) {
-              this.router.navigate(['/username']);
-            }
-          } else {
-            this.router.navigate(['/login']);
-          }
-        }));
+    this.user$ = this.us.userRec;
   }
 
   tabChange(index: number) {

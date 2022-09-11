@@ -1,6 +1,6 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ReadService } from '@db/read.service';
+import { ActionDbService } from '@db/post/action-db.service';
 import { from, Subscription } from 'rxjs';
 
 @Component({
@@ -32,7 +32,7 @@ export class HeartComponent implements OnInit, OnDestroy {
   }
 
   private async actionExists(uid: string) {
-    const { data, error } = await this.read.getActionExists(this.postId, uid, 'hearts');
+    const { data, error } = await this.as.getActionExists(this.postId, uid, 'hearts');
     if (error) {
       console.error(error);
     }
@@ -40,7 +40,7 @@ export class HeartComponent implements OnInit, OnDestroy {
   }
 
   constructor(
-    private read: ReadService,
+    private as: ActionDbService,
     private router: Router
   ) { }
 
@@ -59,8 +59,8 @@ export class HeartComponent implements OnInit, OnDestroy {
     // toggle save and like
     if (this.userId) {
       const { error } = toggle
-        ? await this.read.actionPost(this.postId, this.userId, 'hearts')
-        : await this.read.unActionPost(this.postId, this.userId, 'hearts');
+        ? await this.as.actionPost(this.postId, this.userId, 'hearts')
+        : await this.as.unActionPost(this.postId, this.userId, 'hearts');
 
       if (error) {
         // revert state

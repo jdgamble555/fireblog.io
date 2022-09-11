@@ -7,7 +7,7 @@
         <mat-icon color="primary" class="ng-icon-text">library_books</mat-icon>{{ post.title }}
       </h1>
       <h6><i>{{ post.minutes }} min read</i></h6>
-      <div class="ng-author ng-link" [routerLink]="['/user', post.authorId]">
+      <div class="ng-author ng-link" [routerLink]="['/u', post.authorId]">
         <img *ngIf="post.authorDoc?.photoURL" class="avatar" src="{{ post.authorDoc?.photoURL }}" />
         <mat-icon *ngIf="!post.authorDoc?.photoURL" class="ng-photo-icon">account_circle</mat-icon>
         <p><small><b>{{ post.authorDoc?.displayName }}</b>

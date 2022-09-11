@@ -85,6 +85,7 @@ export class NavService {
   }
 
   openLeftNav(): void {
+    // todo - make this a subscribption
     this.simple = false;
   }
   closeLeftNav(): void {

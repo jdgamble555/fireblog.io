@@ -19,7 +19,7 @@ import {
 } from '@angular/fire/auth';
 import { AuthAction, Role, UserAuth } from '@auth/user.model';
 import { DbModule } from '@db/db.module';
-import { DbService } from '@db/db.service';
+import { UserDbService } from '@db/user/user-db.service';
 import { firstValueFrom, map, Observable } from 'rxjs';
 import { auth_messages } from './auth.messages';
 
@@ -33,11 +33,13 @@ export class AuthService {
 
   constructor(
     private auth: Auth,
-    private db: DbService,
+    private us: UserDbService,
     @Inject(DOCUMENT) private doc: Document
   ) {
     this.user$ = this._user();
   }
+
+  // User
 
   private _user(): Observable<UserAuth | null> {
     return user(this.auth).pipe(
@@ -60,9 +62,7 @@ export class AuthService {
     return await firstValueFrom(this.user$);
   }
 
-  //
   // Login
-  //
 
   async emailLogin(email: string, password: string): Promise<AuthAction> {
 
@@ -76,7 +76,7 @@ export class AuthService {
       };
 
       // create user in db
-      await this.db.createUser(userData, credential.user.uid);
+      await this.us.createUser(userData, credential.user.uid);
       message = this.messages.loginSuccess;
     } catch (e: any) {
       error = e;
@@ -98,7 +98,7 @@ export class AuthService {
           role: Role.Author
         };
         // create user in db
-        await this.db.createUser(userData, credential.user.uid);
+        await this.us.createUser(userData, credential.user.uid);
         message = this.messages.loginSuccess;
       }
     } catch (e: any) {
@@ -207,7 +207,7 @@ export class AuthService {
         photoURL: credential.user.photoURL,
         role: Role.Author
       };
-      await this.db.createUser(userData, credential.user.uid);
+      await this.us.createUser(userData, credential.user.uid);
       message = this.messages.loginSuccess;
 
     } catch (e: any) {
@@ -227,5 +227,4 @@ export class AuthService {
     return _user?.providerData
       .map((p: any) => p.providerId) || [];
   }
-
 }

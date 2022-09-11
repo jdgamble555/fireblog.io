@@ -4,7 +4,6 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { CoreModule } from '@core/core.module';
 import { DbModule } from '@db/db.module';
 import { SharedModule } from '@shared/shared.module';
 import { MarkdownModule } from 'ngx-markdown';
@@ -18,7 +17,6 @@ describe('ReLoginComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ReLoginComponent],
       imports: [
-        CoreModule,
         SharedModule,
         ReactiveFormsModule,
         DbModule,

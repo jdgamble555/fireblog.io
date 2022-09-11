@@ -2,14 +2,15 @@ import { Component, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatChipList } from '@angular/material/chips';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ImageUploadService } from '@db/image-upload.service';
+import { ImageUploadService } from '@db/image/image-upload.service';
 import { AuthService } from '@db/auth/auth.service';
-import { DbService } from '@db/db.service';
 import { TagService } from '@shared/tag/tag.service';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { DialogService } from '@shared/confirm-dialog/dialog.service';
 import { Post } from '@post/post.model';
 import { NavService } from '@nav/nav.service';
+import { PostDbService } from '@db/post/post-db.service';
+import { PostEditService } from '@db/post/post-edit.service';
 
 
 
@@ -69,7 +70,8 @@ export class PostFormComponent {
     public ts: TagService,
     public is: ImageUploadService,
     private auth: AuthService,
-    private db: DbService,
+    private ps: PostDbService,
+    private pes: PostEditService,
     public sb: SnackbarService,
     private ns: NavService,
     private dialog: DialogService
@@ -93,7 +95,7 @@ export class PostFormComponent {
         return;
       }
 
-      this.patchPost = this.db.getPostData(this.id)
+      this.patchPost = this.ps.getPostData(this.id)
         .then(({ error, data }: { data: Post | null, error: string | null }) => {
 
           if (error) {
@@ -150,9 +152,11 @@ export class PostFormComponent {
   // get error
   getError(field: string): any {
     const errors = this.validationMessages[field];
-    for (const e of Object.keys(errors)) {
-      if (this.postForm.get(field)?.hasError(e)) {
-        return errors[e];
+    if (errors) {
+      for (const e of Object.keys(errors)) {
+        if (this.postForm.get(field)?.hasError(e)) {
+          return errors[e];
+        }
       }
     }
   }
@@ -206,7 +210,7 @@ export class PostFormComponent {
       this.imageLoading = false;
 
       // save url to db
-      await this.db.addPostImage(this.id, image);
+      await this.pes.addPostImage(this.id, image);
 
       // add url to imageUploads array
       this.imageUploads.push(image);
@@ -219,7 +223,7 @@ export class PostFormComponent {
   async deletePostImage(val: string): Promise<void> {
 
     // delete image in db
-    await this.db.deletePostImage(this.id, val);
+    await this.pes.deletePostImage(this.id, val);
 
     // delete image file
     await this.is.deleteImage(val);
@@ -293,7 +297,7 @@ export class PostFormComponent {
 
     // add post to db
     try {
-      this.id = await this.db.setPost(data, this.id, publish);
+      this.id = await this.pes.setPost(data, this.id, publish);
     } catch (e: any) {
       console.error(e);
       error = true;
@@ -330,7 +334,7 @@ export class PostFormComponent {
             }
           }
           // delete post
-          this.db.deletePost(this.id, uid);
+          this.pes.deletePost(this.id, uid);
           this.sb.showMsg(this.messages.deleted)
           this.ns.home();
         }

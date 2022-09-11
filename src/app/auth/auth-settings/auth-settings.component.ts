@@ -9,21 +9,20 @@ import {
 } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { from, Observable, of, Subscription } from 'rxjs';
-
 import { debounceTime, take } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { AuthService } from '@db/auth/auth.service';
-import { ImageUploadService } from '@db/image-upload.service';
-import { ReadService } from '@db/read.service';
-import { DbService } from '@db/db.service';
 import { ReLoginComponent } from './re-login/re-login.component';
 import { UserRec } from '@auth/user.model';
 import { DialogService } from '@shared/confirm-dialog/dialog.service';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { matchValidator, MyErrorStateMatcher } from '@shared/form-validators';
 import { NavService } from '@nav/nav.service';
-import { AuthAccessService } from '@db/auth/auth-access.service';
 import { auth_settings_messages, auth_settings_validation_messages } from './auth-settings.messages';
+import { ImageUploadService } from '@db/image/image-upload.service';
+import { UserDbService } from '@db/user/user-db.service';
+import { UserEditService } from '@db/user/user-edit.service';
+import { AuthEditService } from '@db/auth/auth-edit.service';
 
 @Component({
   selector: 'app-auth-settings',
@@ -59,14 +58,14 @@ export class AuthSettingsComponent implements OnInit {
     private fb: FormBuilder,
     private sb: SnackbarService,
     public auth: AuthService,
-    private aas: AuthAccessService,
+    private aes: AuthEditService,
     private dialog: DialogService,
     private d: MatDialog,
     private nav: NavService,
     public is: ImageUploadService,
-    private read: ReadService,
-    private db: DbService,
-    private router: Router
+    private router: Router,
+    private us: UserDbService,
+    private ues: UserEditService
   ) {
     this.nav.closeLeftNav();
     this.nav.addTitle('Settings');
@@ -78,7 +77,7 @@ export class AuthSettingsComponent implements OnInit {
     this.buildAccountForm();
 
     // get user info
-    this.read.getUserRec()
+    this.us.getUserRec()
       .then(async (user: UserRec | null) => {
         if (user) {
           const username = user?.username;
@@ -128,14 +127,15 @@ export class AuthSettingsComponent implements OnInit {
   }
 
   // errors
-  getError(field: string): string[] {
+  getError(field: string): any {
     const errors = this.validationMessages[field];
-    for (const e of Object.keys(errors)) {
-      if (this.accountForm.get(field)?.hasError(e)) {
-        return errors[e];
+    if (errors) {
+      for (const e of Object.keys(errors)) {
+        if (this.accountForm.get(field)?.hasError(e)) {
+          return errors[e];
+        }
       }
     }
-    return [];
   }
   /**
    * Builds the account form control
@@ -177,7 +177,7 @@ export class AuthSettingsComponent implements OnInit {
 
     // update displayName
     const displayName = this.getField('displayName').value;
-    const r = await this.aas.updateProfile({
+    const r = await this.aes.updateProfile({
       displayName
     });
     this.currentDisplayName = displayName;
@@ -193,7 +193,7 @@ export class AuthSettingsComponent implements OnInit {
 
     const username = this.getField('username').value;
     // update username
-    const r = await this.db.updateUsername(username, this.currentUsername);
+    const r = await this.ues.updateUsername(username, this.currentUsername);
     if (r.message) {
       this.currentUsername = username;
       this.sb.showMsg(r.message);
@@ -207,7 +207,7 @@ export class AuthSettingsComponent implements OnInit {
 
     // update email
     const email = this.getField('email').value;
-    const { reAuth, error, message } = await this.aas.updateEmail(email);
+    const { reAuth, error, message } = await this.aes.updateEmail(email);
     this.currentEmail = email;
     if (message) {
       this.sb.showMsg(message);
@@ -232,7 +232,7 @@ export class AuthSettingsComponent implements OnInit {
    */
   async updatePass() {
 
-    const { reAuth, message, error } = await this.aas.updatePass(this.accountForm.value.password);
+    const { reAuth, message, error } = await this.aes.updatePass(this.accountForm.value.password);
     if (message) {
       this.sb.showMsg(message);
     }
@@ -268,7 +268,7 @@ export class AuthSettingsComponent implements OnInit {
   }
 
   async usernameTest(field: string) {
-    const { data, error } = await this.db.validUsername(field);
+    const { data, error } = await this.ues.validUsername(field);
     if (error) {
       console.error(error);
     }
@@ -283,9 +283,9 @@ export class AuthSettingsComponent implements OnInit {
   async updateProvider(e: any, p: any): Promise<void> {
     let r = null;
     if (e.checked) {
-      r = await this.aas.addProvider(p);
+      r = await this.aes.addProvider(p);
     } else {
-      r = await this.aas.removeProvider(p);
+      r = await this.aes.removeProvider(p);
     }
     if (r.message) {
       this.sb.showMsg(r.message);
@@ -315,7 +315,7 @@ export class AuthSettingsComponent implements OnInit {
 
     // delete profile image
     await this.deleteImage();
-    const { reAuth, error, message } = await this.aas.deleteUser();
+    const { reAuth, error, message } = await this.aes.deleteUser();
     if (message) {
       this.sb.showMsg(message);
     }
@@ -368,7 +368,7 @@ export class AuthSettingsComponent implements OnInit {
     // delete the image from url
     try {
       await this.is.deleteImage(url);
-      await this.aas.updateProfile({ photoURL: null });
+      await this.aes.updateProfile({ photoURL: null });
     } catch (e: any) {
       this.sb.showError(e);
     }
@@ -403,7 +403,7 @@ export class AuthSettingsComponent implements OnInit {
         console.error(e);
       }
       // upload new image and save it to photoURL in user db
-      await this.aas.updateProfile({ photoURL: imageURL });
+      await this.aes.updateProfile({ photoURL: imageURL });
     }
   }
 

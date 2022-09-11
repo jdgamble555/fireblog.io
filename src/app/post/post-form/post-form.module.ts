@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 import { PostFormRoutingModule } from './post-form-routing.module';
-import { CoreModule } from '../../core/core.module';
 import { PostFormComponent } from './post-form.component';
 import { SharedModule } from '../../shared/shared.module';
 import { MarkdownModule } from 'ngx-markdown';
 import { MarkdownEditorModule } from '@shared/markdown-editor/markdown-editor.module';
+import { PostEditModule } from '@db/post-edit.module';
 
 // only import if browser
 if (typeof window !== 'undefined') {
@@ -13,8 +13,8 @@ if (typeof window !== 'undefined') {
 
 const modules = [
   PostFormRoutingModule,
-  CoreModule,
-  SharedModule
+  SharedModule,
+  PostEditModule
 ];
 @NgModule({
   declarations: [

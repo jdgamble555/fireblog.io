@@ -3,20 +3,18 @@ import {
   FormGroup,
   FormBuilder,
   Validators,
-  AbstractControl,
-  ValidatorFn
+  AbstractControl
 } from '@angular/forms';
 import { ActivatedRoute, Router, UrlSegment } from '@angular/router';
 import { AuthService } from '@db/auth/auth.service';
-import { DbService } from '@db/db.service';
-import { ReadService } from '@db/read.service';
+import { UserDbService } from '@db/user/user-db.service';
+
 import { NavService } from '@nav/nav.service';
 import { matchValidator, MyErrorStateMatcher } from '@shared/form-validators';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
-import { from, of, Subscription } from 'rxjs';
-import { debounceTime, take } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 import { auth_validation_messages } from './auth.messages';
-import { AuthAction, UserRec } from './user.model';
+import { AuthAction } from './user.model';
 
 
 @Component({
@@ -27,14 +25,13 @@ import { AuthAction, UserRec } from './user.model';
 export class AuthComponent implements OnInit, OnDestroy {
 
   matcher = new MyErrorStateMatcher();
-
   validationMessages = auth_validation_messages;
 
   userForm!: FormGroup;
 
   routeSub: Subscription;
 
-  type!: 'login' | 'register' | 'reset' | 'verify' | 'passwordless' | 'username';
+  type!: 'login' | 'register' | 'reset' | 'verify' | 'passwordless';
   loading = false;
 
   passhide = true;
@@ -44,7 +41,6 @@ export class AuthComponent implements OnInit, OnDestroy {
   isRegister = false;
   isReset = false;
   isVerify = false;
-  isCreateUser = false;
   isPasswordless = false;
   isReturnLogin = false;
 
@@ -57,8 +53,7 @@ export class AuthComponent implements OnInit, OnDestroy {
     private router: Router,
     private nav: NavService,
     private sb: SnackbarService,
-    private db: DbService,
-    private read: ReadService
+    private us: UserDbService
   ) {
 
     // get type from route
@@ -84,16 +79,6 @@ export class AuthComponent implements OnInit, OnDestroy {
     } else if (this.type === 'verify') {
       this.isVerify = true;
       this.title = 'Verify Email Address';
-    } else if (this.type === 'username') {
-      // see if there is already a username
-      await this.read.getUserRec()
-        .then((user: UserRec | null) => {
-          if (user && user.username) {
-            this.router.navigate(['/dashboard']);
-          }
-        });
-      this.isCreateUser = true;
-      this.title = 'Create Username';
     } else if (this.type === 'passwordless') {
       this.isPasswordless = true;
       this.title = 'Passwordless Login';
@@ -117,6 +102,11 @@ export class AuthComponent implements OnInit, OnDestroy {
     this.nav.addTitle(this.title);
 
     // init form controls
+    const emailControl = this.fb.control('', [
+      Validators.required,
+      Validators.email
+    ]);
+
     const passwordControl = this.fb.control('', [
       Validators.pattern('^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$'),
       Validators.minLength(6),
@@ -128,21 +118,10 @@ export class AuthComponent implements OnInit, OnDestroy {
       Validators.required
     ]);
 
-    if (!this.isCreateUser && !this.isVerify) {
-      this.userForm = this.fb.group({
-        email: ['', [
-          Validators.required,
-          Validators.email
-        ]]
-      });
-    } else {
-      this.userForm = this.fb.group({
-        username: ['', [
-          Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(25),
-        ], this.isAvailable()]
-      });
+    this.userForm = this.fb.group({});
+
+    if (!this.isVerify) {
+      this.userForm.addControl('email', emailControl);
     }
 
     if (this.isLogin || this.isRegister) {
@@ -167,9 +146,11 @@ export class AuthComponent implements OnInit, OnDestroy {
   // get error
   getError(field: string): any {
     const errors = this.validationMessages[field];
-    for (const e of Object.keys(errors)) {
-      if (this.userForm.get(field)?.hasError(e)) {
-        return errors[e];
+    if (errors) {
+      for (const e of Object.keys(errors)) {
+        if (this.userForm.get(field)?.hasError(e)) {
+          return errors[e];
+        }
       }
     }
   }
@@ -193,9 +174,6 @@ export class AuthComponent implements OnInit, OnDestroy {
       r = await this.auth.resetPassword(
         this.getField('email')?.value
       );
-    } else if (this.isCreateUser) {
-      const username = (this.getField('username')?.value as string).toLowerCase();
-      r = await this.db.updateUsername(username);
     } else if (this.isPasswordless) {
       r = await this.auth.sendEmailLink(
         this.getField('email')?.value
@@ -213,7 +191,7 @@ export class AuthComponent implements OnInit, OnDestroy {
       }
       if (r.message) {
         this.sb.showMsg(r.message);
-        if (this.isLogin || this.isRegister || this.isCreateUser || this.isReturnLogin) {
+        if (this.isLogin || this.isRegister || this.isReturnLogin) {
           this.router.navigate(['/dashboard']);
         } else if (this.isPasswordless) {
           this.router.navigate(['/login']);
@@ -244,28 +222,6 @@ export class AuthComponent implements OnInit, OnDestroy {
     if (message) {
       this.sb.showMsg(message);
     }
-  }
-
-  isAvailable(current?: string): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } | null => {
-
-      const field = control.value;
-      if (field === current) {
-        return of(null);
-      }
-      return from(this.usernameTest(field)).pipe(
-        debounceTime(500),
-        take(1)
-      );
-    }
-  }
-
-  async usernameTest(field: string) {
-    const { data, error } = await this.db.validUsername(field);
-    if (error) {
-      console.error(error);
-    }
-    return data ? { 'unavailable': true } : null;
   }
 
   ngOnDestroy(): void {

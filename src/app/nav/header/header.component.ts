@@ -1,7 +1,8 @@
 import { Component, EventEmitter, Output, Input } from '@angular/core';
 import { UserRec } from '@auth/user.model';
 import { AuthService } from '@db/auth/auth.service';
-import { ReadService } from '@db/read.service';
+import { PostDbService } from '@db/post/post-db.service';
+import { UserDbService } from '@db/user/user-db.service';
 import { environment } from '@env/environment';
 import { NavService } from '@nav/nav.service';
 import { Post } from '@post/post.model';
@@ -30,10 +31,11 @@ export class HeaderComponent {
     private auth: AuthService,
     public ns: NavService,
     public dm: DarkModeService,
-    private read: ReadService
+    private ps: PostDbService,
+    private us: UserDbService
   ) {
     if (this.ns.isBrowser) {
-      this.user$ = this.read.userRec;
+      this.user$ = this.us.userRec;
     }
     this.dm.setTheme();
     this.env = environment;
@@ -53,7 +55,7 @@ export class HeaderComponent {
     let data = null;
     let error = null;
     if (term) {
-      ({ data, error } = await this.read.searchPost(term));
+      ({ data, error } = await this.ps.searchPost(term));
       if (error) {
         console.error(error);
       }

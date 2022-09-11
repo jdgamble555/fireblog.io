@@ -4,18 +4,20 @@ import {
   Router
 } from '@angular/router';
 import { AuthService } from '@db/auth/auth.service';
-import { DbService } from '@db/db.service';
-import { ReadService } from '@db/read.service';
-import { firstValueFrom } from 'rxjs';
+import { UserDbService } from '@db/user/user-db.service';
 import { Role } from './user.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RoleGuard implements CanActivate {
-  constructor(private read: ReadService, private router: Router) { }
+  // must be an admin
+  constructor(
+    private us: UserDbService,
+    private router: Router
+  ) { }
   async canActivate(): Promise<boolean> {
-    const user = await this.read.getUserRec();
+    const user = await this.us.getUserRec();
     const isAdmin = !!(user && user.role === Role.Admin);
     if (!isAdmin) {
       this.router.navigate(['/home']);
@@ -27,7 +29,11 @@ export class RoleGuard implements CanActivate {
   providedIn: 'root'
 })
 export class LoginGuard implements CanActivate {
-  constructor(private auth: AuthService, private router: Router) { }
+  // must be logged in
+  constructor(
+    private auth: AuthService,
+    private router: Router
+  ) { }
   async canActivate(): Promise<boolean> {
     const user = await this.auth.getUser();
     const isLoggedIn = !!user;
@@ -42,7 +48,11 @@ export class LoginGuard implements CanActivate {
   providedIn: 'root'
 })
 export class NotLoginGuard implements CanActivate {
-  constructor(private auth: AuthService, private router: Router) { }
+  // cannot access if logged in
+  constructor(
+    private auth: AuthService,
+     private router: Router
+     ) { }
   async canActivate(): Promise<boolean> {
     const user = await this.auth.getUser();
     const isLoggedIn = !!user;
@@ -57,7 +67,11 @@ export class NotLoginGuard implements CanActivate {
   providedIn: 'root'
 })
 export class EmailGuard implements CanActivate {
-  constructor(private auth: AuthService, private router: Router) { }
+  // email must be verified
+  constructor(
+    private auth: AuthService,
+     private router: Router
+     ) { }
   async canActivate(): Promise<boolean> {
     // make sure logged in first...
     const user = await this.auth.getUser();
@@ -69,32 +83,3 @@ export class EmailGuard implements CanActivate {
   }
 }
 
-@Injectable({
-  providedIn: 'root'
-})
-export class UsernameGuard implements CanActivate {
-  constructor(
-    private auth: AuthService,
-    private router: Router,
-    private db: DbService
-  ) { }
-  async canActivate(): Promise<boolean> {
-    // make sure logged in first...
-    const user = await this.auth.getUser();
-    if (user) {
-      const { data, error } = await this.db.hasUsername(user?.uid);
-      if (error) {
-        console.error(error);
-      }
-      const hasUsername = data;
-
-      if (!hasUsername) {
-        this.router.navigate(['/username']);
-      }
-      return hasUsername || false;
-    } else {
-      this.router.navigate(['/login']);
-      return false;
-    }
-  }
-}

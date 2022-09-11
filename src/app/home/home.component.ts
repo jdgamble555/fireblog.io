@@ -25,6 +25,9 @@ export class HomeComponent {
 
     this.env = environment;
 
+    this.pls.type = 'new';
+
+    this.ns.resetBC();
     this.ns.openLeftNav();
 
     this.seo.generateTags({
