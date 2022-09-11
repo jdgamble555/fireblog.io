@@ -41,4 +41,4 @@ export interface PostInput {
   pageSize?: number,
   drafts?: boolean
 };
-
+  

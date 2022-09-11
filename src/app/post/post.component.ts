@@ -58,13 +58,17 @@ export class PostComponent {
       domain: this.env.title,
       image: r.image || undefined,
       description,
-      user: environment.author
+      user: r.authorDoc.username
     });
 
     // generate schema
+    // todo - create schema service, add full content, use new type within types
     this.seo.setBlogSchema({
       title: r.title,
-      author: environment.author,
+      author: r.authorDoc.displayName,
+      username: r.authorDoc.username,
+      authorId: r.authorId,
+      authorURL: `${environment.site}/u/${r.authorId}/${r.authorDoc.username}`,
       image: r.image || undefined,
       description,
       keywords: r.tags.join(', '),

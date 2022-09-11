@@ -5,11 +5,8 @@ import { UsernameComponent } from './username.component';
 import { UserEditService } from '@db/user/user-edit.service';
 
 
-// todo - delete this and create dashboard module
-// todo - creat username guard for isloggedin and if exists
-// todo - create post and post-list module
+// todo - create username guard for isloggedin and if exists
 // todo - create separate module for login
-// todo - figure out save and like modules (two different?)
 
 @NgModule({
   declarations: [UsernameComponent],

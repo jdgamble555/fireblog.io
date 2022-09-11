@@ -84,7 +84,10 @@ export class SeoService {
     updatedAt = '',
     time = '',
     id = '',
-    url = ''
+    url = '',
+    authorURL = '',
+    username = '',
+    authorId = ''
   }): void {
 
     const s = {
@@ -93,7 +96,10 @@ export class SeoService {
       "headline": title,
       "author": {
         "@type": "Person",
-        "name": author
+        "name": author,
+        "url": authorURL,
+        "alternateName": username,
+        "identifier": authorId
       },
       "datePublished": createdAt,
       "dateModified": !!updatedAt ? updatedAt : createdAt,
