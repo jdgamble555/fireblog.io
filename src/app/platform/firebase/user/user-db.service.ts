@@ -47,6 +47,8 @@ export class UserDbService {
   }
 
   async getUserRec(): Promise<UserRec | null> {
+
+    // todo - try catch
     const uid = (await firstValueFrom(user(this.auth)))?.uid;
     if (uid) {
       const docSnap = await getDoc<UserRec>(

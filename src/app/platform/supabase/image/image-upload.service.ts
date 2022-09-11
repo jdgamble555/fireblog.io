@@ -1,7 +1,17 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
+import {
+  Storage,
+  ref,
+  deleteObject,
+  uploadBytesResumable,
+  percentage,
+  getDownloadURL
+} from '@angular/fire/storage';
 import { Observable } from 'rxjs';
-import { DbModule } from './db.module';
+import { ImageModule } from './image.module';
+
+// todo - separate image functions
 
 interface Preview {
   blob: Blob;
@@ -9,7 +19,7 @@ interface Preview {
 }
 
 @Injectable({
-  providedIn: DbModule
+  providedIn: ImageModule
 })
 export class ImageUploadService {
 
@@ -23,6 +33,7 @@ export class ImageUploadService {
     uploadingImage = false;
 
     constructor(
+      private storage: Storage,
       @Inject(DOCUMENT) private document: Document
     ) { }
 
@@ -32,6 +43,16 @@ export class ImageUploadService {
      * @returns image url
      */
     async getURL(gs: string): Promise<string | undefined> {
+      try {
+        return await getDownloadURL(
+          ref(this.storage, gs)
+        );
+      } catch (e: any) {
+        // catch no image file
+        if (e.code === 'storage/unauthorized') {
+          return;
+        }
+      }
       return;
     }
 
@@ -129,8 +150,19 @@ export class ImageUploadService {
      * @returns - a resolved promise that image was deleted
      */
     async deleteImage(url: string): Promise<void> {
-
-      return;
+      try {
+        // delete image
+        return await deleteObject(
+          ref(this.storage, url)
+        );
+      } catch (e: any) {
+        if (e.code === 'storage/invalid-argument') {
+          // don't delete anything if no previous image
+          return;
+        } else {
+          throw e;
+        }
+      }
     }
 
     /**
@@ -141,7 +173,26 @@ export class ImageUploadService {
      */
     async uploadImage(folder: string, file: File | null, name = this.randomID()): Promise<string> {
 
-      return '';
+      const ext = file!.name.split('.').pop();
+      const path = `${folder}/${name}.${ext}`;
 
+      if (file) {
+        if (file!.type.split('/')[0] !== 'image') {
+          throw { code: 'image/file-type' };
+        }
+        else {
+          const storageRef = ref(this.storage, path);
+          const task = uploadBytesResumable(storageRef, file);
+          this.uploadPercent = percentage(task);
+
+          // upload image
+          this.uploadingImage = true;
+          await task;
+          this.uploadingImage = false;
+          return await getDownloadURL(storageRef);
+        }
+      } else {
+        throw { code: 'invalid-file' };
+      }
     }
 }

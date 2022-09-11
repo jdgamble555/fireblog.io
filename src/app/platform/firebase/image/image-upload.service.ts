@@ -12,6 +12,7 @@ import { Observable } from 'rxjs';
 import { ImageModule } from './image.module';
 
 // todo - separate image functions
+// todo - errr type with code and message
 
 interface Preview {
   blob: Blob;

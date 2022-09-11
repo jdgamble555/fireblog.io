@@ -1,20 +1,21 @@
 import { TestBed } from '@angular/core/testing';
+import { AuthModule } from '@angular/fire/auth';
 import { RouterTestingModule } from '@angular/router/testing';
+import { DbModule } from '@db/db.module';
 import { MarkdownModule, MarkdownService } from 'ngx-markdown';
-import { DbModule } from './db.module';
+import { AuthService } from './auth.service';
 
 
-import { ReadService } from './read.service';
 
-describe('ReadService', () => {
-  let service: ReadService;
+describe('AuthService', () => {
+  let service: AuthService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [DbModule, MarkdownModule, MarkdownModule.forRoot(), RouterTestingModule],
+      imports: [DbModule, AuthModule, MarkdownModule.forRoot(), RouterTestingModule],
       providers: [MarkdownService]
     });
-    service = TestBed.inject(ReadService);
+    service = TestBed.inject(AuthService);
   });
 
   it('should be created', () => {
