@@ -8,10 +8,11 @@ import {
   percentage,
   getDownloadURL
 } from '@angular/fire/storage';
+import { blobToData, randomID, scaleImage } from '@shared/image-tools/image-tools';
 import { Observable } from 'rxjs';
 import { ImageModule } from './image.module';
 
-// todo - separate image functions
+// todo - error type with code and message
 
 interface Preview {
   blob: Blob;
@@ -23,176 +24,114 @@ interface Preview {
 })
 export class ImageUploadService {
 
-    // image type
-    type = 'image/jpeg';
+  // image type
+  type = 'image/jpeg';
 
-    // use for progress bar
-    uploadPercent: Observable<number> | any = null;
+  // use for progress bar
+  uploadPercent: Observable<number> | any = null;
 
-    // use for spinners
-    uploadingImage = false;
+  // use for spinners
+  uploadingImage = false;
 
-    constructor(
-      private storage: Storage,
-      @Inject(DOCUMENT) private document: Document
-    ) { }
+  constructor(
+    private storage: Storage,
+    @Inject(DOCUMENT) private document: Document
+  ) { }
 
-    /**
-     * Returns image url from google URL
-     * @param gs - google url
-     * @returns image url
-     */
-    async getURL(gs: string): Promise<string | undefined> {
-      try {
-        return await getDownloadURL(
-          ref(this.storage, gs)
-        );
-      } catch (e: any) {
-        // catch no image file
-        if (e.code === 'storage/unauthorized') {
-          return;
-        }
-      }
-      return;
-    }
-
-    /**
-     * Generate Random ID for Image Name
-     * @returns randomly generated ID
-     */
-    randomID(): string {
-      // generate image id
-      return Array(16)
-        .fill(0)
-        .map(() => String.fromCharCode(Math.floor(Math.random() * 26) + 97))
-        .join('') +
-        Date.now().toString(24);
-    }
-    /**
-     *
-     * Canvas tools to resize image
-     *
-     */
-
-    async blobToData(blob: Blob): Promise<string> {
-      return new Promise((res: any) => {
-        const reader = new FileReader();
-        reader.onloadend = () => res(reader.result as string);
-        reader.readAsDataURL(blob);
-      });
-    }
-
-    blobToFile(blob: Blob, fileName: string): File {
-      return new File([blob], fileName, { type: this.type });
-    }
-
-    drawImageScaled(img: HTMLImageElement, ctx: CanvasRenderingContext2D): void {
-      const canvas = ctx.canvas;
-      const hRatio = canvas.width / img.width;
-      const vRatio = canvas.height / img.height;
-      const ratio = Math.max(hRatio, vRatio);
-      const centerShift_x = (canvas.width - img.width * ratio) / 2;
-      const centerShift_y = (canvas.height - img.height * ratio) / 2;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, img.width, img.height,
-        centerShift_x, centerShift_y, img.width * ratio, img.height * ratio);
-    }
-
-    async scaleImage(src: any, newX?: number, newY?: number): Promise<Blob> {
-      return new Promise((res: any, rej: any) => {
-        const img = new Image();
-        img.src = src;
-        img.onload = () => {
-          const elem = this.document.createElement('canvas');
-          if (newX) {
-            elem.width = newX;
-          }
-          if (newY) {
-            elem.height = newY;
-          }
-          const ctx = elem.getContext('2d') as CanvasRenderingContext2D;
-          this.drawImageScaled(img, ctx);
-          ctx.canvas.toBlob(res, this.type, 1);
-        }
-        img.onerror = error => rej(error);
-      });
-    }
-
-    /**
-   * Gets an image blob before upload
-   * @param event - file event
-   * @returns - string blob of image
+  /**
+   * Returns image url from google URL
+   * @param gs - google url
+   * @returns image url
    */
-    async previewImage(event: Event): Promise<Preview | undefined> {
-
-      // add event to image service
-      const target = event.target as HTMLInputElement;
-
-      if (target.files?.length) {
-
-        // view file before upload
-        const file = target.files[0];
-        const filename = file.name;
-
-        // get image preview
-        const image = await this.blobToData(file);
-
-        // return resized version
-        const blob = await this.scaleImage(image, 800, 418);
-        return { filename, blob };
-      }
-      return;
-    }
-
-    /**
-     * Delete Image from Storage Bucket
-     * @param url - url of bucket item to delete
-     * @returns - a resolved promise that image was deleted
-     */
-    async deleteImage(url: string): Promise<void> {
-      try {
-        // delete image
-        return await deleteObject(
-          ref(this.storage, url)
-        );
-      } catch (e: any) {
-        if (e.code === 'storage/invalid-argument') {
-          // don't delete anything if no previous image
-          return;
-        } else {
-          throw e;
-        }
+  async getURL(gs: string): Promise<string | undefined> {
+    try {
+      return await getDownloadURL(
+        ref(this.storage, gs)
+      );
+    } catch (e: any) {
+      // catch no image file
+      if (e.code === 'storage/unauthorized') {
+        return;
       }
     }
+    return;
+  }
 
-    /**
-     * Uploads Image to Storage Bucket
-     * @param folder - folder containing image
-     * @param file - file blob
-     * @param name - image file name, default random name
-     */
-    async uploadImage(folder: string, file: File | null, name = this.randomID()): Promise<string> {
+  /**
+ * Gets an image blob before upload
+ * @param event - file event
+ * @returns - string blob of image
+ */
+  async previewImage(event: Event): Promise<Preview | undefined> {
 
-      const ext = file!.name.split('.').pop();
-      const path = `${folder}/${name}.${ext}`;
+    // add event to image service
+    const target = event.target as HTMLInputElement;
 
-      if (file) {
-        if (file!.type.split('/')[0] !== 'image') {
-          throw { code: 'image/file-type' };
-        }
-        else {
-          const storageRef = ref(this.storage, path);
-          const task = uploadBytesResumable(storageRef, file);
-          this.uploadPercent = percentage(task);
+    if (target.files?.length) {
 
-          // upload image
-          this.uploadingImage = true;
-          await task;
-          this.uploadingImage = false;
-          return await getDownloadURL(storageRef);
-        }
+      // view file before upload
+      const file = target.files[0];
+      const filename = file.name;
+
+      // get image preview
+      const image = await blobToData(file);
+
+      // return resized version
+      const blob = await scaleImage(this.document, image, undefined, 800, 418);
+      return { filename, blob };
+    }
+    return;
+  }
+
+  /**
+   * Delete Image from Storage Bucket
+   * @param url - url of bucket item to delete
+   * @returns - a resolved promise that image was deleted
+   */
+  async deleteImage(url: string): Promise<void> {
+    try {
+      // delete image
+      return await deleteObject(
+        ref(this.storage, url)
+      );
+    } catch (e: any) {
+      if (e.code === 'storage/invalid-argument') {
+        // don't delete anything if no previous image
+        return;
       } else {
-        throw { code: 'invalid-file' };
+        throw e;
       }
     }
+  }
+
+  /**
+   * Uploads Image to Storage Bucket
+   * @param folder - folder containing image
+   * @param file - file blob
+   * @param name - image file name, default random name
+   */
+  async uploadImage(folder: string, file: File | null, name = randomID()): Promise<string> {
+
+    const ext = file!.name.split('.').pop();
+    const path = `${folder}/${name}.${ext}`;
+
+    if (file) {
+      if (file!.type.split('/')[0] !== 'image') {
+        throw { code: 'image/file-type' };
+      }
+      else {
+        const storageRef = ref(this.storage, path);
+        const task = uploadBytesResumable(storageRef, file);
+        this.uploadPercent = percentage(task);
+
+        // upload image
+        this.uploadingImage = true;
+        await task;
+        this.uploadingImage = false;
+        return await getDownloadURL(storageRef);
+      }
+    } else {
+      throw { code: 'invalid-file' };
+    }
+  }
 }

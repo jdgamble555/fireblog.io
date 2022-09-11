@@ -64,6 +64,8 @@ export class AuthComponent implements OnInit, OnDestroy {
     this.nav.closeLeftNav();
   }
 
+  // todo - create separate module for login
+
   async ngOnInit() {
 
     // define types

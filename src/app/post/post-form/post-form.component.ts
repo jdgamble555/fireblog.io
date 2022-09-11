@@ -11,6 +11,8 @@ import { Post } from '@post/post.model';
 import { NavService } from '@nav/nav.service';
 import { PostDbService } from '@db/post/post-db.service';
 import { PostEditService } from '@db/post/post-edit.service';
+import { blobToData, blobToFile } from '@shared/image-tools/image-tools';
+import { post_form_messages, post_form_validation_messages } from './post-form.messages';
 
 
 
@@ -23,26 +25,8 @@ export class PostFormComponent {
 
   @ViewChild('chipList') chipList!: MatChipList;
 
-  validationMessages: any = {
-    title: {
-      required: 'Title is required.',
-      minlength: 'Title must be at least 2 characters long.'
-    },
-    content: {
-      required: 'Content is required.',
-      minlength: 'Content must be at least 3 characters long.'
-    },
-    tags: {
-      required: 'At least one tag is required.',
-      min: 'You cannot have more than 5 tags.'
-    }
-  };
-
-  messages = {
-    published: 'Your post is now published!',
-    deleted: 'Your post is now deleted!',
-    deleteConfirm: 'Are you sure you want to delete your post?'
-  };
+  validationMessages = post_form_validation_messages;
+  messages = post_form_messages;
 
   postForm: FormGroup;
   isNewPage = true;
@@ -179,8 +163,8 @@ export class PostFormComponent {
 
     if (p && p.blob) {
       // get data to preview image
-      this.imageView = await this.is.blobToData(p.blob);
-      this.imageFile = this.is.blobToFile(p.blob, p.filename);
+      this.imageView = await blobToData(p.blob);
+      this.imageFile = blobToFile(p.blob, p.filename);
       this.postForm.updateValueAndValidity();
 
       // delete tmp cover image

@@ -19,6 +19,8 @@ export class TagListComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
 
+    // todo - get rid of load
+
     // get tags
     const { data, error } = await this.ns.load('tags', this.ts.getTags());
     if (error) {

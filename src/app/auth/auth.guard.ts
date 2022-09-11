@@ -51,8 +51,8 @@ export class NotLoginGuard implements CanActivate {
   // cannot access if logged in
   constructor(
     private auth: AuthService,
-     private router: Router
-     ) { }
+    private router: Router
+  ) { }
   async canActivate(): Promise<boolean> {
     const user = await this.auth.getUser();
     const isLoggedIn = !!user;
@@ -70,8 +70,8 @@ export class EmailGuard implements CanActivate {
   // email must be verified
   constructor(
     private auth: AuthService,
-     private router: Router
-     ) { }
+    private router: Router
+  ) { }
   async canActivate(): Promise<boolean> {
     // make sure logged in first...
     const user = await this.auth.getUser();

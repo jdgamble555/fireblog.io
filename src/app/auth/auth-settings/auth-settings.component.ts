@@ -23,6 +23,7 @@ import { ImageUploadService } from '@db/image/image-upload.service';
 import { UserDbService } from '@db/user/user-db.service';
 import { UserEditService } from '@db/user/user-edit.service';
 import { AuthEditService } from '@db/auth/auth-edit.service';
+import { blobToFile } from '@shared/image-tools/image-tools';
 
 @Component({
   selector: 'app-auth-settings',
@@ -388,7 +389,7 @@ export class AuthSettingsComponent implements OnInit {
     if (file) {
 
       // convert to jpeg
-      const image = this.is.blobToFile(file, file?.name);
+      const image = blobToFile(file, file?.name);
 
       const user = await this.auth.getUser();
       const uid = user?.uid;
