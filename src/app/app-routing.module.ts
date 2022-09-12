@@ -4,7 +4,6 @@ import { UsernameGuard } from '@auth/username/username.guard';
 import { UserPostGuard } from '@post/post-list/post-list.guard';
 import { PostListResolver } from '@post/post-list/post-list.resolver';
 import { PostGuard } from '@post/post.guard';
-import { PostResolver } from '@post/post.resolver';
 import { AuthComponent } from './auth/auth.component';
 import { LoginGuard, EmailGuard, NotLoginGuard } from './auth/auth.guard';
 import { HomeComponent } from './home/home.component';
@@ -28,7 +27,7 @@ const routes: Routes = [
   // posts
   // todo - p instead of post
   { path: 'post/:id', component: PostComponent, canActivate: [PostGuard] },
-  { path: 'post/:id/:slug', component: PostComponent, canActivate: [PostGuard], resolve: { post: PostResolver } },
+  { path: 'post/:id/:slug', component: PostComponent, canActivate: [PostGuard] },
   { path: 't/:tag', component: PostListComponent, resolve: { posts: PostListResolver } },
   { path: 'u/:uid', component: PostListComponent, canActivate: [UserPostGuard] },
   { path: 'u/:uid/:username', component: PostListComponent, canActivate: [UserPostGuard], resolve: { posts: PostListResolver } },

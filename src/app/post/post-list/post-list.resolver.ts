@@ -29,12 +29,16 @@ export class PostListResolver implements Resolve<{ posts: Post[] | null, count: 
 
   async load(route: ActivatedRouteSnapshot) {
 
-    const hasPostsState = this.state.hasState<Post[]>('posts');
-    const hasCountState = this.state.hasState<string>('count');
+    // preloads post component from routes only
+    const uid = route.paramMap.get('uid') || undefined;
+    const tag = route.paramMap.get('tag') || undefined;
 
     let posts = null;
     let count = null;
     let error = null;
+
+    const hasPostsState = this.state.hasState<Post[]>('posts');
+    const hasCountState = this.state.hasState<string>('count');
 
     // load server state if exists
     if (this.ns.isBrowser && hasPostsState && hasCountState) {
@@ -42,10 +46,6 @@ export class PostListResolver implements Resolve<{ posts: Post[] | null, count: 
       count = this.state.getState<string>('count');
 
     } else {
-
-      // preloads post component from routes only
-      const uid = route.paramMap.get('uid') || undefined;
-      const tag = route.paramMap.get('tag') || undefined;
 
       // fetch data
       ({ count, posts, error } = await this.ps.getPosts({ uid, tag }));

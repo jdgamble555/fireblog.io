@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, Router } from '@angular/router';
 import { PostDbService } from '@db/post/post-db.service';
+import { StateService } from '@shared/state/state.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,12 +10,11 @@ export class PostGuard implements CanActivate {
 
   constructor(
     private ps: PostDbService,
-    private router: Router
+    private router: Router,
+    private state: StateService
   ) { }
 
   async canActivate(route: ActivatedRouteSnapshot): Promise<boolean> {
-
-    // todo - add caching to prevent extra db fetching
 
     let slug = route.paramMap.get('slug');
     const id = route.paramMap.get('id');
@@ -23,13 +23,16 @@ export class PostGuard implements CanActivate {
 
     if (id) {
 
-      ({ data, error } = await this.ps.getPostById(id));
+      ({ data, error } = await this.state.loadState('post', this.ps.getPostById(id)));
       if (error) {
         console.error(error);
       }
 
       // handle bad slugs due to renamed posts
       if (slug && data && (data.slug === slug)) {
+
+        // use guard as a resolver to pass data to component
+        route.data = { ...route.data, post: data };
         return true;
       }
 

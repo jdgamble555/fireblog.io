@@ -61,6 +61,8 @@ export class PostListComponent implements OnDestroy {
     const authorId = this.route.snapshot.params['uid'];
     const username = this.route.snapshot.params['username'];
 
+    // todo -- !!!!! fix route issues
+
     // set dynamic types
     const type: PostType = bookmarks
       ? 'bookmarks'

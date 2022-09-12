@@ -9,7 +9,6 @@ import { DbModule } from '@db/db.module';
 import { environment } from '@env/environment';
 import { NavModule } from '@nav/nav.module';
 import { AuthComponent } from '@auth/auth.component';
-import { PostResolver } from '@post/post.resolver';
 import { PostListModule } from '@post/post-list/post-list.module';
 import { PostModule } from '@post/post.module';
 import { MarkdownModule } from 'ngx-markdown';
@@ -39,7 +38,7 @@ import { MarkdownModule } from 'ngx-markdown';
       sanitize: SecurityContext.NONE
     })
   ],
-  providers: [PostResolver],
+  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
