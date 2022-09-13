@@ -8,7 +8,6 @@ import { UserRec } from '@auth/user.model';
 import { Post, PostInput, PostType } from '@post/post.model';
 import { SeoService } from '@shared/seo/seo.service';
 import { NavService } from '@nav/nav.service';
-import { PostListService } from './post-list.service';
 import { PostDbService } from '@db/post/post-db.service';
 import { UserDbService } from '@db/user/user-db.service';
 
@@ -33,7 +32,6 @@ export class PostListComponent implements OnDestroy {
     private router: Router,
     public ns: NavService,
     private seo: SeoService,
-    private pls: PostListService,
     @Inject(DOCUMENT) private doc: Document
   ) {
     this.env = environment;
@@ -54,26 +52,21 @@ export class PostListComponent implements OnDestroy {
 
     let count: string | null = p.posts?.count;
     let posts: Post[] | null = p.posts?.posts;
-    let bookmarks: boolean = p.bookmarks;
 
     // dynamic routes not ssr
     const tag = this.route.snapshot.params['tag'];
     const authorId = this.route.snapshot.params['uid'];
     const username = this.route.snapshot.params['username'];
 
-    // todo -- !!!!! fix route issues
-
     // set dynamic types
-    const type: PostType = bookmarks
-      ? 'bookmarks'
-      : tag
-        ? 'tag'
-        : authorId
-          ? 'user'
-          : this.pls.type;
+    const type: PostType = tag
+      ? 'tag'
+      : authorId
+        ? 'user'
+        : this.ns.type;
 
     // handle resolver router or new tab clicks
-    if (!type || type === 'new') {
+    if (type === 'new') {
       this.total = count;
       this.posts = posts;
       return;
@@ -140,16 +133,16 @@ export class PostListComponent implements OnDestroy {
 
     const posts = this.posts;
     const url = this.router.url;
+    const isDash = url === '/dashboard';
+
+    if (isDash) {
+      this.ns.addTitle('Dashboard');
+    }
 
     // meta data
     switch (type) {
       case 'bookmarks':
-        url === '/bookmarks'
-          ? this.ns.addTitle('Bookmarks')
-          : (
-            this.ns.addTitle('Dashboard'),
-            this.ns.addBC('Bookmarks')
-          );
+        this.ns.addBC('Bookmarks');
         break;
       case 'tag':
         const tag = this.input.tag;
@@ -160,20 +153,15 @@ export class PostListComponent implements OnDestroy {
         });
         break;
       case 'user':
-        url === '/dashboard'
-          ? (
-            this.ns.addTitle('Dashboard'),
-            this.ns.addBC('Posts')
-          ) : (
-            username && this.ns.addTitle(username)
-          );
+        isDash
+          ? this.ns.addBC('Posts')
+          : (username && this.ns.addTitle(username));
         break;
       case 'liked':
         break;
       case 'updated':
         break;
       case 'drafts':
-        this.ns.addTitle('Dashboard');
         this.ns.addBC('Drafts');
         break;
       default:

@@ -6,7 +6,7 @@
     <meta itemprop="position" content="1" />
   </li>
   <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem"
-    *ngFor="let c of ns.directories; index as i">
+    *ngFor="let c of this.ns.directories; index as i">
     <a itemprop="item" mat-button [routerLink]="c.location ? c.location : []">
       <span itemprop="name">{{ c.name }}</span>
     </a>

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { PostListService } from '@post/post-list/post-list.service';
 import { Tag } from '../post.model';
+import { TagListService } from './tag-list.service';
 
 @Component({
   selector: 'app-tag-list',
@@ -11,7 +11,7 @@ export class TagListComponent {
 
   tags!: Tag[] | null;
 
-  constructor(private pls: PostListService) {
-    this.tags = this.pls.tags;
+  constructor(private tls: TagListService) {
+    this.tags = this.tls.tags;
   }
 }

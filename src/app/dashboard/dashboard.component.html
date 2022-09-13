@@ -4,7 +4,7 @@
       <mat-icon color="primary" class="ng-icon-text">comment</mat-icon>Welcome {{ user?.displayName }}!
     </h1>
   </mat-card>
-  <mat-tab-group class="ng-card" animationDuration="0ms" (selectedIndexChange)="tabChange($event)" #tabIndex>
+  <mat-tab-group class="ng-card" animationDuration="0ms" [(selectedIndex)]="this.ns.dashboardIndex" (selectedIndexChange)="tabChange($event)" #tabIndex>
     <mat-tab label="Bookmarks{{ user?.bookmarksCount ? ' (' + user?.bookmarksCount + ')' : '' }}">
       <ng-template matTabContent>
         <br>

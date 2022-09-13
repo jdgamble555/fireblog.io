@@ -40,18 +40,18 @@
           <span>Account Settings</span>
         </button>
         <mat-divider></mat-divider>
-        <button mat-menu-item routerLink="/bookmarks">
-          <mat-icon class="ng-menu-icon">bookmarks</mat-icon>
-          <span>Bookmarks</span>
-        </button>
-        <mat-divider></mat-divider>
         <button mat-menu-item routerLink="/dashboard">
           <mat-icon class="ng-menu-icon">dashboard</mat-icon>
           <span>Dashboard</span>
         </button>
         <mat-divider></mat-divider>
+        <button mat-menu-item (click)="bookmarksPage()">
+          <mat-icon class="ng-menu-icon">bookmarks</mat-icon>
+          <span>Bookmarks</span>
+        </button>
+        <mat-divider></mat-divider>
         <ng-container *ngIf="user.role === 'admin'">
-          <button mat-menu-item [routerLink]="['/u', user.uid, user.username]">
+          <button mat-menu-item (click)="userPostsPage()">
             <mat-icon class="ng-menu-icon">account_box</mat-icon>
             <span>My Posts</span>
           </button>

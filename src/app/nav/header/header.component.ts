@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Output, Input } from '@angular/core';
+import { Router } from '@angular/router';
 import { UserRec } from '@auth/user.model';
 import { AuthService } from '@db/auth/auth.service';
 import { PostDbService } from '@db/post/post-db.service';
@@ -32,7 +33,8 @@ export class HeaderComponent {
     public ns: NavService,
     public dm: DarkModeService,
     private ps: PostDbService,
-    private us: UserDbService
+    private us: UserDbService,
+    private router: Router
   ) {
     if (this.ns.isBrowser) {
       this.user$ = this.us.userRec;
@@ -43,6 +45,18 @@ export class HeaderComponent {
 
   toggle() {
     this.dm.toggleTheme();
+  }
+
+  bookmarksPage() {
+    this.ns.type = 'bookmarks';
+    this.ns.dashboardIndex = 0;
+    this.router.navigate(['/dashboard']);
+  }
+
+  userPostsPage() {
+    this.ns.type = 'user';
+    this.ns.dashboardIndex = 1;
+    this.router.navigate(['/dashboard']);
   }
 
   logout() {

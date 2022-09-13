@@ -2,7 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { MatTabGroup } from '@angular/material/tabs';
 import { UserRec } from '@auth/user.model';
 import { UserDbService } from '@db/user/user-db.service';
-import { PostListService } from '@post/post-list/post-list.service';
+import { NavService } from '@nav/nav.service';
 import { Observable } from 'rxjs';
 
 
@@ -13,16 +13,14 @@ import { Observable } from 'rxjs';
 })
 export class DashboardComponent {
 
-  @ViewChild("tabIndex", { static: false }) tabIndex!: MatTabGroup;
-
   user$: Observable<UserRec | null>;
 
   constructor(
     public us: UserDbService,
-    private pls: PostListService
+    public ns: NavService
   ) {
 
-    this.pls.type = 'bookmarks';
+    this.ns.type = 'bookmarks';
 
     // see if logged in
     this.user$ = this.us.userRec;
@@ -30,11 +28,11 @@ export class DashboardComponent {
 
   tabChange(index: number) {
     if (index === 0) {
-      this.pls.type = 'bookmarks';
+      this.ns.type = 'bookmarks';
     } else if (index === 1) {
-      this.pls.type = 'user';
+      this.ns.type = 'user';
     } else {
-      this.pls.type = 'drafts';
+      this.ns.type = 'drafts';
     }
   }
 }

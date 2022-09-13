@@ -2,10 +2,10 @@ import { DOCUMENT, isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Router } from '@angular/router';
 import { environment } from '@env/environment';
+import { PostType } from '@post/post.model';
 import { SeoService } from '@shared/seo/seo.service';
 
 
-declare const Zone: any;
 interface Link {
   name: string;
   location: string;
@@ -19,10 +19,15 @@ export class NavService {
   simple = false;
 
   private title: string;
+
+  dashboardIndex = 0;
+
+  directories: Link[];
+  type: PostType = 'new';
+
   isBrowser: Boolean;
   isServer: Boolean;
   doc: Document;
-  directories: Link[];
 
   constructor(
     @Inject(PLATFORM_ID) platformId: Object,
@@ -80,4 +85,6 @@ export class NavService {
   home(): void {
     this.router.navigate(['/']);
   }
+
+
 }

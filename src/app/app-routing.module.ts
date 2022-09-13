@@ -31,7 +31,6 @@ const routes: Routes = [
   { path: 't/:tag', component: PostListComponent, resolve: { posts: PostListResolver } },
   { path: 'u/:uid', component: PostListComponent, canActivate: [UserPostGuard] },
   { path: 'u/:uid/:username', component: PostListComponent, canActivate: [UserPostGuard], resolve: { posts: PostListResolver } },
-  { path: 'bookmarks', component: PostListComponent, canActivate: [LoginGuard] },
 
   // logged in
   { path: 'new', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [EmailGuard, LoginGuard] },

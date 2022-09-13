@@ -38,7 +38,6 @@ import { MarkdownModule } from 'ngx-markdown';
       sanitize: SecurityContext.NONE
     })
   ],
-  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -1,5 +1,5 @@
 import { Component, isDevMode } from '@angular/core';
-import { PostListService } from '@post/post-list/post-list.service';
+import { LeftnavService } from './leftnav.service';
 
 @Component({
   selector: 'app-leftnav',
@@ -11,9 +11,8 @@ export class LeftnavComponent {
   total!: string | null;
   isDev: boolean;
 
-  constructor(private pls: PostListService) {
+  constructor(private lns: LeftnavService) {
     this.isDev = isDevMode();
-    this.total = this.pls.postTotal;
+    this.total = this.lns.postTotal;
   }
-
 }

@@ -993,6 +993,10 @@ mat-paginator .mat-form-field {
 }
 
 .simple-wrapper {
+  margin-right: auto;
+  margin-left: auto;
+  max-width: 995px;
+  display: grid;
   grid-template-areas:
     "header"
     "content"
