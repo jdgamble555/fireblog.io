@@ -68,7 +68,7 @@
         </button>
       </mat-menu>
       <a mat-icon-button [matMenuTriggerFor]="appMenu">
-        <img class="avatar" *ngIf="user.photoURL" [src]="user.photoURL" />
+        <img class="avatar" *ngIf="user.photoURL" [src]="user.photoURL" [alt]="user.displayName" />
         <mat-icon *ngIf="!user.photoURL">account_circle</mat-icon>
       </a>
     </div>

@@ -48,7 +48,10 @@ export class SeoService {
       { name: 'twitter:site', content: '@' + domain },
       { name: 'twitter:image:alt', content: title },
       { name: 'twitter:image', content: image },
-      { name: 'twitter:description', content: description }
+      { name: 'twitter:description', content: description },
+
+      // regular meta description
+      { name: 'description', content: description }
     ]);
 
     if (imageW) {
