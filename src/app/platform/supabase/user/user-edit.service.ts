@@ -26,7 +26,6 @@ export class UserEditService {
   }
 
   async deleteUser(): Promise<void> {
-    // todo - add try catch
 
   }
 

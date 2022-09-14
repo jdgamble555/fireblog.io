@@ -25,7 +25,6 @@ export class PostComponent {
   postId!: string;
   slug!: string;
 
-  // todo - type this
   env: any;
 
   constructor(

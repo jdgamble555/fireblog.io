@@ -7,13 +7,12 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router, UrlSegment } from '@angular/router';
 import { AuthService } from '@db/auth/auth.service';
-import { UserDbService } from '@db/user/user-db.service';
 
 import { NavService } from '@nav/nav.service';
 import { matchValidator, MyErrorStateMatcher } from '@shared/form-validators';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { Subscription } from 'rxjs';
-import { auth_validation_messages } from './auth.messages';
+import { auth_messages, auth_validation_messages } from './auth.messages';
 import { AuthAction } from './user.model';
 
 
@@ -25,7 +24,8 @@ import { AuthAction } from './user.model';
 export class AuthComponent implements OnInit, OnDestroy {
 
   matcher = new MyErrorStateMatcher();
-  validationMessages = auth_validation_messages;
+  validationMessages: any = auth_validation_messages;
+  messages = auth_messages;
 
   userForm!: FormGroup;
 
@@ -52,8 +52,7 @@ export class AuthComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private nav: NavService,
-    private sb: SnackbarService,
-    private us: UserDbService
+    private sb: SnackbarService
   ) {
 
     // get type from route
@@ -87,15 +86,14 @@ export class AuthComponent implements OnInit, OnDestroy {
     } else if (this.type === '_login') {
       const url = this.router.url;
       // signin with link
-      const { isConfirmed, error, message } = await this.auth.confirmSignIn(url)
+      const { isConfirmed, error } = await this.auth.confirmSignIn(url)
       isConfirmed
         ? this.router.navigate(['/dashboard'])
         : null;
       if (error) {
         this.sb.showError(error);
-      }
-      if (message) {
-        this.sb.showMsg(message);
+      } else {
+        this.sb.showMsg(this.messages.sendEmailLink);
       }
       this.isReturnLogin = true;
       this.title = 'Passwordless Login';
@@ -160,6 +158,7 @@ export class AuthComponent implements OnInit, OnDestroy {
   async onSubmit(): Promise<void> {
 
     this.loading = true;
+    let message = null;
     let r: AuthAction | null = null;
 
     if (this.isLogin) {
@@ -167,32 +166,36 @@ export class AuthComponent implements OnInit, OnDestroy {
         this.getField('email')?.value,
         this.getField('password')?.value
       );
+      message = this.messages.loginSuccess;
     } else if (this.isRegister) {
       r = await this.auth.emailSignUp(
         this.getField('email')?.value,
         this.getField('password')?.value
       );
+      message = this.messages.accountCreated;
     } else if (this.isReset) {
       r = await this.auth.resetPassword(
         this.getField('email')?.value
       );
+      message = this.messages.resetPassword;
     } else if (this.isPasswordless) {
       r = await this.auth.sendEmailLink(
         this.getField('email')?.value
       );
+      message = this.messages.sendEmailLink;
     } else if (this.isReturnLogin) {
       const url = this.router.url;
       r = await this.auth.confirmSignIn(
         url,
         this.getField('email')?.value,
       );
+      message = this.messages.loginSuccess;
     }
     if (r) {
       if (r.error) {
         this.sb.showError(r.error);
-      }
-      if (r.message) {
-        this.sb.showMsg(r.message);
+      } else if (message) {
+        this.sb.showMsg(message);
         if (this.isLogin || this.isRegister || this.isReturnLogin) {
           this.router.navigate(['/dashboard']);
         } else if (this.isPasswordless) {
@@ -204,25 +207,23 @@ export class AuthComponent implements OnInit, OnDestroy {
   }
 
   async providerLogin(provider: string): Promise<void> {
-    const { error, message, isNew } = await this.auth.oAuthLogin(provider);
+    const { error, isNew } = await this.auth.oAuthLogin(provider);
     isNew
       ? this.router.navigate(['/username'])
       : this.router.navigate(['/dashboard']);
     if (error) {
       this.sb.showError(error);
-    }
-    if (message) {
-      this.sb.showMsg(message);
+    } else {
+      this.sb.showMsg(this.messages.loginSuccess);
     }
   }
 
   async sendEmail(): Promise<void> {
-    const { error, message } = await this.auth.sendVerificationEmail();
+    const { error } = await this.auth.sendVerificationEmail();
     if (error) {
       this.sb.showError(error);
-    }
-    if (message) {
-      this.sb.showMsg(message);
+    } else {
+      this.sb.showMsg(this.messages.emailVerifySent);
     }
   }
 

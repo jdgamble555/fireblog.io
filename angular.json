@@ -72,7 +72,8 @@
                 }
               ],
               "outputHashing": "all",
-              "tsConfig": "tsconfig.app.json"
+              "tsConfig": "tsconfig.app.json",
+              "sourceMap": true
             },
             "development": {
               "buildOptimizer": false,

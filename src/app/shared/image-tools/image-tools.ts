@@ -11,6 +11,11 @@ export const randomID = (): string => {
     Date.now().toString(24);
 };
 
+export interface Preview {
+  blob: Blob;
+  filename: string;
+}
+
 /**
  *
  * Canvas tools to resize image
@@ -60,3 +65,29 @@ export const scaleImage = async (doc: any, src: any, type = 'image/jpeg', newX?:
     img.onerror = error => rej(error);
   });
 };
+
+/**
+* Gets an image blob before upload
+* @param event - file event
+* @returns - string blob of image
+*/
+export const previewImage = async (doc: any, event: Event,): Promise<Preview | undefined> => {
+
+  // add event to image service
+  const target = event.target as HTMLInputElement;
+
+  if (target.files?.length) {
+
+    // view file before upload
+    const file = target.files[0];
+    const filename = file.name;
+
+    // get image preview
+    const image = await blobToData(file);
+
+    // return resized version
+    const blob = await scaleImage(doc, image, undefined, 800, 418);
+    return { filename, blob };
+  }
+  return;
+}

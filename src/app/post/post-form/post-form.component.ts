@@ -11,7 +11,7 @@ import { Post } from '@post/post.model';
 import { NavService } from '@nav/nav.service';
 import { PostDbService } from '@db/post/post-db.service';
 import { PostEditService } from '@db/post/post-edit.service';
-import { blobToData, blobToFile } from '@shared/image-tools/image-tools';
+import { blobToData, blobToFile, previewImage } from '@shared/image-tools/image-tools';
 import { post_form_messages, post_form_validation_messages } from './post-form.messages';
 
 
@@ -159,7 +159,7 @@ export class PostFormComponent {
   async addCoverImage(event: Event): Promise<void> {
 
     // get blob for upload
-    const p = await this.is.previewImage(event);
+    const p = await previewImage(this.ns.doc, event);
 
     if (p && p.blob) {
       // get data to preview image
@@ -169,7 +169,10 @@ export class PostFormComponent {
 
       // delete tmp cover image
       if (this.imageTmp) {
-        await this.is.deleteImage(this.imageTmp);
+        const { error } = await this.is.deleteImage(this.imageTmp);
+        if (error) {
+          console.error(error);
+        }
         this.imageTmp = null;
       }
     }
@@ -190,17 +193,22 @@ export class PostFormComponent {
 
       // upload image with spinner
       this.imageLoading = true;
-      const image = await this.is.uploadImage(`post_images/${uid}`, file);
+      const { data: image, error } = await this.is.uploadImage(`post_images/${uid}`, file);
+      if (error) {
+        console.error(error);
+      }
       this.imageLoading = false;
 
-      // save url to db
-      await this.pes.addPostImage(this.id, image);
+      if (image) {
+        // save url to db
+        await this.pes.addPostImage(this.id, image);
 
-      // add url to imageUploads array
-      this.imageUploads.push(image);
+        // add url to imageUploads array
+        this.imageUploads.push(image);
 
-      // show msg
-      this.sb.showMsg('Image Added!', 500);
+        // show msg
+        this.sb.showMsg('Image Added!', 500);
+      }
     }
   }
 
@@ -245,13 +253,18 @@ export class PostFormComponent {
     // if new image, upload it
     if (this.imageFile) {
       try {
-        const image = await this.is.uploadImage(`cover_images/${uid}`, this.imageFile);
-        data = {
-          ...data,
-          imageTmp: image
-        };
-        this.imageFile = undefined;
-        this.imageTmp = image;
+        const { data: image, error } = await this.is.uploadImage(`cover_images/${uid}`, this.imageFile);
+        if (error) {
+          console.error(error);
+        }
+        if (image) {
+          data = {
+            ...data,
+            imageTmp: image
+          };
+          this.imageFile = undefined;
+          this.imageTmp = image;
+        }
       } catch (e: any) {
         console.error(e);
         error = true;
@@ -262,10 +275,9 @@ export class PostFormComponent {
     if (publish && this.image !== this.imageView) {
       // delete old cover image file
       if (this.image) {
-        try {
-          await this.is.deleteImage(this.image);
-        } catch (e: any) {
-          console.error(e);
+        const { error: _e } = await this.is.deleteImage(this.image);
+        if (_e) {
+          console.error(_e);
           error = true;
         }
       }

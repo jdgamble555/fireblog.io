@@ -8,7 +8,7 @@ import {
   Firestore,
   getDoc
 } from '@angular/fire/firestore';
-import { UserRec } from '@auth/user.model';
+import { UserRec, UserRequest } from '@auth/user.model';
 import { DbModule } from '@db/db.module';
 import { setWithCounter } from '@db/fb-tools';
 import { firstValueFrom, map, Observable, of, switchMap } from 'rxjs';
@@ -46,34 +46,43 @@ export class UserDbService {
     );
   }
 
-  async getUserRec(): Promise<UserRec | null> {
-
-    // todo - try catch
-    const uid = (await firstValueFrom(user(this.auth)))?.uid;
-    if (uid) {
-      const docSnap = await getDoc<UserRec>(
-        doc(this.afs, 'users', uid) as DocumentReference<UserRec>
-      );
-      if (docSnap.exists()) {
-        return docSnap.data();
+  async getUserRec(): Promise<UserRequest<UserRec | null>> {
+    // get user record
+    let data = null;
+    let error = null;
+    try {
+      const uid = (await firstValueFrom(user(this.auth)))?.uid;
+      if (uid) {
+        const docSnap = await getDoc<UserRec>(
+          doc(this.afs, 'users', uid) as DocumentReference<UserRec>
+        );
+        if (docSnap.exists()) {
+          data = docSnap.data();
+        }
       }
+    } catch (e: any) {
+      error = e;
     }
-    return null;
+    return { data, error };
   }
 
-  async createUser(user: UserRec, id: string): Promise<void> {
-
+  async createUser(user: UserRec, id: string): Promise<UserRequest<void>> {
     // create user only if DNE
-    const docSnap = await getDoc<UserRec>(
-      doc(this.afs, 'users', id) as DocumentReference<UserRec>
-    );
-    if (!docSnap.exists()) {
-      await setWithCounter(
-        doc(this.afs, 'users', id),
-        user
+    let error = null;
+    try {
+      const docSnap = await getDoc<UserRec>(
+        doc(this.afs, 'users', id) as DocumentReference<UserRec>
       );
+      if (!docSnap.exists()) {
+        await setWithCounter(
+          doc(this.afs, 'users', id),
+          user
+        );
+      }
+    } catch (e: any) {
+      error = e;
     }
-    return;
+    return { error };
   }
 
   /**

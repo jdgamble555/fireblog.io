@@ -35,5 +35,10 @@ export interface AuthAction {
   isNew?: boolean | null;
   isConfirmed?: boolean | null;
   error: string | null;
-  message: string | null;
+}
+
+export interface UserRequest<T> {
+  error: string | null,
+  data?: T
+  exists?: boolean | null
 }

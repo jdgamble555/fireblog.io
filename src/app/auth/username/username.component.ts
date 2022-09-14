@@ -6,15 +6,13 @@ import {
   AbstractControl,
   ValidatorFn
 } from '@angular/forms';
-import { Router } from '@angular/router';
-import { AuthAction } from '@auth/user.model';
 import { UserEditService } from '@db/user/user-edit.service';
 import { NavService } from '@nav/nav.service';
 import { MyErrorStateMatcher } from '@shared/form-validators';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { from, of } from 'rxjs';
 import { debounceTime, take } from 'rxjs/operators';
-import { username_validation_messages } from './username.messages';
+import { username_messages, username_validation_messages } from './username.messages';
 
 
 @Component({
@@ -27,6 +25,7 @@ export class UsernameComponent {
   matcher = new MyErrorStateMatcher();
 
   validationMessages = username_validation_messages;
+  messages = username_messages;
 
   userForm!: FormGroup;
 
@@ -47,7 +46,6 @@ export class UsernameComponent {
 
   constructor(
     private fb: FormBuilder,
-    private router: Router,
     private nav: NavService,
     private sb: SnackbarService,
     private ues: UserEditService
@@ -86,23 +84,14 @@ export class UsernameComponent {
   async onSubmit(): Promise<void> {
 
     this.loading = true;
-    let r: AuthAction | null = null;
 
     const username = (this.getField('username')?.value as string).toLowerCase();
-    r = await this.ues.updateUsername(username) as AuthAction;
+    const { error } = await this.ues.updateUsername(username);
 
-    if (r) {
-      if (r.error) {
-        this.sb.showError(r.error);
-      }
-      if (r.message) {
-        this.sb.showMsg(r.message);
-        if (this.isLogin || this.isRegister || this.isCreateUser || this.isReturnLogin) {
-          this.router.navigate(['/dashboard']);
-        } else if (this.isPasswordless) {
-          this.router.navigate(['/login']);
-        }
-      }
+    if (error) {
+        console.error(error);
+    } else {
+      this.sb.showMsg(this.messages.usernameCreated);
     }
     this.loading = false;
   }
@@ -128,5 +117,4 @@ export class UsernameComponent {
     }
     return data ? { 'unavailable': true } : null;
   }
-
 }

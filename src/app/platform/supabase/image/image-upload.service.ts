@@ -12,8 +12,6 @@ import { blobToData, randomID, scaleImage } from '@shared/image-tools/image-tool
 import { Observable } from 'rxjs';
 import { ImageModule } from './image.module';
 
-// todo - error type with code and message
-
 interface Preview {
   blob: Blob;
   filename: string;

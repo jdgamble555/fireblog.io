@@ -17,7 +17,10 @@ export class RoleGuard implements CanActivate {
     private router: Router
   ) { }
   async canActivate(): Promise<boolean> {
-    const user = await this.us.getUserRec();
+    const { error, data: user } = await this.us.getUserRec();
+    if (error) {
+      console.error(error);
+    }
     const isAdmin = !!(user && user.role === Role.Admin);
     if (!isAdmin) {
       this.router.navigate(['/home']);

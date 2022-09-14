@@ -23,7 +23,7 @@ export class PostListResolver implements Resolve<{ posts: Post[] | null, count: 
     this.type = null;
   }
 
-  // todo - add return type here
+  // todo - add return type here when doing post-db
   resolve(route: ActivatedRouteSnapshot): Promise<{ posts: Post[] | null, count: string | null }> {
     return this.load(route);
   }

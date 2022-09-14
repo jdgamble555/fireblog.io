@@ -8,29 +8,26 @@ import {
   setDoc,
   writeBatch
 } from '@angular/fire/firestore';
-import { UserRec } from '@auth/user.model';
+import { UserRec, UserRequest } from '@auth/user.model';
 import { AuthEditModule } from '@db/auth-edit.module';
 import { deleteWithCounter } from '@db/fb-tools';
 import { firstValueFrom } from 'rxjs';
-import { user_messages } from './user.messages';
 
 @Injectable({
   providedIn: AuthEditModule
 })
 export class UserEditService {
 
-  messages = user_messages;
-
   constructor(
     private afs: Firestore,
     private auth: Auth,
   ) { }
 
-  async getUid() {
+  async getUid(): Promise<string | null> {
     return (await firstValueFrom(user(this.auth)))?.uid || null;
   }
 
-  async updateUser(user: any): Promise<{ error: string | null }> {
+  async updateUser(user: any): Promise<UserRequest<void>> {
     const uid = await this.getUid();
     let error = null;
     if (uid) {
@@ -47,32 +44,36 @@ export class UserEditService {
     return { error };
   }
 
-  async deleteUser(): Promise<void> {
-    // todo - add try catch
+  async deleteUser(): Promise<UserRequest<void>> {
     const uid = await this.getUid();
-    if (uid) {
-      await deleteWithCounter(
-        doc(this.afs, 'users', uid)
-      );
-    }
-  }
-
-  async validUsername(name: string): Promise<{ error: string | null, data: boolean | null }> {
-    let data = null;
     let error = null;
     try {
-      data = await getDoc(
-        doc(this.afs, 'usernames', name)
-      ).then((doc: DocumentSnapshot<any>) => doc.exists());
+      if (uid) {
+        await deleteWithCounter(
+          doc(this.afs, 'users', uid)
+        );
+      }
     } catch (e: any) {
       error = e;
     }
-    return { data, error };
+    return { error };
   }
 
-  async updateUsername(username: string, currentUsername?: string): Promise<{ error: string | null, message: string | null }> {
+  async validUsername(name: string): Promise<UserRequest<void>> {
+    let exists: boolean | null = null;
     let error = null;
-    let message = null;
+    try {
+      exists = await getDoc<UserRec>(
+        doc(this.afs, 'usernames', name)
+      ).then((doc: DocumentSnapshot<UserRec>) => doc.exists());
+    } catch (e: any) {
+      error = e;
+    }
+    return { exists, error };
+  }
+
+  async updateUsername(username: string, currentUsername?: string): Promise<UserRequest<void>> {
+    let error = null;
     const uid = await this.getUid();
     if (uid) {
       try {
@@ -90,21 +91,20 @@ export class UserEditService {
           { uid }
         );
         await batch.commit();
-        message = this.messages.usernameUpdated;
       } catch (e: any) {
         error = e;
       }
     }
-    return { error, message };
+    return { error };
   }
 
-  async hasUsername(): Promise<{ error: string | null, data: boolean | null }> {
+  async hasUsername(): Promise<UserRequest<void>> {
     let error = null;
-    let data = null;
+    let exists = null;
     const uid = await this.getUid();
     if (uid) {
       try {
-        data = await getDoc<UserRec>(
+        exists = await getDoc<UserRec>(
           doc(this.afs, 'users', uid)
         ).then((doc) => {
           if (doc.exists()) {
@@ -117,6 +117,6 @@ export class UserEditService {
         e = error;
       }
     }
-    return { error, data };
+    return { error, exists };
   }
 }

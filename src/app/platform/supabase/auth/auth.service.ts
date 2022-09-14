@@ -52,7 +52,10 @@ export class AuthService {
   private async _userCheck(u: UserAuth): Promise<void> {
 
     // create user if DNE
-    const user = await this.us.getUserRec();
+    const {error, data: user } = await this.us.getUserRec();
+    if (error) {
+      console.error(error);
+    }
     if (!user) {
       this.us.createUser(u, u.uid);
     }
@@ -67,45 +70,38 @@ export class AuthService {
   async emailLogin(email: string, password: string): Promise<AuthAction> {
 
     let error = null;
-    let message = null;
 
-    return { error, message };
+    return { error };
   }
 
   async emailSignUp(email: string, password: string): Promise<AuthAction> {
     let error = null;
-    let message = null;
-
-    return { message, error };
+    return { error };
   }
 
   async sendEmailLink(email: string): Promise<AuthAction> {
-    let message = null;
     let error = null;
 
-    return { message, error };
+    return {error };
   }
 
   async sendVerificationEmail(): Promise<AuthAction> {
 
     let error = null;
-    let message = null;
 
-    return { error, message };
+    return { error};
   }
 
   async confirmSignIn(url: string, email?: string): Promise<AuthAction> {
     let error = null;
-    let message = null;
     let isConfirmed = false;
-    return { isConfirmed, message, error };
+    return { isConfirmed,error };
   }
 
   async resetPassword(email: string): Promise<AuthAction> {
     let error = null;
-    let message = null;
 
-    return { message, error };
+    return { error };
   }
 
   async oAuthLogin(p: string): Promise<AuthAction> {
@@ -113,8 +109,7 @@ export class AuthService {
     const { error } = await this.sb.supabase.auth.signIn({
       provider: p as Provider,
     });
-    const message = this.messages.loginSuccess;
-    return { message, error: error?.message || null };
+    return { error: error?.message || null };
   }
 
   async logout(): Promise<void> {

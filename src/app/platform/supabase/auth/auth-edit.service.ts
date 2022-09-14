@@ -21,38 +21,33 @@ export class AuthEditService {
 
   // Auth
 
-  async oAuthReLogin(p: string): Promise<any> {
+  async oAuthReLogin(p: string): Promise<AuthAction> {
     let error = null;
-    let message = null;
-    return { error, message };
+    return { error };
   }
 
   // Providers
 
   async addProvider(p: string): Promise<AuthAction> {
-    let message = null;
     let error = null;
-    return { message, error };
+    return { error };
   }
 
   async removeProvider(p: string): Promise<AuthAction> {
     let error = null;
-    let message = null;
-    return { message, error };
+    return { error };
   }
 
   async updateEmail(email: string): Promise<AuthAction> {
     let error = null;
-    let message = null;
     let reAuth = false;
-    return { reAuth, error, message };
+    return { reAuth, error };
   }
 
   async updatePass(pass: string): Promise<AuthAction> {
     let error = null;
-    let message = null;
     let reAuth = false;
-    return { reAuth, error, message };
+    return { reAuth, error };
   }
 
   async updateProfile(profile: {
@@ -60,14 +55,12 @@ export class AuthEditService {
     photoURL?: string | null | undefined;
   }): Promise<AuthAction> {
     let error = null;
-    let message = null;
-    return { message, error };
+    return { error };
   }
 
   async deleteUser(): Promise<AuthAction> {
     let error = null;
-    let message = null;
     let reAuth = false;
-    return { reAuth, error, message };
+    return { reAuth, error };
   }
 }

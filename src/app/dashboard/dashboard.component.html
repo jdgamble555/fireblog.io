@@ -1,4 +1,4 @@
-<ng-container *ngIf="user$ | async as user">
+<div *ngIf="user$ | async as user" class="ng-border">
   <mat-card class="ng-card">
     <h1>
       <mat-icon color="primary" class="ng-icon-text">comment</mat-icon>Welcome {{ user?.displayName }}!
@@ -26,4 +26,4 @@
       </mat-tab>
     </ng-container>
   </mat-tab-group>
-</ng-container>
+</div>

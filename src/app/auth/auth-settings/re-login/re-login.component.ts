@@ -2,6 +2,7 @@ import { Component, OnInit, Inject } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { AuthEditService } from '@db/auth/auth-edit.service';
+import { auth_messages } from '@db/auth/auth.messages';
 import { AuthService } from '@db/auth/auth.service';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 
@@ -12,11 +13,9 @@ import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 })
 export class ReLoginComponent implements OnInit {
 
-  //reAuth: boolean = null;
-
-  providers: any = '';
-
+  messages = auth_messages;
   userForm!: FormGroup;
+  providers: any = '';
 
   constructor(
     private fb: FormBuilder,
@@ -34,12 +33,11 @@ export class ReLoginComponent implements OnInit {
   }
 
   async providerLogin(provider: string) {
-    const { message, error } = await this.aes.oAuthReLogin(provider);
-    if (message) {
-      this.sb.showMsg(message);
-    }
+    const { error } = await this.aes.oAuthReLogin(provider);
     if (error) {
       this.sb.showError(error);
+    } else {
+      this.sb.showMsg(this.messages.loginSuccess);
     }
     this.d.close();
   }

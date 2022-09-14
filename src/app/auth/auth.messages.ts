@@ -1,4 +1,4 @@
-export const auth_validation_messages: any = {
+export const auth_validation_messages = {
   email: {
     required: 'Email is required.',
     email: 'Email must be a valid email address.'
@@ -19,4 +19,13 @@ export const auth_validation_messages: any = {
     maxlength: 'Username cannot be more than 25 characters long.',
     unavailable: 'That username is taken.'
   }
+};
+
+export const auth_messages = {
+  accountCreated: 'Your account has been created and you have been logged in.',
+  emailVerifySent: 'A verification email has been sent.',
+  resetPassword: 'Your password reset link has been sent.',
+  sendEmailLink: 'Your email login link has been sent.',
+  loginSuccess: 'You have been successfully logged in!',
+  emailConfirm: 'Your email has been confirmed!'
 };

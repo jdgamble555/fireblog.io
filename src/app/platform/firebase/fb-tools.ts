@@ -10,6 +10,7 @@ import {
   SetOptions,
   writeBatch
 } from "@firebase/firestore";
+import { PartialWithFieldValue } from "firebase/firestore";
 import { docData } from "rxfire/firestore";
 import {
   combineLatest,
@@ -22,11 +23,9 @@ import {
 } from "rxjs/operators";
 
 
-export async function setWithCounter(
-  ref: DocumentReference<DocumentData>,
-  data: {
-    [x: string]: any;
-  },
+export async function setWithCounter<T>(
+  ref: DocumentReference<T>,
+  data: PartialWithFieldValue<T>,
   setOptions?: SetOptions,
   opts?: {
     paths?: { [col: string]: string },
@@ -46,50 +45,54 @@ export async function setWithCounter(
   const counterCol = '_counters';
   const col = ref.path.split('/').slice(0, -1).join('/');
   const countRef = doc(ref.firestore, counterCol, col);
-  const refSnap = await getDoc(ref);
+  const refSnap = await getDoc<T>(ref);
 
   // don't increase count if edit
-  if (refSnap.exists()) {
-    if (opts.dates) {
-      data.updatedAt = serverTimestamp();
-    }
-    await setDoc(ref, data, setOptions);
+  try {
+    if (refSnap.exists()) {
+      if (opts.dates) {
+        data = { ...data as any, updatedAt: serverTimestamp() };
+      }
+      await setDoc<T>(ref, data, setOptions);
 
-    // increase count
-  } else {
-    // set doc
-    const batch = writeBatch(ref.firestore);
+      // increase count
+    } else {
+      // set doc
+      const batch = writeBatch(ref.firestore);
 
-    if (opts.dates) {
-      data.createdAt = serverTimestamp();
-    }
-    batch.set(ref, data, setOptions);
+      if (opts.dates) {
+        data = { ...data as any, createdAt: serverTimestamp() };
+      }
+      batch.set(ref, data, setOptions);
 
-    // if other counts
-    if (paths) {
-      const keys = Object.keys(paths);
-      keys.map((k: string) => {
-        batch.update(
-          doc(ref.firestore, `${k}/${paths[k]}`),
-          {
-            [col + 'Count']: increment(1),
-            ['_' + col + 'Doc']: ref
-          }
-        );
-      });
+      // if other counts
+      if (paths) {
+        const keys = Object.keys(paths);
+        keys.map((k: string) => {
+          batch.update(
+            doc(ref.firestore, `${k}/${paths[k]}`),
+            {
+              [col + 'Count']: increment(1),
+              ['_' + col + 'Doc']: ref
+            }
+          );
+        });
+      }
+      // _counter doc
+      batch.set(countRef, {
+        count: increment(1),
+        _tmpDoc: ref
+      }, { merge: true });
+      // create counts
+      return await batch.commit();
     }
-    // _counter doc
-    batch.set(countRef, {
-      count: increment(1),
-      _tmpDoc: ref
-    }, { merge: true });
-    // create counts
-    return batch.commit();
+  } catch (e: any) {
+    throw e;
   }
 }
 
-export async function deleteWithCounter(
-  ref: DocumentReference<DocumentData>,
+export async function deleteWithCounter<T>(
+  ref: DocumentReference<T>,
   opts?: {
     paths?: { [col: string]: string }
   }
@@ -103,28 +106,31 @@ export async function deleteWithCounter(
   const col = ref.path.split('/').slice(0, -1).join('/');
   const countRef = doc(ref.firestore, counterCol, col);
   const batch = writeBatch(ref.firestore);
-
-  // if other counts
-  if (paths) {
-    const keys = Object.keys(paths);
-    keys.map((k: string) => {
-      batch.update(
-        doc(ref.firestore, `${k}/${paths[k]}`),
-        {
-          [col + 'Count']: increment(-1),
-          ['_' + col + 'Doc']: ref
-        }
-      );
-    });
+  try {
+    // if other counts
+    if (paths) {
+      const keys = Object.keys(paths);
+      keys.map((k: string) => {
+        batch.update(
+          doc(ref.firestore, `${k}/${paths[k]}`),
+          {
+            [col + 'Count']: increment(-1),
+            ['_' + col + 'Doc']: ref
+          }
+        );
+      });
+    }
+    // delete doc
+    batch.delete(ref);
+    batch.set(countRef, {
+      count: increment(-1),
+      _tmpDoc: ref
+    }, { merge: true });
+    // edit counts
+    return await batch.commit();
+  } catch (e: any) {
+    throw e;
   }
-  // delete doc
-  batch.delete(ref);
-  batch.set(countRef, {
-    count: increment(-1),
-    _tmpDoc: ref
-  }, { merge: true });
-  // edit counts
-  return batch.commit();
 }
 
 export function expandRef<T>(obs: Observable<T>, fields: any[] = []): Observable<T> {
@@ -197,73 +203,71 @@ export async function searchIndex(docObj: Document, opts: {
     opts.ref.firestore,
     `${searchCol}/${colId}/${allCol}/${opts.ref.id}`
   );
+  try {
+    if (opts.del) {
+      await deleteDoc(searchRef);
+    } else {
 
-  if (opts.del) {
-    await deleteDoc(searchRef);
-  } else {
+      let data: any = {};
+      let m: any = {};
 
-    let data: any = {};
-    let m: any = {};
+      // go through each field to index
+      for (const field of opts.fields) {
 
-    // go through each field to index
-    for (const field of opts.fields) {
+        // new indexes
+        let fieldValue = opts.after[field];
 
-      // new indexes
-      let fieldValue = opts.after[field];
-
-      // if array, turn into string
-      if (Array.isArray(fieldValue)) {
-        fieldValue = fieldValue.join(' ');
-      }
-      let index = createIndex(docObj, fieldValue, numWords);
-
-      // if filter function, run function on each word
-      if (opts.useSoundex) {
-        const temp = [];
-        for (const i of index) {
-          temp.push(i.split(' ').map(
-            (v: string) => soundex(v)
-          ).join(' '));
+        // if array, turn into string
+        if (Array.isArray(fieldValue)) {
+          fieldValue = fieldValue.join(' ');
         }
-        index = temp;
-        for (const phrase of index) {
-          if (phrase) {
-            let v = '';
-            const t = phrase.split(' ');
-            while (t.length > 0) {
-              const r = t.shift();
-              v += v ? ' ' + r : r;
-              // increment for relevance
-              m[v] = m[v] ? m[v] + 1 : 1;
+        let index = createIndex(docObj, fieldValue, numWords);
+
+        // if filter function, run function on each word
+        if (opts.useSoundex) {
+          const temp = [];
+          for (const i of index) {
+            temp.push(i.split(' ').map(
+              (v: string) => soundex(v)
+            ).join(' '));
+          }
+          index = temp;
+          for (const phrase of index) {
+            if (phrase) {
+              let v = '';
+              const t = phrase.split(' ');
+              while (t.length > 0) {
+                const r = t.shift();
+                v += v ? ' ' + r : r;
+                // increment for relevance
+                m[v] = m[v] ? m[v] + 1 : 1;
+              }
+            }
+          }
+        } else {
+          for (const phrase of index) {
+            if (phrase) {
+              let v = '';
+              for (let i = 0; i < phrase.length; i++) {
+                v = phrase.slice(0, i + 1).trim();
+                // increment for relevance
+                m[v] = m[v] ? m[v] + 1 : 1;
+              }
             }
           }
         }
-      } else {
-        for (const phrase of index) {
-          if (phrase) {
-            let v = '';
-            for (let i = 0; i < phrase.length; i++) {
-              v = phrase.slice(0, i + 1).trim();
-              // increment for relevance
-              m[v] = m[v] ? m[v] + 1 : 1;
-            }
-          }
-        }
       }
-    }
-    data[termField] = m;
+      data[termField] = m;
 
-    data = {
-      ...data,
-      slug: opts.after.slug,
-      title: opts.after.title
-    };
-
-    try {
-      await setDoc(searchRef, data)
-    } catch (e: any) {
-      console.error(e);
+      data = {
+        ...data,
+        slug: opts.after.slug,
+        title: opts.after.title
+      };
+      return await setDoc(searchRef, data);
     }
+  } catch (e: any) {
+    throw e;
   }
 }
 

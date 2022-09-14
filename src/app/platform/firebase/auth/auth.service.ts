@@ -36,27 +36,10 @@ export class AuthService {
     private us: UserDbService,
     @Inject(DOCUMENT) private doc: Document
   ) {
-    this.user$ = this._user();
+    this.user$ = user(this.auth) as Observable<UserAuth | null>;
   }
 
   // User
-
-  private _user(): Observable<UserAuth | null> {
-    return user(this.auth).pipe(
-      map((u: User | null) => {
-        return u
-          ? ({
-            uid: u?.uid,
-            email: u?.email,
-            emailVerified: u?.emailVerified,
-            photoURL: u?.photoURL,
-            phoneNumber: u?.phoneNumber,
-            displayName: u?.displayName
-          } as UserAuth)
-          : null
-      })
-    )
-  }
 
   async getUser(): Promise<UserAuth | null> {
     return await firstValueFrom(this.user$);
@@ -67,27 +50,25 @@ export class AuthService {
   async emailLogin(email: string, password: string): Promise<AuthAction> {
 
     let error = null;
-    let message = null;
     try {
       const credential = await signInWithEmailAndPassword(this.auth, email, password);
       const userData = {
         email,
         role: Role.Author
       };
-
       // create user in db
-      // todo - fix this error checking
-      await this.us.createUser(userData, credential.user.uid);
-      message = this.messages.loginSuccess;
+      const { error } = await this.us.createUser(userData, credential.user.uid);
+      if (error) {
+        throw error;
+      }
     } catch (e: any) {
       error = e;
     }
-    return { error, message };
+    return { error };
   }
 
   async emailSignUp(email: string, password: string): Promise<AuthAction> {
     let error = null;
-    let message = null;
     try {
       // create user, add name, send email verification
       const credential = await createUserWithEmailAndPassword(this.auth, email, password);
@@ -99,17 +80,18 @@ export class AuthService {
           role: Role.Author
         };
         // create user in db
-        await this.us.createUser(userData, credential.user.uid);
-        message = this.messages.loginSuccess;
+        const { error: _e } = await this.us.createUser(userData, credential.user.uid);
+        if (_e) {
+          throw _e;
+        }
       }
     } catch (e: any) {
       error = e;
     }
-    return { message, error };
+    return { error };
   }
 
   async sendEmailLink(email: string): Promise<AuthAction> {
-    let message = null;
     let error = null;
     const actionCodeSettings = {
       // Your redirect URL
@@ -123,35 +105,30 @@ export class AuthService {
         actionCodeSettings
       );
       this.doc.defaultView?.localStorage.setItem('emailForSignIn', email);
-      message = this.messages.sendEmailLink;
     } catch (e: any) {
       error = e;
     }
-    return { message, error };
+    return { error };
   }
 
   async sendVerificationEmail(): Promise<AuthAction> {
-
     let error = null;
-    let message = null;
     try {
       // update in firebase authentication
       const _user = await firstValueFrom(user(this.auth));
 
       if (_user) {
         await sendEmailVerification(_user);
-        message = this.messages.emailVerifySent;
-        this.logout();
+        await this.logout();
       }
     } catch (e: any) {
       error = e;
     }
-    return { error, message };
+    return { error };
   }
 
   async confirmSignIn(url: string, email?: string): Promise<AuthAction> {
     let error = null;
-    let message = null;
     let isConfirmed = false;
     if (!email) {
       email = this.doc.defaultView?.localStorage.getItem('emailForSignIn') || undefined;
@@ -165,31 +142,27 @@ export class AuthService {
           this.doc.defaultView?.localStorage.removeItem('emailForSignIn');
           await this.auth.updateCurrentUser(r.user);
           isConfirmed = true;
-          message = this.messages.emailConfirm;
         }
       }
     } catch (e: any) {
       error = e;
     }
-    return { isConfirmed, message, error };
+    return { isConfirmed, error };
   }
 
   async resetPassword(email: string): Promise<AuthAction> {
     let error = null;
-    let message = null;
     // sends reset password email
     try {
       await sendPasswordResetEmail(this.auth, email);
-      message = this.messages.resetPassword;
     } catch (e: any) {
       error = e;
     }
-    return { message, error };
+    return { error };
   }
 
   async oAuthLogin(p: string): Promise<AuthAction> {
     let error = null;
-    let message = null;
     let isNew = null;
     try {
       // get provider, sign in
@@ -199,7 +172,6 @@ export class AuthService {
       if (additionalInfo) {
         isNew = additionalInfo.isNewUser;
       }
-
       // create user in db
       const userData = {
         displayName: credential.user.displayName,
@@ -208,13 +180,14 @@ export class AuthService {
         photoURL: credential.user.photoURL,
         role: Role.Author
       };
-      await this.us.createUser(userData, credential.user.uid);
-      message = this.messages.loginSuccess;
-
+      const { error: _e } = await this.us.createUser(userData, credential.user.uid);
+      if (_e) {
+        throw _e;
+      }
     } catch (e: any) {
       error = e;
     }
-    return { isNew, message, error };
+    return { isNew, error };
   }
 
   async logout(): Promise<void> {

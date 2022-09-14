@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { environment } from '@env/environment';
 import { PostType } from '@post/post.model';
 import { SeoService } from '@shared/seo/seo.service';
+import { Observable, Subject } from 'rxjs';
 
 
 interface Link {
@@ -17,9 +18,7 @@ interface Link {
 export class NavService {
 
   simple = false;
-
   private title: string;
-
   dashboardIndex = 0;
 
   directories: Link[];
@@ -75,16 +74,23 @@ export class NavService {
   }
 
   openLeftNav(): void {
-    // todo - make this a subscribption
-    this.simple = false;
+    // wait for view to render
+    if (this.isBrowser) {
+      setTimeout(() => {
+        this.simple = false;
+      }, 0);
+    }
   }
   closeLeftNav(): void {
-    this.simple = true;
+    // wait for view to render
+    if (this.isBrowser) {
+      setTimeout(() => {
+        this.simple = true;
+      }, 0);
+    }
   }
 
   home(): void {
     this.router.navigate(['/']);
   }
-
-
 }

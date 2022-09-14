@@ -6,3 +6,7 @@ export const username_validation_messages: any = {
     unavailable: 'That username is taken.'
   }
 };
+
+export const username_messages: any = {
+  usernameCreated: 'Your username has been successfully created!'
+}

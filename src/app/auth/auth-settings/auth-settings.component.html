@@ -1,4 +1,4 @@
-<div *ngIf="auth.user$ | async as user">
+<div *ngIf="auth.user$ | async as user" class="ng-border">
   <mat-card class="ng-card-outline centered ng-edit">
     <form [formGroup]="accountForm">
       <h1>Settings</h1>
@@ -8,10 +8,13 @@
             <mat-panel-title>Profile</mat-panel-title>
             <mat-panel-description>Change Your Name and Picture</mat-panel-description>
           </mat-expansion-panel-header>
-          <div libDropZone (dropped)="uploadImage($event)" (hovered)="toggleHover($event)" class="drop-zone">
+          <div libDropZone (dropped)="uploadImage($event)" (hovered)="toggleHover($event)">
             <div (click)="file.click()">
-              <img *ngIf="user.photoURL" [src]="user.photoURL" class="drop-image" />
-              <mat-icon *ngIf="!user.photoURL" class="ng-account-icon">account_circle</mat-icon>
+              <img *ngIf="user.photoURL" [src]="user.photoURL" class="drop-image" [alt]="user.displayName" />
+              <div *ngIf="!user.photoURL">
+                <mat-icon class="ng-account-icon">account_circle</mat-icon>
+                <p>Click to upload an image!</p>
+              </div>
             </div>
           </div>
           <br />
