@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { doc, docSnapshots, DocumentSnapshot, Firestore, getDoc } from '@angular/fire/firestore';
+import { doc, DocumentSnapshot, Firestore, getDoc } from '@angular/fire/firestore';
 import { DbModule } from '@db/db.module';
 import { deleteWithCounter, setWithCounter } from '@db/fb-tools';
-import { map, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: DbModule
@@ -66,13 +65,5 @@ export class ActionDbService {
       error = e;
     }
     return { error };
-  }
-
-  subAction(id: string, uid: string, action: string): Observable<boolean> {
-    return docSnapshots(
-      doc(this.afs, action, `${id}_${uid}`)
-    ).pipe(
-      map((snap: DocumentSnapshot<any>) => snap.exists())
-    );
   }
 }

@@ -33,29 +33,6 @@ export class PostEditService {
   ) { }
 
   /**
-  * Get latest version of post
-  * @param id
-  * @returns
-  */
-  private subPostData(id: string): Observable<Post> {
-
-    // get doc refs
-    const docRef = doc(this.afs, 'posts', id);
-    const draftRef = doc(this.afs, 'drafts', id);
-
-    // return latest, draft or published
-    return docSnapshots<Post>(draftRef).pipe(
-      switchMap((doc: DocumentSnapshot<Post>) =>
-        doc.exists()
-          ? docData(draftRef, { idField: 'id' })
-          : docData(docRef, { idField: 'id' })
-      )
-    );
-  }
-
-
-
-  /**
    * Edit an existing post / create new post
    * @param id doc id
    * @param data doc data

@@ -150,9 +150,7 @@ export class AuthEditService {
       // update in firebase authentication
       const user = await this._fbUser();
       if (user) {
-        console.log(profile)
         await updateProfile(user, profile);
-        console.log(user)
         const {error: _e } = await this.ues.updateUser(profile);
         if (_e) {
           throw _e;

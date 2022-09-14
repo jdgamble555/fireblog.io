@@ -89,7 +89,7 @@ export class PostDbService {
     let data = null;
     let error = null;
     try {
-      data = await firstValueFrom(this.subPostById(id, user));
+      data = await firstValueFrom(this.subPostById(id));
     } catch (e: any) {
       error = e;
     }
@@ -101,8 +101,7 @@ export class PostDbService {
    * @param id post id
    * @returns post observable joined by author doc
    */
-  private subPostById(id: string, user?: UserRec): Observable<Post | null> {
-    let _post: Post | null;
+  private subPostById(id: string): Observable<Post | null> {
     return expandRef<Post>(
       docData<Post>(
         doc(this.afs, 'posts', id)
@@ -114,24 +113,6 @@ export class PostDbService {
           createdAt: (p?.createdAt as Timestamp)?.toMillis() || 0,
           updatedAt: (p?.updatedAt as Timestamp)?.toMillis() || 0,
         }) : null)
-      ).pipe(
-        switchMap((p: Post | null) => {
-          _post = p;
-          if (user && user.uid) {
-            return combineLatest([
-              this.as.subAction(id, user.uid, 'hearts'),
-              this.as.subAction(id, user.uid, 'bookmarks')
-            ]);
-          }
-          return of(null);
-        }),
-        map((p: [boolean, boolean] | null) => {
-          if (p && _post) {
-            // save liked and saved
-            [_post.liked, _post.saved] = p;
-          }
-          return _post;
-        })
       );
   }
   /**
@@ -317,41 +298,6 @@ export class PostDbService {
             // offset is only okay here because of caching
             map((l: Post[]) => l.slice(_offset))
           ), ['authorDoc']);
-      }
-
-      // get user likes and bookmarks
-      if (uid) {
-        let _posts: Post[] = [];
-        posts = posts.pipe(
-          switchMap((r: Post[] | null) => {
-            if (r && r.length > 0) {
-              _posts = r;
-              const actions: any[] = [];
-              _posts.map((_p: Post) => {
-                if (_p.id && uid) {
-                  actions.push(
-                    this.as.subAction(_p.id, uid, 'hearts'),
-                    this.as.subAction(_p.id, uid, 'bookmarks')
-                  );
-                }
-              });
-              if (actions.length > 0) {
-                return combineLatest(actions);
-              }
-            }
-            return of(null);
-          }),
-          map((s: any[] | null) => {
-            if (s && s.length > 0) {
-              _posts.map((p: Post) => {
-                p.liked = s.shift();
-                p.saved = s.shift();
-                return p;
-              });
-            }
-            return _posts;
-          })
-        );
       }
 
       // convert date types for ssr

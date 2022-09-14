@@ -53,14 +53,14 @@ export class UserDbService {
 
 
   async createUser(user: UserRec, id: string): Promise<void> {
-    const { data, error } = await this.sb.supabase.from('profiles').upsert({
+    const { error } = await this.sb.supabase.from('profiles').upsert({
       id: user.uid,
       photo_url: user.photoURL,
       //phoneNumber: u.phone,
       display_name: user.displayName
     });
     if (error) {
-      console.log(error);
+      console.error(error);
     }
     return;
   }

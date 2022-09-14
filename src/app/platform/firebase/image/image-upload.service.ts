@@ -54,6 +54,22 @@ export class ImageUploadService {
     return { error, data };
   }
 
+  async objectExists(url: string): Promise<{ error: any, data: boolean | null }> {
+    // make sure image exists
+    let error = null;
+    let data = null;
+    const { error: _e } = await this.getURL(url);
+    if (_e) {
+      if (_e.code !== 'storage/object-not-found') {
+        error = _e;
+        data = true;
+      } else {
+        data = false;
+      }
+    }
+    return { data, error };
+  }
+
   /**
    * Delete Image from Storage Bucket
    * @param url - url of bucket item to delete
@@ -61,13 +77,11 @@ export class ImageUploadService {
    */
   async deleteImage(url: string): Promise<{ error: any }> {
     let error = null;
-    // make sure image exists
-    const { error: _e } = await this.getURL(url);
+    const { data: exists, error: _e } = await this.objectExists(url);
     if (_e) {
-      if (_e.code !== 'storage/object-not-found') {
-        error = _e;
-      }
-    } else {
+      error = _e;
+    }
+    if (exists) {
       try {
         // delete image
         await deleteObject(
