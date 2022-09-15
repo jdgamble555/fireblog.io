@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterModule } from '@angular/router';
+import { DbModule } from '@db/db.module';
+import { PostDbService } from '@db/post/post-db.service';
 import { MarkdownService } from 'ngx-markdown';
 import { CoreModule } from '../core/core.module';
 
@@ -13,8 +15,8 @@ describe('NavComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [NavComponent],
-      imports: [NavModule, CoreModule, RouterModule.forRoot([])],
-      providers: [MarkdownService]
+      imports: [NavModule, CoreModule, DbModule, RouterModule.forRoot([])],
+      providers: [MarkdownService, PostDbService]
     })
       .compileComponents();
   });

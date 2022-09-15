@@ -19,7 +19,7 @@ export class UserEditService {
 
   }
 
-  async updateUser(user: any): Promise<{ error: string | null }> {
+  async updateUser(user: any): Promise<{ error: any }> {
     const uid = await this.getUid();
     let error = null;
     return { error };
@@ -29,19 +29,19 @@ export class UserEditService {
 
   }
 
-  async validUsername(name: string): Promise<{ error: string | null, data: boolean | null }> {
+  async validUsername(name: string): Promise<{ error: any, data: boolean | null }> {
     let data = null;
     let error = null;
     return { data, error };
   }
 
-  async updateUsername(username: string, currentUsername?: string): Promise<{ error: string | null, message: string | null }> {
+  async updateUsername(username: string, currentUsername?: string): Promise<{ error: any, message: string | null }> {
     let error = null;
     let message = null;
     return { error, message };
   }
 
-  async hasUsername(): Promise<{ error: string | null, data: boolean | null }> {
+  async hasUsername(): Promise<{ error: any, data: boolean | null }> {
     let error = null;
     let data = null;
     return { error, data };

@@ -15,7 +15,11 @@ export const environment = {
   icon: 'whatshot',
   icon_class: 'ng-fire',
   icon_dark_class: 'ng-fire',
-  back: ''
+  back: '',
+  
+  // for testing only
+  supabase_url: 'asdf',
+  supabase_key: 'asfd'
 };
 
 /*

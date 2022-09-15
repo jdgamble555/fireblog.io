@@ -34,11 +34,11 @@ export interface AuthAction {
   reAuth?: boolean | null;
   isNew?: boolean | null;
   isConfirmed?: boolean | null;
-  error: string | null;
+  error: any;
 }
 
 export interface UserRequest<T> {
-  error: string | null,
+  error: any,
   data?: T
   exists?: boolean | null
 }

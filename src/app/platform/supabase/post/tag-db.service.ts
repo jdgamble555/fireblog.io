@@ -10,7 +10,7 @@ export class TagDbService {
 
   constructor() { }
 
-  async getTags(): Promise<{ data: Tag[] | null, error: string | null }> {
+  async getTags(): Promise<{ data: Tag[] | null, error: any }> {
     let error = null;
     let data = null;
     return { data, error };

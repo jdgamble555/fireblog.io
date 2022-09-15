@@ -19,7 +19,7 @@ export class TagDbService {
 
   constructor(private afs: Firestore) { }
 
-  async getTags(): Promise<{ data: Tag[] | null, error: string | null }> {
+  async getTags(): Promise<{ data: Tag[] | null, error: any }> {
     let error, data = null;
     try {
       data = await getDocs<Tag>(

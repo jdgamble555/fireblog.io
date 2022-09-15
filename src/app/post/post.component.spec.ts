@@ -3,8 +3,6 @@ import { DbModule } from '@db/db.module';
 import { MarkdownModule } from 'ngx-markdown';
 import { AppRoutingModule } from '../app-routing.module';
 import { CoreModule } from '../core/core.module';
-
-
 import { PostComponent } from './post.component';
 
 describe('PostComponent', () => {

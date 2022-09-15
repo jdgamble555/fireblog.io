@@ -159,7 +159,8 @@
               "node_modules/prismjs/components/prism-typescript.min.js",
               "node_modules/prismjs/components/prism-xml-doc.min.js"
             ],
-            "codeCoverageExclude": ["./src/app/platform/supabase/**"]
+            "codeCoverage": true,
+            "codeCoverageExclude": ["src/app/platform/supabase/**/*"]
           }
         },
         "deploy": {

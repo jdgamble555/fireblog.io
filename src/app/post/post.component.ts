@@ -49,35 +49,35 @@ export class PostComponent {
   meta(r: Post) {
 
     // add bread crumbs
-    this.ns.setBC(r.title as string);
-    let description = this.ms.parse(r.content as string);
+    this.ns.setBC(r?.title as string);
+    let description = this.ms.parse(r?.content as string);
     description = description.substring(0, 125).replace(/(\r\n|\n|\r)/gm, "");
 
     // generate seo tags
     this.seo.generateTags({
-      title: r.title + ' - ' + this.env.title,
+      title: r?.title + ' - ' + this.env.title,
       domain: this.env.title,
-      image: r.image || undefined,
+      image: r?.image || undefined,
       description,
-      user: r.authorDoc.username
+      user: r?.authorDoc.username
     });
 
     // generate schema
     // todo - create schema service, add full content, use new type within types
     this.seo.setBlogSchema({
-      title: r.title,
-      author: r.authorDoc.displayName,
-      username: r.authorDoc.username,
-      authorId: r.authorId,
-      authorURL: `${environment.site}/u/${r.authorId}/${r.authorDoc.username}`,
-      image: r.image || undefined,
+      title: r?.title,
+      author: r?.authorDoc.displayName,
+      username: r?.authorDoc.username,
+      authorId: r?.authorId,
+      authorURL: `${environment.site}/u/${r?.authorId}/${r?.authorDoc.username}`,
+      image: r?.image || undefined,
       description,
-      keywords: r.tags.join(', '),
-      createdAt: new Date(r.createdAt).toISOString(),
-      updatedAt: new Date(r.updatedAt).toISOString(),
-      time: r.minutes,
-      id: r.id,
-      url: `${environment.site}/post/${r.id}/${r.slug}`
+      keywords: r?.tags.join(', '),
+      createdAt: new Date(r?.createdAt || null).toISOString(),
+      updatedAt: new Date(r?.updatedAt || null).toISOString(),
+      time: r?.minutes,
+      id: r?.id,
+      url: `${environment.site}/post/${r?.id}/${r?.slug}`
     });
   }
 }

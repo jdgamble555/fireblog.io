@@ -5,10 +5,7 @@ import {
   arrayUnion,
   collection,
   doc,
-  docData,
-  docSnapshots,
   DocumentReference,
-  DocumentSnapshot,
   Firestore,
   getDoc,
   increment,
@@ -19,7 +16,6 @@ import { deleteWithCounter, searchIndex, setWithCounter } from '@db/fb-tools';
 import { PostEditModule } from '@db/post-edit.module';
 import { Post } from '@post/post.model';
 import { MarkdownService } from 'ngx-markdown';
-import { Observable, switchMap } from 'rxjs';
 
 @Injectable({
   providedIn: PostEditModule
@@ -38,85 +34,97 @@ export class PostEditService {
    * @param data doc data
    * @returns void
    */
-  async setPost(data: Post, id = this.getId(), publish = false): Promise<string> {
+  async setPost(data: Post, id = this.getId(), publish = false): Promise<{ error: any, data: string | null }> {
+    let error = null;
+    let _data = null;
+    try {
+      const authorId = data.authorId;
+      // create author doc ref
+      if (authorId) {
 
-    const authorId = data.authorId;
+        data.authorDoc = doc(this.afs, 'users', authorId);
 
-    // create author doc ref
-    if (authorId) {
+        // get doc refs
+        const docRef = doc(this.afs, 'posts', id);
+        const draftRef = doc(this.afs, 'drafts', id);
+        const docSnap = await getDoc(docRef);
+        const docData = docSnap.data() as Post || [];
 
-      data.authorDoc = doc(this.afs, 'users', authorId);
+        // remove counters from update
+        let {
+          heartsCount,
+          draftsCount,
+          bookmarksCount,
+          _tmpDoc,
+          ...d
+        } = data;
+        data = d;
 
-      // get doc refs
-      const docRef = doc(this.afs, 'posts', id);
-      const draftRef = doc(this.afs, 'drafts', id);
-      const docSnap = await getDoc(docRef);
-      const docData = docSnap.data() as Post || [];
+        if (publish) {
 
-      // remove counters from update
-      let {
-        heartsCount,
-        draftsCount,
-        bookmarksCount,
-        _tmpDoc,
-        ...d
-      } = data;
-      data = d;
+          // remove tags
+          let { tags, ...tmp } = data;
+          data = tmp;
 
-      if (publish) {
+          // save changes
+          await setWithCounter(
+            docRef,
+            data,
+            { merge: true },
+            { paths: { users: authorId } }
+          );
 
-        // remove tags
-        let { tags, ...tmp } = data;
-        data = tmp;
+          // delete draft doc
+          await deleteWithCounter(
+            draftRef,
+            { paths: { users: authorId } }
+          );
 
-        // save changes
-        await setWithCounter(
-          docRef,
-          data,
-          { merge: true },
-          { paths: { users: authorId } }
-        );
+          // update tags
+          // todo - update tages normally
+          await this.updateTags(
+            doc(this.afs, 'posts/' + id),
+            docData.tags,
+            tags
+          );
 
-        // delete draft doc
-        await deleteWithCounter(
-          draftRef,
-          { paths: { users: authorId } }
-        );
+          // index post, run in background, don't wait
+          data.content = this.markdownService.parse(data.content as string);
+          data.tags = tags;
+          this.indexPost(id, data);
 
-        // update tags
-        await this.updateTags(
-          doc(this.afs, 'posts/' + id),
-          docData.tags,
-          tags
-        );
+        } else {
 
-        // index post, run in background, don't wait
-        data.content = this.markdownService.parse(data.content as string);
-        data.tags = tags;
-        this.indexPost(id, data);
-
-      } else {
-
-        // save draft
-        await setWithCounter(
-          draftRef,
-          data,
-          { merge: true },
-          { paths: { users: authorId } }
-        );
+          // save draft
+          await setWithCounter(
+            draftRef,
+            data,
+            { merge: true },
+            { paths: { users: authorId } }
+          );
+        }
       }
+      _data = id;
+    } catch (e: any) {
+      error = e;
     }
-    return id;
+    return { error, data: _data };
   }
   /**
    * Delete Post by ID
    * @param id
    */
-  async deletePost(id: string, uid: string): Promise<void> {
-    await deleteWithCounter(
-      doc(this.afs, 'posts', id),
-      { paths: { users: uid } }
-    );
+  async deletePost(id: string, uid: string): Promise<{ error: any }> {
+    let error = null;
+    try {
+      await deleteWithCounter(
+        doc(this.afs, 'posts', id),
+        { paths: { users: uid } }
+      );
+    } catch (e: any) {
+      error = e;
+    }
+    return { error };
   }
   //
   // Images
@@ -127,22 +135,34 @@ export class PostEditService {
    * @param id
    * @param url
    */
-  async addPostImage(id: string, url: string): Promise<void> {
-    await updateDoc(
-      doc(this.afs, 'drafts', id),
-      { imageUploads: arrayUnion(url) }
-    );
+  async addPostImage(id: string, url: string): Promise<{ error: any }> {
+    let error = null;
+    try {
+      await updateDoc(
+        doc(this.afs, 'drafts', id),
+        { imageUploads: arrayUnion(url) }
+      );
+    } catch (e: any) {
+      error = e;
+    }
+    return { error };
   }
   /**
    * Delete image from post doc
    * @param id
    * @param url
    */
-  async deletePostImage(id: string, url: string): Promise<void> {
-    await updateDoc(
-      doc(this.afs, 'drafts', id),
-      { imageUploads: arrayRemove(url) }
-    );
+  async deletePostImage(id: string, url: string): Promise<{ error: any }> {
+    let error = null;
+    try {
+      await updateDoc(
+        doc(this.afs, 'drafts', id),
+        { imageUploads: arrayRemove(url) }
+      );
+    } catch (e: any) {
+      error = e;
+    }
+    return { error };
   }
 
   /**
@@ -164,12 +184,18 @@ export class PostEditService {
    * @param id
    * @param data
    */
-  async indexPost(id: string, data: any): Promise<void> {
-    await searchIndex(this.document, {
-      ref: doc(this.afs, 'posts', id),
-      after: data,
-      fields: ['content', 'title', 'tags']
-    });
+  async indexPost(id: string, data: any): Promise<{ error: any }> {
+    let error = null;
+    try {
+      await searchIndex(this.document, {
+        ref: doc(this.afs, 'posts', id),
+        after: data,
+        fields: ['content', 'title', 'tags']
+      });
+    } catch (e: any) {
+      error = e;
+    }
+    return { error };
   }
   /**
    * Update Tags Doc
@@ -183,49 +209,55 @@ export class PostEditService {
     before: string[] = [],
     after: string[] = [],
     tagsDoc = 'tags'
-  ): Promise<void> {
+  ): Promise<{ error: any }> {
 
-    const removed = before.length > 0
-      ? before.filter((x: string) => !after.includes(x))
-      : [];
-    const added = after.length > 0
-      ? after.filter((x: string) => !before.includes(x))
-      : [];
+    let error = null;
+    try {
+      const removed = before.length > 0
+        ? before.filter((x: string) => !after.includes(x))
+        : [];
+      const added = after.length > 0
+        ? after.filter((x: string) => !before.includes(x))
+        : [];
 
-    const batch = writeBatch(docRef.firestore);
+      const batch = writeBatch(docRef.firestore);
 
-    batch.update(
-      docRef,
-      { tags: after }
-    );
-
-    // added
-    for (const t of added) {
-
-      // + 1 count
-      batch.set(
-        doc(docRef.firestore, tagsDoc + '/' + t),
-        { count: increment(1), _tmpDoc: docRef },
-        { merge: true }
+      batch.update(
+        docRef,
+        { tags: after }
       );
-    }
 
-    // removed
-    for (const t of removed) {
+      // added
+      for (const t of added) {
 
-      // -1 count
-      const tagsRef = doc(docRef.firestore, tagsDoc + '/' + t);
-      const tagsSnap = await getDoc(tagsRef);
-
-      if ((tagsSnap.data() as any).count == 1) {
-        batch.delete(tagsRef);
-      } else {
-        batch.update(
-          tagsRef,
-          { count: increment(-1), _tmpDoc: docRef }
+        // + 1 count
+        batch.set(
+          doc(docRef.firestore, tagsDoc + '/' + t),
+          { count: increment(1), _tmpDoc: docRef },
+          { merge: true }
         );
       }
+
+      // removed
+      for (const t of removed) {
+
+        // -1 count
+        const tagsRef = doc(docRef.firestore, tagsDoc + '/' + t);
+        const tagsSnap = await getDoc(tagsRef);
+
+        if ((tagsSnap.data() as any).count == 1) {
+          batch.delete(tagsRef);
+        } else {
+          batch.update(
+            tagsRef,
+            { count: increment(-1), _tmpDoc: docRef }
+          );
+        }
+      }
+      batch.commit();
+    } catch (e: any) {
+      error = e;
     }
-    batch.commit();
+    return { error };
   }
 }

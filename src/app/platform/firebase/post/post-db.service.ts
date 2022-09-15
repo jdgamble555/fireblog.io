@@ -22,8 +22,7 @@ import { DbModule } from '@db/db.module';
 import { expandRef, expandRefs, soundex } from '@db/fb-tools';
 import { UserDbService } from '@db/user/user-db.service';
 import { Post, PostInput } from '@post/post.model';
-import { combineLatest, firstValueFrom, map, Observable, of, switchMap } from 'rxjs';
-import { ActionDbService } from './action-db.service';
+import { firstValueFrom, map, Observable, of } from 'rxjs';
 import { TagDbService } from './tag-db.service';
 
 
@@ -34,7 +33,6 @@ export class PostDbService {
 
   constructor(
     private afs: Firestore,
-    private as: ActionDbService,
     private ts: TagDbService,
     private us: UserDbService
   ) { }
@@ -44,7 +42,7 @@ export class PostDbService {
   * @param col - Collection Path
   * @returns - total count
   */
-  async getTotal(col: string): Promise<{ data: string | null, error: string | null }> {
+  async getTotal(col: string): Promise<{ data: string | null, error: any }> {
     let error, data = null;
     try {
       data = await getDoc(
@@ -66,7 +64,7 @@ export class PostDbService {
   }
 
 
-  async getPostData(id: string): Promise<{ error: string | null, data: Post | null }> {
+  async getPostData(id: string): Promise<{ error: any, data: Post | null }> {
     const docRef = doc(this.afs, 'posts', id);
     const draftRef = doc(this.afs, 'drafts', id);
 
@@ -83,7 +81,7 @@ export class PostDbService {
     return { error, data };
   }
 
-  async getPostById(id: string, user?: UserRec): Promise<{ data: Post | null, error: string | null }> {
+  async getPostById(id: string, user?: UserRec): Promise<{ data: Post | null, error: any }> {
 
     // todo - do without SubPostId
     let data = null;
@@ -120,17 +118,24 @@ export class PostDbService {
    * @param id
    * @returns
    */
-  async seoPostById(id: string): Promise<Post | undefined> {
-    return (await getDoc(
-      doc(this.afs, 'posts', id)
-    )).data() as Post;
+  async seoPostById(id: string): Promise<{ error: any, data: Post | null }> {
+    let error = null;
+    let data = null;
+    try {
+      data = (await getDoc(
+        doc(this.afs, 'posts', id)
+      )).data() as Post;
+    } catch (e: any) {
+      error = e;
+    }
+    return { error, data };
   }
   /**
    * Get post by slug, use is mainly for backwards compatibility
    * @param slug
    * @returns
    */
-  async getPostBySlug(slug: string): Promise<{ error?: any, data: Post | null }> {
+  async getPostBySlug(slug: string): Promise<{ error: any, data: Post | null }> {
     let error = null;
     let data = null;
     try {
@@ -159,7 +164,7 @@ export class PostDbService {
  * @param term
  * @returns Observable of search
  */
-  async searchPost(term: string): Promise<{ data: Post[] | null, error: string | null }> {
+  async searchPost(term: string): Promise<{ data: Post[] | null, error: any}> {
     term = term.split(' ')
       .map(
         (v: string) => soundex(v)
@@ -200,7 +205,7 @@ export class PostDbService {
     uid,
     field,
     drafts = false
-  }: PostInput = {}) {
+  }: PostInput = {}): Promise<{ error: any, posts: Post[] | null, count: string | null }> {
 
     const { error, posts, count } = this.subPosts({
       sortField,
@@ -219,7 +224,6 @@ export class PostDbService {
       posts: await firstValueFrom(posts),
       count: await firstValueFrom(count)
     };
-
   }
 
   /**
@@ -239,7 +243,7 @@ export class PostDbService {
   }: PostInput = {}): {
     count: Observable<string | null>,
     posts: Observable<Post[] | null>,
-    error: string | null
+    error: any
   } {
 
     const _limit = page * pageSize;

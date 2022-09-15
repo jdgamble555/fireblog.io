@@ -24,19 +24,19 @@ export class PostDbService {
   * @param col - Collection Path
   * @returns - total count
   */
-  async getTotal(col: string): Promise<{ data: string | null, error: string | null }> {
+  async getTotal(col: string): Promise<{ data: string | null, error:any }> {
     let error = null;
     let data = null;
     return { error, data };
   }
 
-  async getPostData(id: string): Promise<{ error: string | null, data: Post | null }> {
+  async getPostData(id: string): Promise<{ error: any, data: Post | null }> {
     let error = null;
     let data = null;
     return { error, data };
   }
 
-  async getPostById(id: string, user?: UserRec): Promise<{ data: Post | null, error: string | null }> {
+  async getPostById(id: string, user?: UserRec): Promise<{ data: Post | null, error: any }> {
 
     let data = null;
     let error = null;
@@ -56,7 +56,7 @@ export class PostDbService {
    * @param slug
    * @returns
    */
-  async getPostBySlug(slug: string): Promise<{ error?: any, data: Post | null }> {
+  async getPostBySlug(slug: string): Promise<{ error: any, data: Post | null }> {
     let error = null;
     let data = null;
     return { data, error };
@@ -67,7 +67,7 @@ export class PostDbService {
  * @param term
  * @returns Observable of search
  */
-  async searchPost(term: string): Promise<{ data: Post[] | null, error: string | null }> {
+  async searchPost(term: string): Promise<{ data: Post[] | null, error: any }> {
     let data = null;
     let error = null;
     return { data, error };

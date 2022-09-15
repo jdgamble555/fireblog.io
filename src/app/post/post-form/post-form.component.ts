@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatChipList } from '@angular/material/chips';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -13,6 +13,7 @@ import { PostDbService } from '@db/post/post-db.service';
 import { PostEditService } from '@db/post/post-edit.service';
 import { blobToData, blobToFile, previewImage } from '@shared/image-tools/image-tools';
 import { post_form_messages, post_form_validation_messages } from './post-form.messages';
+import { Subscription } from 'rxjs';
 
 
 
@@ -21,12 +22,14 @@ import { post_form_messages, post_form_validation_messages } from './post-form.m
   templateUrl: './post-form.component.html',
   styleUrls: ['./post-form.component.scss']
 })
-export class PostFormComponent {
+export class PostFormComponent implements OnDestroy {
 
   @ViewChild('chipList') chipList!: MatChipList;
 
   validationMessages = post_form_validation_messages;
   messages = post_form_messages;
+
+  confirmSub!: Subscription;
 
   postForm: FormGroup;
   isNewPage = true;
@@ -80,7 +83,7 @@ export class PostFormComponent {
       }
 
       this.patchPost = this.ps.getPostData(this.id)
-        .then(({ error, data }: { data: Post | null, error: string | null }) => {
+        .then(({ error, data }: { data: Post | null, error: any}) => {
 
           if (error) {
             console.error(error);
@@ -292,10 +295,11 @@ export class PostFormComponent {
     }
 
     // add post to db
-    try {
-      this.id = await this.pes.setPost(data, this.id, publish);
-    } catch (e: any) {
-      console.error(e);
+
+    const { data: id, error: _e } = await this.pes.setPost(data, this.id, publish);
+    this.image = id;
+    if (_e) {
+      console.error(_e);
       error = true;
     }
 
@@ -311,7 +315,7 @@ export class PostFormComponent {
 
     const confirm = this.dialog.confirmDialog(this.messages.deleteConfirm);
     // delete when confirmed
-    confirm.afterClosed()
+    this.confirmSub = confirm.afterClosed()
       .subscribe((confirmed: any) => {
 
         // delete files
@@ -339,5 +343,9 @@ export class PostFormComponent {
 
   updateState(e: any): void {
     this.state = e;
+  }
+
+  ngOnDestroy(): void {
+    if (this.confirmSub) this.confirmSub.unsubscribe();
   }
 }

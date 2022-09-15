@@ -10,7 +10,7 @@ export class ActionDbService {
 
   constructor(private afs: Firestore) { }
 
-  async getAction(id: string, uid: string, action: string): Promise<{ error: string | null, data: boolean | null }> {
+  async getAction(id: string, uid: string, action: string): Promise<{ error: any, data: boolean | null }> {
     let error = null;
     let data = null;
     try {
@@ -23,7 +23,7 @@ export class ActionDbService {
     return { data, error };
   }
 
-  async getActionExists(postId: string, userId: string, action: string): Promise<{ data: boolean | null, error: string | null }> {
+  async getActionExists(postId: string, userId: string, action: string): Promise<{ data: boolean | null, error: any }> {
     let error = null;
     let data = null;
     try {
@@ -36,7 +36,7 @@ export class ActionDbService {
     return { data, error };
   }
 
-  async actionPost(postId: string, userId: string, action: string): Promise<{ error: string | null }> {
+  async actionPost(postId: string, userId: string, action: string): Promise<{ error: any}> {
     let error = null;
     try {
       await setWithCounter(
@@ -54,7 +54,7 @@ export class ActionDbService {
     return { error };
   }
 
-  async unActionPost(postId: string, userId: string, action: string): Promise<{ error: string | null }> {
+  async unActionPost(postId: string, userId: string, action: string): Promise<{ error: any}> {
     let error = null;
     try {
       await deleteWithCounter(

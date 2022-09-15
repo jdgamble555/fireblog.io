@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { DbModule } from '@db/db.module';
+import { ActionDbService } from '@db/post/action-db.service';
 
 import { HeartComponent } from './heart.component';
 
@@ -8,9 +10,10 @@ describe('HeartComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ HeartComponent ]
-    })
-    .compileComponents();
+      imports: [DbModule],
+      declarations: [HeartComponent],
+      providers: [ActionDbService]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(HeartComponent);
     component = fixture.componentInstance;

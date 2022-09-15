@@ -1,9 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { StorageModule } from '@angular/fire/storage';
 import { RouterTestingModule } from '@angular/router/testing';
-import { DbModule } from './db.module';
-
-
+import { DbModule } from '@db/db.module';
 import { ImageUploadService } from './image-upload.service';
 
 describe('ImageUploadService', () => {
@@ -11,7 +9,8 @@ describe('ImageUploadService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [StorageModule, DbModule, RouterTestingModule]
+      imports: [StorageModule, DbModule, RouterTestingModule],
+      providers:[ImageUploadService]
     });
     service = TestBed.inject(ImageUploadService);
   });
