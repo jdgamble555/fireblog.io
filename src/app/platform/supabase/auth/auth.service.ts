@@ -52,12 +52,12 @@ export class AuthService {
   private async _userCheck(u: UserAuth): Promise<void> {
 
     // create user if DNE
-    const {error, data: user } = await this.us.getUserRec();
+    const { error, data: user } = await this.us.getUserRec();
     if (error) {
       console.error(error);
     }
     if (!user) {
-      this.us.createUser(u, u.uid);
+      await this.us.createUser(u, u.uid);
     }
   }
 
@@ -68,39 +68,32 @@ export class AuthService {
   // Login
 
   async emailLogin(email: string, password: string): Promise<AuthAction> {
-
-    let error = null;
-
+    const { error } = await this.sb.supabase.auth.signIn({ email, password });
     return { error };
   }
 
   async emailSignUp(email: string, password: string): Promise<AuthAction> {
-    let error = null;
+    const { error } = await this.sb.supabase.auth.signUp({ email, password });
     return { error };
   }
 
   async sendEmailLink(email: string): Promise<AuthAction> {
-    let error = null;
-
-    return {error };
+    const { error } = await this.sb.supabase.auth.signIn({ email });
+    return { error };
   }
 
   async sendVerificationEmail(): Promise<AuthAction> {
-
-    let error = null;
-
-    return { error};
+    // not available for supabase
+    return { error: null };
   }
 
   async confirmSignIn(url: string, email?: string): Promise<AuthAction> {
-    let error = null;
-    let isConfirmed = false;
-    return { isConfirmed,error };
+    // not necessary for supabase
+    return { isConfirmed: false, error: null };
   }
 
   async resetPassword(email: string): Promise<AuthAction> {
-    let error = null;
-
+    const { error } = await this.sb.supabase.auth.api.resetPasswordForEmail(email);
     return { error };
   }
 
@@ -109,7 +102,7 @@ export class AuthService {
     const { error } = await this.sb.supabase.auth.signIn({
       provider: p as Provider,
     });
-    return { error: error?.message || null };
+    return { error };
   }
 
   async logout(): Promise<void> {
@@ -122,6 +115,9 @@ export class AuthService {
   // Providers
 
   async getProviders(): Promise<string[]> {
-    return [];
+    const sb = this.sb.supabase.auth.user();
+    let providers: string[] = sb?.app_metadata.providers;
+    providers = providers.map((p: string) => p === 'google' ? 'google.com' : p);
+    return providers;
   }
 }

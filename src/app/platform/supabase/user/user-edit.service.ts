@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { UserRec } from '@auth/user.model';
+import { UserAccount } from '@auth/user.model';
 import { AuthEditModule } from '@db/auth-edit.module';
-import { firstValueFrom } from 'rxjs';
+import { SupabaseService } from '../supabase.service';
 import { user_messages } from './user.messages';
 
 @Injectable({
@@ -11,39 +11,44 @@ export class UserEditService {
 
   messages = user_messages;
 
-  constructor(
-
-  ) { }
+  constructor(private sb: SupabaseService) { }
 
   async getUid() {
-
+    return this.sb.supabase.auth.user()?.id;
   }
 
-  async updateUser(user: any): Promise<{ error: any }> {
+  async updateUser({ displayName, photoURL, phoneNumber, email }: UserAccount): Promise<{ error: any }> {
+    // don't need email for supabase
     const uid = await this.getUid();
-    let error = null;
+    const { error } = await this.sb.supabase.from('profiles').upsert({
+      id: uid,
+      photo_url: photoURL,
+      phone_number: phoneNumber,
+      display_name: displayName
+    });
     return { error };
   }
 
-  async deleteUser(): Promise<void> {
-
+  async deleteUser(): Promise<{ error: any }> {
+    const id = await this.getUid();
+    const { error } = await this.sb.supabase.from('profiles').delete().eq('id', id);
+    return { error };
   }
 
   async validUsername(name: string): Promise<{ error: any, data: boolean | null }> {
-    let data = null;
-    let error = null;
-    return { data, error };
+    const { error, count } = await this.sb.supabase.from('profiles').select('username', { count: 'exact' }).eq('username', name);
+    return { error, data: (count !== 0) };
   }
 
-  async updateUsername(username: string, currentUsername?: string): Promise<{ error: any, message: string | null }> {
-    let error = null;
-    let message = null;
-    return { error, message };
+  async updateUsername(username: string, currentUsername?: string): Promise<{ error: any }> {
+    const id = await this.getUid();
+    const { error } = await this.sb.supabase.from('profiles').update({ username }).eq('id', id);
+    return { error };
   }
 
   async hasUsername(): Promise<{ error: any, data: boolean | null }> {
-    let error = null;
-    let data = null;
-    return { error, data };
+    const id = await this.getUid();
+    const { error, data } = await this.sb.supabase.from('profiles').select('username').eq('id', id).not('username', 'is', null);
+    return { error, data: !!data };
   }
 }

@@ -8,7 +8,7 @@ import {
   setDoc,
   writeBatch
 } from '@angular/fire/firestore';
-import { UserRec, UserRequest } from '@auth/user.model';
+import { UserAccount, UserRec, UserRequest } from '@auth/user.model';
 import { AuthEditModule } from '@db/auth-edit.module';
 import { deleteWithCounter } from '@db/fb-tools';
 import { firstValueFrom } from 'rxjs';
@@ -27,14 +27,14 @@ export class UserEditService {
     return (await firstValueFrom(user(this.auth)))?.uid || null;
   }
 
-  async updateUser(user: any): Promise<UserRequest<void>> {
+  async updateUser({ photoURL, displayName, phoneNumber, email }: UserAccount): Promise<UserRequest<void>> {
     const uid = await this.getUid();
     let error = null;
     if (uid) {
       try {
         await setDoc(
           doc(this.afs, 'users', uid),
-          user,
+          { photoURL, displayName, phoneNumber, email },
           { merge: true }
         );
       } catch (e: any) {
@@ -65,7 +65,7 @@ export class UserEditService {
     try {
       exists = await getDoc<UserRec>(
         doc(this.afs, 'usernames', name)
-      ).then((doc: DocumentSnapshot<UserRec>) => doc.exists());
+      ).then(doc => doc.exists());
     } catch (e: any) {
       error = e;
     }
@@ -106,7 +106,7 @@ export class UserEditService {
       try {
         exists = await getDoc<UserRec>(
           doc(this.afs, 'users', uid)
-        ).then((doc) => {
+        ).then(doc => {
           if (doc.exists()) {
             const r = doc.data();
             return 'username' in r;

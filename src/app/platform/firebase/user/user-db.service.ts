@@ -4,7 +4,6 @@ import {
   doc,
   docData,
   DocumentReference,
-  DocumentSnapshot,
   Firestore,
   getDoc
 } from '@angular/fire/firestore';
@@ -31,7 +30,7 @@ export class UserDbService {
 
   private _userSub(): Observable<UserRec | null> {
     return user(this.auth).pipe(
-      switchMap((user: User | null) =>
+      switchMap(user =>
         user
           ? this._subUserRec(user.uid)
           : of(null)
@@ -95,22 +94,21 @@ export class UserDbService {
     return docData<any>(
       doc(this.afs, 'users', uid)
     ).pipe(
-      map((r: any) => r ? r[col + 'Count'] : null)
+      map(r => r ? r[col + 'Count'] : null)
     );
   }
 
-  async getUsernameFromId(uid: string): Promise<{ error?: any, username: string | null }> {
+  async getUsernameFromId(uid: string): Promise<{ error?: any, data: string | null }> {
     let error = null;
-    let username = null;
+    let data= null;
     try {
-      username = await getDoc<UserRec>(
+      data = await getDoc<UserRec>(
         doc(this.afs, 'users', uid)
-      ).then((snap: DocumentSnapshot<UserRec>) => (snap.data())?.username) || null;
+      ).then(snap => (snap.data())?.username) || null;
     }
     catch (e: any) {
       error = e;
     }
-    return { username, error };
+    return { data, error };
   }
-
 }

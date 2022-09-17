@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { UserRec } from '@auth/user.model';
+import { UserAuth, UserRec, UserRequest } from '@auth/user.model';
 import { DbModule } from '@db/db.module';
 import { User } from '@supabase/supabase-js';
 import { map, Observable, of, switchMap } from 'rxjs';
@@ -20,62 +20,46 @@ export class UserDbService {
     this.userRec = this.userSub();
   }
 
-  private mapUser(user: sb_User): UserRec {
-    return ({
-      uid: user?.id,
-      photoURL: user?.photo_url,
-      displayName: user?.display_name,
-      createdAt: user?.created_at,
-      updatedAt: user?.updated_at,
-      username: user?.username
-    });
-  }
+  private mapUser = (user: sb_User): UserRec => ({
+    uid: user?.id,
+    photoURL: user?.photo_url,
+    displayName: user?.display_name,
+    createdAt: user?.created_at,
+    updatedAt: user?.updated_at,
+    username: user?.username,
+    email: user?.email
+  });
 
   userSub(): Observable<UserRec | null> {
     return this.sb.authState().pipe(
       switchMap((user: User | null) =>
         user
-          ? this.sb.subWhere('profiles', 'id', user?.id)
+          ? this.sb.subWhere<sb_User>('profiles', 'id', user?.id)
           : of(null)
       ),
-      map((user: sb_User) => user ? this.mapUser(user) : null)
+      map(user => user ? this.mapUser(user) : null)
     );
   }
 
-  async getUserRec(): Promise<UserRec | null> {
-    const id = this.sb.supabase.auth.user()?.id;
-    const { data: user, error } = await this.sb.supabase.from('profiles').select('*').eq('id', id).single();
-    if (error) {
-      console.error(error);
-    }
-    return user ? this.mapUser(user) : null;
+  async getUserRec(): Promise<UserRequest<UserRec | null>> {
+    const user = this.sb.supabase.auth.user();
+    let { data, error } = await this.sb.supabase.from('profiles').select('*').eq('id', user?.id).single();
+    data = { ...data, email: user?.email };
+    return { data: data ? this.mapUser(data) : null, error };
   }
 
-
-  async createUser(user: UserRec, id: string): Promise<void> {
+  async createUser(user: UserAuth, id: string): Promise<{ error: any }> {
     const { error } = await this.sb.supabase.from('profiles').upsert({
-      id: user.uid,
+      id,
       photo_url: user.photoURL,
-      //phoneNumber: u.phone,
+      phone_number: user.phoneNumber,
       display_name: user.displayName
     });
-    if (error) {
-      console.error(error);
-    }
-    return;
+    return { error };
   }
 
-  /**
-   * Return total number of docs by a user
-   * @param uid - user id
-   * @param col - column
-   * @returns
-   */
-
-  async getUsernameFromId(uid: string): Promise<{ error?: any, username: string | null }> {
-    let error = null;
-    let username = null;
-    return { username, error };
+  async getUsernameFromId(uid: string): Promise<{ error?: any, data: string | null }> {
+    const { data, error } = await this.sb.supabase.from('profiles').select('*').eq('id', uid).single();
+    return { data: data.username, error };
   }
-
 }

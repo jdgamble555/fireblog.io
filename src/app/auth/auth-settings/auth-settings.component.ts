@@ -23,6 +23,7 @@ import { UserDbService } from '@db/user/user-db.service';
 import { UserEditService } from '@db/user/user-edit.service';
 import { AuthEditService } from '@db/auth/auth-edit.service';
 import { blobToFile } from '@shared/image-tools/image-tools';
+import { username_validation_messages } from '@auth/username/username.messages';
 
 @Component({
   selector: 'app-auth-settings',
@@ -34,7 +35,7 @@ export class AuthSettingsComponent implements OnInit {
   @ViewChild(FormGroupDirective) private passFormDirective!: FormGroupDirective;
 
   messages = auth_settings_messages;
-  validationMessages = auth_settings_validation_messages;
+  validationMessages = {...auth_settings_validation_messages, ...username_validation_messages };
   errors = auth_settings_errors;
 
   matcher = new MyErrorStateMatcher();
@@ -183,13 +184,11 @@ export class AuthSettingsComponent implements OnInit {
   async updateProfile() {
     // update displayName
     const displayName = this.getField('displayName').value;
-    const r = await this.aes.updateProfile({
-      displayName
-    });
-    this.currentDisplayName = displayName;
-    if (r.error) {
-      this.sb.showError(r.error);
+    const { error } = await this.aes.updateProfile({ displayName });
+    if (error) {
+      this.sb.showError(error);
     } else {
+      this.currentDisplayName = displayName;
       this.sb.showMsg(this.messages.profileUpdated);
     }
   }
@@ -201,6 +200,7 @@ export class AuthSettingsComponent implements OnInit {
     if (error) {
       this.sb.showError(error);
     } else {
+      this.currentUsername = username;
       this.sb.showMsg(this.messages.usernameUpdated);
     }
   }
@@ -223,6 +223,7 @@ export class AuthSettingsComponent implements OnInit {
       if (error) {
         this.sb.showError(error);
       } else {
+        this.currentEmail = email;
         this.sb.showMsg(this.messages.emailUpdated);
       }
     }
@@ -244,8 +245,7 @@ export class AuthSettingsComponent implements OnInit {
     } else {
       if (error) {
         this.sb.showError(error);
-      } else {
-        this.sb.showMsg(this.messages.passUpdated);
+      } else {        this.sb.showMsg(this.messages.passUpdated);
       }
     }
   }

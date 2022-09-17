@@ -5,15 +5,12 @@ import {
   CollectionReference,
   doc,
   docData,
-  DocumentData,
-  DocumentSnapshot,
   Firestore,
   getDoc,
   getDocs,
   limit,
   orderBy,
   query,
-  QuerySnapshot,
   Timestamp,
   where
 } from '@angular/fire/firestore';
@@ -47,7 +44,7 @@ export class PostDbService {
     try {
       data = await getDoc(
         doc(this.afs, '_counters', col)
-      ).then((r) => r.exists() ? r.data()?.count : null);
+      ).then(r => r.exists() ? r.data()?.count : null);
     } catch (e: any) {
       error = e;
     }
@@ -59,10 +56,9 @@ export class PostDbService {
     return docData<any>(
       doc(this.afs, '_counters', col)
     ).pipe(
-      map((r: any) => r ? r.count : null)
+      map(r => r ? r.count : null)
     );
   }
-
 
   async getPostData(id: string): Promise<{ error: any, data: Post | null }> {
     const docRef = doc(this.afs, 'posts', id);
@@ -71,10 +67,10 @@ export class PostDbService {
     let error, data = null;
     try {
       data = await getDoc<Post>(draftRef)
-        .then((snap: DocumentSnapshot<Post>) => snap.exists()
+        .then(snap => snap.exists()
           ? getDoc(draftRef)
           : getDoc(docRef))
-        .then((doc: DocumentSnapshot<DocumentData>) => ({ id: doc.id, ...doc.data() }));
+        .then(doc => ({ id: doc.id, ...doc.data() }));
     } catch (e: any) {
       error = e;
     }
@@ -105,7 +101,7 @@ export class PostDbService {
         doc(this.afs, 'posts', id)
       ), ['authorDoc']).pipe(
         // add id field, ssr dates
-        map((p: Post) => p ? ({
+        map(p => p ? ({
           ...p,
           id,
           createdAt: (p?.createdAt as Timestamp)?.toMillis() || 0,
@@ -145,7 +141,7 @@ export class PostDbService {
           where('slug', '==', slug),
           limit(1)
         )
-      ).then((snap: QuerySnapshot<Post>) => {
+      ).then(snap => {
         const doc = snap.docs[0];
         return {
           id: doc.id,
@@ -164,10 +160,9 @@ export class PostDbService {
  * @param term
  * @returns Observable of search
  */
-  async searchPost(term: string): Promise<{ data: Post[] | null, error: any}> {
+  async searchPost(term: string): Promise<{ data: Post[] | null, error: any }> {
     term = term.split(' ')
-      .map(
-        (v: string) => soundex(v)
+      .map(v => soundex(v)
       ).join(' ');
     let data = null;
     let error = null;
@@ -285,9 +280,9 @@ export class PostDbService {
                 ...filters
               ), { idField: 'id' }
             ), ['postDoc']).pipe(
-              map((p: any) => p.map((s: any) => s.postDoc)),
+              map(p => p.map((s: any) => s.postDoc)),
               // offset is only okay here because of caching
-              map((l: Post[]) => l.slice(_offset))
+              map(l => l.slice(_offset))
             ), ['authorDoc']);
       } else {
 
@@ -300,18 +295,18 @@ export class PostDbService {
             ), { idField: 'id' }
           ).pipe(
             // offset is only okay here because of caching
-            map((l: Post[]) => l.slice(_offset))
+            map(l => l.slice(_offset))
           ), ['authorDoc']);
       }
 
       // convert date types for ssr
-      posts = posts.pipe(map((p: Post[] | null) => p
-        ? p.map((data: any) => ({
+      posts = posts.pipe(map(p =>
+        p ? p.map(data =>
+        ({
           ...data,
           createdAt: (data?.createdAt as Timestamp)?.toMillis() || 0,
           updatedAt: (data?.updatedAt as Timestamp)?.toMillis() || 0,
-        }))
-        : null
+        })) : null
       ));
 
     } catch (e: any) {
@@ -332,7 +327,7 @@ export class PostDbService {
     }
 
     count = count.pipe(
-      map((total: string) =>
+      map(total =>
         total == '0' || total === undefined
           ? 'none'
           : total

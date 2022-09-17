@@ -42,3 +42,10 @@ export interface UserRequest<T> {
   data?: T
   exists?: boolean | null
 }
+
+export interface UserAccount {
+  displayName?: string | null,
+  photoURL?: string | null,
+  phoneNumber?: string | null,
+  email?: string | null
+}

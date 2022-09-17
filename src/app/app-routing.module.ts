@@ -1,14 +1,18 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { UsernameGuard } from '@auth/username/username.guard';
-import { UserPostGuard } from '@post/post-list/post-list.guard';
+import { AuthComponent } from '@auth/auth.component';
+import {
+  EmailGuard,
+  LoginGuard,
+  NotLoginGuard,
+  NotUsernameGuard,
+  UserPostGuard
+} from '@auth/auth.guard';
+import { PostListComponent } from '@post/post-list/post-list.component';
 import { PostListResolver } from '@post/post-list/post-list.resolver';
+import { PostComponent } from '@post/post.component';
 import { PostGuard } from '@post/post.guard';
-import { AuthComponent } from './auth/auth.component';
-import { LoginGuard, EmailGuard, NotLoginGuard } from './auth/auth.guard';
 import { HomeComponent } from './home/home.component';
-import { PostListComponent } from './post/post-list/post-list.component';
-import { PostComponent } from './post/post.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent, resolve: { posts: PostListResolver } },
@@ -36,7 +40,7 @@ const routes: Routes = [
   { path: 'new', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [EmailGuard, LoginGuard] },
   { path: 'edit/:id', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [EmailGuard, LoginGuard] },
   { path: 'settings', loadChildren: () => import('./auth/auth-settings/auth-settings.module').then(m => m.AuthSettingsModule), canActivate: [LoginGuard] },
-  { path: 'username', loadChildren: () => import('./auth/username/username.module').then(m => m.UsernameModule), canActivate: [UsernameGuard] },
+  { path: 'username', loadChildren: () => import('./auth/username/username.module').then(m => m.UsernameModule), canActivate: [LoginGuard, NotUsernameGuard] },
   { path: 'dashboard', loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule), canActivate: [LoginGuard] },
   { path: '**', redirectTo: '/' }
 ];

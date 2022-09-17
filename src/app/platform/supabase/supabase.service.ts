@@ -11,6 +11,7 @@ export interface sb_User {
   photo_url?: string;
   username?: string;
   display_name?: string;
+  email?: string;
 }
 
 @Injectable({
@@ -39,12 +40,12 @@ export class SupabaseService {
     });
   }
 
-  subWhere(col: string, field: string, value: string): Observable<any> {
-    return new Observable((subscriber: Subscriber<any>) => {
-      this.supabase.from(col).select('*').eq(field, value).single().then((payload: any) => {
+  subWhere<T>(col: string, field: string, value: string): Observable<T> {
+    return new Observable((subscriber: Subscriber<T>) => {
+      this.supabase.from(col).select('*').eq(field, value).single().then(payload => {
         subscriber.next(payload.data);
       });
-      return this.supabase.from(`${col}:${field}=eq.${value}`).on('*', (payload: any) => {
+      return this.supabase.from(`${col}:${field}=eq.${value}`).on('*', payload => {
         subscriber.next(payload.new);
       }).subscribe();
     });

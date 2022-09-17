@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { AuthAction } from '@auth/user.model';
-import { firstValueFrom } from 'rxjs';
-import { AuthService } from './auth.service';
-import { auth_messages, auth_errors, replaceMsg } from './auth.messages';
+import { auth_messages, auth_errors } from './auth.messages';
 import { AuthEditModule } from '@db/auth-edit.module';
+import { SupabaseService } from '../supabase.service';
 import { UserEditService } from '@db/user/user-edit.service';
 
 @Injectable({
@@ -15,52 +14,57 @@ export class AuthEditService {
   errors = auth_errors;
 
   constructor(
-    private as: AuthService,
+    private sb: SupabaseService,
     private ues: UserEditService
   ) { }
 
   // Auth
 
   async oAuthReLogin(p: string): Promise<AuthAction> {
-    let error = null;
-    return { error };
+    // not necessary for supabase
+    return { error: null };
   }
 
   // Providers
 
   async addProvider(p: string): Promise<AuthAction> {
-    let error = null;
-    return { error };
+    // would need to write stored procedure for this
+    return { error: null };
   }
 
   async removeProvider(p: string): Promise<AuthAction> {
-    let error = null;
-    return { error };
+    // would need to write stored procedure for this
+    return { error: null };
   }
 
   async updateEmail(email: string): Promise<AuthAction> {
-    let error = null;
-    let reAuth = false;
-    return { reAuth, error };
+    const { error } = await this.sb.supabase.auth.update({ email });
+    return { reAuth: false, error };
   }
 
-  async updatePass(pass: string): Promise<AuthAction> {
-    let error = null;
-    let reAuth = false;
-    return { reAuth, error };
+  async updatePass(password: string): Promise<AuthAction> {
+    const { error } = await this.sb.supabase.auth.update({ password });
+    return { reAuth: false, error };
   }
 
-  async updateProfile(profile: {
+  async updateProfile({ displayName, photoURL }: {
     displayName?: string | null | undefined;
     photoURL?: string | null | undefined;
   }): Promise<AuthAction> {
-    let error = null;
+    let data = {};
+    if (displayName) {
+      data = { full_name: displayName, name: displayName };
+    }
+    if (photoURL) {
+      data = { ...data, avatar_url: photoURL, picture: photoURL };
+    }
+    let { error } = await this.sb.supabase.auth.update({ data });
+    ({ error } = await this.ues.updateUser({ displayName, photoURL }));
     return { error };
   }
 
   async deleteUser(): Promise<AuthAction> {
-    let error = null;
-    let reAuth = false;
-    return { reAuth, error };
+    // would need to write stored procedure for this
+    return { reAuth: false, error: null };
   }
 }
