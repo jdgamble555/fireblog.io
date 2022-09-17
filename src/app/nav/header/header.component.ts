@@ -26,7 +26,7 @@ export class HeaderComponent {
 
   isActiveSearch = false;
   terms!: Post[] | null;
-  user$: Observable<UserRec | null> = of(null);
+  user$: Observable<UserRec | null>;
 
   constructor(
     private auth: AuthService,
@@ -36,9 +36,7 @@ export class HeaderComponent {
     private us: UserDbService,
     private router: Router
   ) {
-    if (this.ns.isBrowser) {
-      this.user$ = this.us.userRec;
-    }
+    this.user$ = this.ns.isBrowser ? this.us.userRec : of(null);
     this.dm.setTheme();
     this.env = environment;
   }

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { DbModule } from '@db/db.module';
 import { Tag } from '@post/post.model';
-import { map, Observable, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 @Injectable({
   providedIn: DbModule

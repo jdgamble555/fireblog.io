@@ -1,8 +1,8 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
+import { auth_messages } from '@auth/auth.messages';
 import { AuthEditService } from '@db/auth/auth-edit.service';
-import { auth_messages } from '@db/auth/auth.messages';
 import { AuthService } from '@db/auth/auth.service';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 

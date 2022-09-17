@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { AuthAction } from '@auth/user.model';
-import { auth_messages, auth_errors } from './auth.messages';
 import { AuthEditModule } from '@db/auth-edit.module';
 import { SupabaseService } from '../supabase.service';
 import { UserEditService } from '@db/user/user-edit.service';
@@ -9,9 +8,6 @@ import { UserEditService } from '@db/user/user-edit.service';
   providedIn: AuthEditModule
 })
 export class AuthEditService {
-
-  messages = auth_messages;
-  errors = auth_errors;
 
   constructor(
     private sb: SupabaseService,
@@ -58,8 +54,9 @@ export class AuthEditService {
     if (photoURL) {
       data = { ...data, avatar_url: photoURL, picture: photoURL };
     }
-    let { error } = await this.sb.supabase.auth.update({ data });
-    ({ error } = await this.ues.updateUser({ displayName, photoURL }));
+
+    let { error } = await this.ues.updateUser({ displayName, photoURL });
+    ({ error } = await this.sb.supabase.auth.update({ data }));
     return { error };
   }
 

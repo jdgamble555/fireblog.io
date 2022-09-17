@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { UserAuth, UserRec, UserRequest } from '@auth/user.model';
 import { DbModule } from '@db/db.module';
 import { User } from '@supabase/supabase-js';
-import { map, Observable, of, switchMap } from 'rxjs';
+import { map, Observable, of, switchMap, tap } from 'rxjs';
 import { sb_User, SupabaseService } from '../supabase.service';
 
 @Injectable({

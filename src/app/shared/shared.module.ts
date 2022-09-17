@@ -6,7 +6,11 @@ import { ConfirmDialogModule } from './confirm-dialog/confirm-dialog.module';
 import { DropZoneDirective } from './drop-zone/drop-zone.directive';
 import { HeartComponent } from './heart/heart.component';
 import { SaveComponent } from './save/save.component';
+import { UrlSanitizerPipe } from './url-sanitizer.pipe';
 
+const pipes = [
+  UrlSanitizerPipe
+];
 
 const modules = [
   FormsModule,
@@ -27,7 +31,8 @@ const components = [
 @NgModule({
   declarations: [
     ...directives,
-    ...components
+    ...components,
+    ...pipes
   ],
   imports: [
     ...modules
@@ -35,7 +40,8 @@ const components = [
   exports: [
     ...modules,
     ...directives,
-    ...components
+    ...components,
+    ...pipes
   ]
 })
 export class SharedModule { }

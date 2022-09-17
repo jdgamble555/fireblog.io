@@ -1,10 +1,8 @@
-import { DOCUMENT } from '@angular/common';
-import { Inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { AuthAction, UserAuth } from '@auth/user.model';
 import { DbModule } from '@db/db.module';
 import { UserDbService } from '@db/user/user-db.service';
 import { firstValueFrom, map, Observable, tap } from 'rxjs';
-import { auth_messages } from './auth.messages';
 import { Provider, User } from '@supabase/supabase-js';
 import { SupabaseService } from '../supabase.service';
 
@@ -13,13 +11,11 @@ import { SupabaseService } from '../supabase.service';
 })
 export class AuthService {
 
-  messages = auth_messages;
   user$: Observable<UserAuth | null>;
 
   constructor(
     private us: UserDbService,
-    private sb: SupabaseService,
-    @Inject(DOCUMENT) private doc: Document
+    private sb: SupabaseService
   ) {
     this.user$ = this._user();
   }
@@ -39,7 +35,7 @@ export class AuthService {
 
   private _user(): Observable<UserAuth | null> {
     return this.sb.authState().pipe(
-      map((u: User | null) => u ? this._mapUser(u) : null),
+      map(u => u ? this._mapUser(u) : null),
       tap(async (u: UserAuth | null) => {
         if (u) {
           // add user info if user DNE

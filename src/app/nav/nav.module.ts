@@ -10,6 +10,8 @@ import { TagListService } from '@post/tag-list/tag-list.service';
 import { TagListComponent } from '@post/tag-list/tag-list.component';
 
 
+// todo - separate modules with shared so that only core is imported
+
 const components = [
   NavComponent,
   HeaderComponent,

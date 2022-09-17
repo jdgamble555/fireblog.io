@@ -1,7 +1,7 @@
-import { DOCUMENT } from '@angular/common';
-import { Inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { randomID } from '@shared/image-tools/image-tools';
 import { Observable } from 'rxjs';
+import { SupabaseService } from '../supabase.service';
 import { ImageModule } from './image.module';
 
 
@@ -20,7 +20,7 @@ export class ImageUploadService {
   uploadingImage = false;
 
   constructor(
-    @Inject(DOCUMENT) private document: Document
+    private sb: SupabaseService
   ) { }
 
   /**
@@ -29,16 +29,8 @@ export class ImageUploadService {
    * @returns image url
    */
   async getURL(gs: string): Promise<{ error: any, data: string | null }> {
-    let error = null;
-    let data = null;
-    return { error, data };
-  }
-
-  async objectExists(url: string): Promise<{ error: any, data: boolean | null }> {
-    // make sure image exists
-    let error = null;
-    let data = null;
-    return { data, error };
+    const { data, error } = this.sb.supabase.storage.from('photos').getPublicUrl(gs.substring(gs.indexOf('/') + 1));
+    return { error, data: data?.publicURL || null };
   }
 
   /**
@@ -47,7 +39,8 @@ export class ImageUploadService {
    * @returns - a resolved promise that image was deleted
    */
   async deleteImage(url: string): Promise<{ error: any }> {
-    let error = null;
+
+    const { error } = await this.sb.supabase.storage.from('photos').remove([url]);
     return { error };
   }
 
@@ -57,13 +50,41 @@ export class ImageUploadService {
    * @param file - file blob
    * @param name - image file name, default random name
    */
-  async uploadImage(folder: string, file: File | null, name = randomID()): Promise<{ data: string | null, error: any }> {
+  async uploadImage(folder: string, file: File | null, name = randomID()): Promise<{ data: any | null, error: any }> {
 
+    folder = folder.replace('_', '-');
     const ext = file!.name.split('.').pop();
     const path = `${folder}/${name}.${ext}`;
-
     let error = null;
     let data = null;
-    return { data, error };
+    const { error: _e } = await this.deleteImage(path);
+    if (_e) {
+      console.error(_e);
+    }
+    //let progress = null;
+    try {
+      if (file) {
+        if (file!.type.split('/')[0] !== 'image') {
+          throw { code: 'image/file-type' };
+        }
+        else {
+          // this.uploadPercent = percentage(task);
+          // todo - add progress
+          ({ error, data } = await this.sb.supabase.storage.from('photos').upload(path, file));
+        }
+      } else {
+        throw { code: 'invalid-file' };
+      }
+    } catch (e: any) {
+      error = e;
+    }
+    let url = null;
+    if (data?.Key) {
+
+      ({ error, data: url } = await this.getURL(data.Key));
+      url = url + '?lastmod=' + Math.random();
+    }
+    return { data: url, error };
   }
 }
+

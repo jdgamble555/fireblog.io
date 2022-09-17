@@ -2,14 +2,11 @@ import { Injectable } from '@angular/core';
 import { UserAccount } from '@auth/user.model';
 import { AuthEditModule } from '@db/auth-edit.module';
 import { SupabaseService } from '../supabase.service';
-import { user_messages } from './user.messages';
 
 @Injectable({
   providedIn: AuthEditModule
 })
 export class UserEditService {
-
-  messages = user_messages;
 
   constructor(private sb: SupabaseService) { }
 
