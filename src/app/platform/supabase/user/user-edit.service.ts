@@ -11,7 +11,7 @@ export class UserEditService {
   constructor(private sb: SupabaseService) { }
 
   async getUid() {
-    return this.sb.supabase.auth.user()?.id;
+    return (await this.sb.supabase.auth.getUser()).data.user?.id;
   }
 
   async updateUser({ displayName, photoURL, phoneNumber, email }: UserAccount): Promise<{ error: any }> {

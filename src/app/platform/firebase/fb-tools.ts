@@ -22,7 +22,6 @@ import {
   switchMap
 } from "rxjs/operators";
 
-
 export async function setWithCounter<T>(
   ref: DocumentReference<T>,
   data: PartialWithFieldValue<T>,

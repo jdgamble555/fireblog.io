@@ -34,12 +34,12 @@ export class AuthEditService {
   }
 
   async updateEmail(email: string): Promise<AuthAction> {
-    const { error } = await this.sb.supabase.auth.update({ email });
+    const { error } = await this.sb.supabase.auth.updateUser({ email });
     return { reAuth: false, error };
   }
 
   async updatePass(password: string): Promise<AuthAction> {
-    const { error } = await this.sb.supabase.auth.update({ password });
+    const { error } = await this.sb.supabase.auth.updateUser({ password });
     return { reAuth: false, error };
   }
 
@@ -56,7 +56,7 @@ export class AuthEditService {
     }
 
     let { error } = await this.ues.updateUser({ displayName, photoURL });
-    ({ error } = await this.sb.supabase.auth.update({ data }));
+    ({ error } = await this.sb.supabase.auth.updateUser({ data }));
     return { error };
   }
 

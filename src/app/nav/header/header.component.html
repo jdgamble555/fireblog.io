@@ -50,7 +50,7 @@
           <span>Bookmarks</span>
         </button>
         <mat-divider></mat-divider>
-        <ng-container *ngIf="user.role === 'admin'">
+        <ng-container *ngIf="(user.role | lowercase) === 'admin' || (user.role | lowercase) === 'editor'">
           <button mat-menu-item (click)="userPostsPage()">
             <mat-icon class="ng-menu-icon">account_box</mat-icon>
             <span>My Posts</span>

@@ -12,6 +12,7 @@ import {
   updateDoc,
   writeBatch
 } from '@angular/fire/firestore';
+import { AuthService } from '@db/auth/auth.service';
 import { deleteWithCounter, searchIndex, setWithCounter } from '@db/fb-tools';
 import { PostEditModule } from '@db/post-edit.module';
 import { Post } from '@post/post.model';
@@ -25,6 +26,7 @@ export class PostEditService {
   constructor(
     private afs: Firestore,
     private markdownService: MarkdownService,
+    private auth: AuthService,
     @Inject(DOCUMENT) private document: Document
   ) { }
 
@@ -34,9 +36,9 @@ export class PostEditService {
    * @param data doc data
    * @returns void
    */
-  async setPost(data: Post, id = this.getId(), publish = false): Promise<{ error: any, data: string | null }> {
+  async setPost(data: Post, id = this.getId(), publish = false): Promise<{ error: any, data: any | null }> {
     let error = null;
-    let _data = null;
+    let _data: any = null;
     try {
       const authorId = data.authorId;
       // create author doc ref
@@ -104,7 +106,7 @@ export class PostEditService {
           );
         }
       }
-      _data = id;
+      _data = { ...data, id };
     } catch (e: any) {
       error = e;
     }
@@ -114,15 +116,18 @@ export class PostEditService {
    * Delete Post by ID
    * @param id
    */
-  async deletePost(id: string, uid: string): Promise<{ error: any }> {
+  async deletePost(id: string): Promise<{ error: any }> {
+    const uid = (await this.auth.getUser())?.uid;
     let error = null;
-    try {
-      await deleteWithCounter(
-        doc(this.afs, 'posts', id),
-        { paths: { users: uid } }
-      );
-    } catch (e: any) {
-      error = e;
+    if (uid) {
+      try {
+        await deleteWithCounter(
+          doc(this.afs, 'posts', id),
+          { paths: { users: uid } }
+        );
+      } catch (e: any) {
+        error = e;
+      }
     }
     return { error };
   }

@@ -31,7 +31,4 @@ export class ActionDbService {
     return { error };
   }
 
-  subAction(id: string, uid: string, action: string): Observable<boolean> {
-    return of();
-  }
 }

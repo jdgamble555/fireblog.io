@@ -28,9 +28,9 @@ export class ImageUploadService {
    * @param gs - google url
    * @returns image url
    */
-  async getURL(gs: string): Promise<{ error: any, data: string | null }> {
-    const { data, error } = this.sb.supabase.storage.from('photos').getPublicUrl(gs.substring(gs.indexOf('/') + 1));
-    return { error, data: data?.publicURL || null };
+  async getURL(gs: string): Promise<{  data: string | null }> {
+    const { data } = this.sb.supabase.storage.from('photos').getPublicUrl(gs);
+    return { data: data.publicUrl || null };
   }
 
   /**
@@ -79,9 +79,9 @@ export class ImageUploadService {
       error = e;
     }
     let url = null;
-    if (data?.Key) {
+    if (data?.path) {
 
-      ({ error, data: url } = await this.getURL(data.Key));
+      ({ data: url } = await this.getURL(data.path));
       url = url + '?lastmod=' + Math.random();
     }
     return { data: url, error };

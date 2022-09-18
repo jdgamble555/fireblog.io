@@ -141,6 +141,7 @@ export class UserPostGuard implements CanActivate {
 
     if (uid) {
       // username checks
+      // todo -fix!
       const fetch_un = this.us.getUsernameFromId(uid);
       const { data: currentUsername, error } = await this.state.loadState('user', fetch_un);
       if (error) {

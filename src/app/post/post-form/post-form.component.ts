@@ -296,8 +296,9 @@ export class PostFormComponent implements OnDestroy {
 
     // add post to db
 
-    const { data: id, error: _e } = await this.pes.setPost(data, this.id, publish);
-    this.image = id;
+    const { data: _data, error: _e } = await this.pes.setPost(data, this.id, publish);
+    this.image = _data?.id;
+    this.id = _data?.id;
     if (_e) {
       console.error(_e);
       error = true;
@@ -310,8 +311,6 @@ export class PostFormComponent implements OnDestroy {
   }
 
   async deletePost(): Promise<void> {
-
-    const uid = (await this.auth.getUser())?.uid as string;
 
     const confirm = this.dialog.confirmDialog(this.messages.deleteConfirm);
     // delete when confirmed
@@ -334,7 +333,7 @@ export class PostFormComponent implements OnDestroy {
             }
           }
           // delete post
-          this.pes.deletePost(this.id, uid);
+          this.pes.deletePost(this.id);
           this.sb.showMsg(this.messages.deleted)
           this.ns.home();
         }

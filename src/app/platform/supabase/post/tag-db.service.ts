@@ -16,20 +16,4 @@ export class TagDbService {
     return { data, error };
   }
 
-  /**
-   * Get all tags and their count
-   * @returns tags
-   */
-  private subTags(): Observable<Tag[]> {
-    return of();
-  }
-
-  /**
-   * Get tag count from tag doc
-   * @param t - tag
-   * @returns
-   */
-  subTagTotal(t: string): Observable<string> {
-    return of('');
-  }
 }

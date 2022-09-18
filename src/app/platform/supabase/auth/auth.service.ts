@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AuthAction, UserAuth } from '@auth/user.model';
 import { DbModule } from '@db/db.module';
 import { UserDbService } from '@db/user/user-db.service';
-import { firstValueFrom, map, Observable, tap } from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
 import { Provider, User } from '@supabase/supabase-js';
 import { SupabaseService } from '../supabase.service';
 
@@ -58,13 +58,15 @@ export class AuthService {
   }
 
   async getUser(): Promise<UserAuth | null> {
-    return await firstValueFrom(this.user$);
+    const user = (await this.sb.supabase.auth.getSession()).data.session?.user;
+    const _data = user ? this._mapUser(user) : null;
+    return _data;
   }
 
   // Login
 
   async emailLogin(email: string, password: string): Promise<AuthAction> {
-    const { error } = await this.sb.supabase.auth.signIn({ email, password });
+    const { error } = await this.sb.supabase.auth.signInWithPassword({ email, password });
     return { error };
   }
 
@@ -74,7 +76,7 @@ export class AuthService {
   }
 
   async sendEmailLink(email: string): Promise<AuthAction> {
-    const { error } = await this.sb.supabase.auth.signIn({ email });
+    const { error } = await this.sb.supabase.auth.signInWithOtp({ email });
     return { error };
   }
 
@@ -89,13 +91,13 @@ export class AuthService {
   }
 
   async resetPassword(email: string): Promise<AuthAction> {
-    const { error } = await this.sb.supabase.auth.api.resetPasswordForEmail(email);
+    const { error } = await this.sb.supabase.auth.resetPasswordForEmail(email);
     return { error };
   }
 
   async oAuthLogin(p: string): Promise<AuthAction> {
     p = p.replace('.com', '');
-    const { error } = await this.sb.supabase.auth.signIn({
+    const { error } = await this.sb.supabase.auth.signInWithOAuth({
       provider: p as Provider,
     });
     return { error };
@@ -111,8 +113,8 @@ export class AuthService {
   // Providers
 
   async getProviders(): Promise<string[]> {
-    const sb = this.sb.supabase.auth.user();
-    let providers: string[] = sb?.app_metadata.providers;
+    const sb = await this.sb.supabase.auth.getSession();
+    let providers = sb.data.session?.user.app_metadata.providers;
     providers = providers.map((p: string) => p === 'google' ? 'google.com' : p);
     return providers;
   }

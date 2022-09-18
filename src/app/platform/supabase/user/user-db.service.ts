@@ -20,6 +20,7 @@ export class UserDbService {
     this.userRec = this.userSub();
   }
 
+  // todo - fix all this mapping crap
   private mapUser = (user: sb_User): UserRec => ({
     uid: user?.id,
     photoURL: user?.photo_url,
@@ -27,7 +28,8 @@ export class UserDbService {
     createdAt: user?.created_at,
     updatedAt: user?.updated_at,
     username: user?.username,
-    email: user?.email
+    email: user?.email,
+    role: user?.role as any
   });
 
   userSub(): Observable<UserRec | null> {
@@ -42,7 +44,7 @@ export class UserDbService {
   }
 
   async getUserRec(): Promise<UserRequest<UserRec | null>> {
-    const user = this.sb.supabase.auth.user();
+    const user = (await this.sb.supabase.auth.getSession()).data.session?.user;
     let { data, error } = await this.sb.supabase.from('profiles').select('*').eq('id', user?.id).single();
     data = { ...data, email: user?.email };
     return { data: data ? this.mapUser(data) : null, error };

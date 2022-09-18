@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { DbModule } from '@db/db.module';
 import { environment } from '@env/environment';
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
-import { Observable, Subscriber } from 'rxjs';
+import { from, of, Observable, Subscriber, switchMap } from 'rxjs';
 
 export interface sb_User {
   id: string;
@@ -12,6 +12,7 @@ export interface sb_User {
   username?: string;
   display_name?: string;
   email?: string;
+  role?: string;
 }
 
 @Injectable({
@@ -32,22 +33,27 @@ export class SupabaseService {
 
   authState(): Observable<User | null> {
     return new Observable((subscriber: Subscriber<User | null>) => {
-      subscriber.next(this.supabase.auth.user());
+      this.supabase.auth.getSession().then(session =>
+        subscriber.next(session.data.session?.user)
+      );
       const auth = this.supabase.auth.onAuthStateChange(async ({ }, session) => {
         subscriber.next(session?.user);
       });
-      return auth.data?.unsubscribe;
+      return auth.data.subscription.unsubscribe;
     });
   }
 
-  subWhere<T>(col: string, field: string, value: string): Observable<T> {
+  subWhere<T>(table: string, field: string, value: string): Observable<T> {
     return new Observable((subscriber: Subscriber<T>) => {
-      this.supabase.from(col).select('*').eq(field, value).single().then(payload => {
+      this.supabase.from(table).select('*').eq(field, value).single().then(payload => {
         subscriber.next(payload.data);
       });
-      return this.supabase.from(`${col}:${field}=eq.${value}`).on('*', payload => {
-        subscriber.next(payload.new);
-      }).subscribe();
+      const filter = `${field}=eq.${value}`;
+      return this.supabase.channel('public:' + `${table}:${filter}`).on('postgres_changes', {
+        event: '*', schema: 'public', table, filter
+      }, (payload: { new: T | undefined; }) => {
+        subscriber.next(payload.new)
+      })
     });
   }
 

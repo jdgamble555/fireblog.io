@@ -19,6 +19,7 @@ import { DbModule } from '@db/db.module';
 import { expandRef, expandRefs, soundex } from '@db/fb-tools';
 import { UserDbService } from '@db/user/user-db.service';
 import { Post, PostInput } from '@post/post.model';
+import { snapToData } from 'rxfire/firestore';
 import { firstValueFrom, map, Observable, of } from 'rxjs';
 import { TagDbService } from './tag-db.service';
 
@@ -79,53 +80,28 @@ export class PostDbService {
 
   async getPostById(id: string, user?: UserRec): Promise<{ data: Post | null, error: any }> {
 
-    // todo - do without SubPostId
     let data = null;
     let error = null;
     try {
-      data = await firstValueFrom(this.subPostById(id));
+      data = await getDoc<Post>(
+        doc(this.afs, 'posts', id)
+      ).then(postSnap => snapToData<Post>(postSnap, { idField: 'id' }) as Post)
+        .then(async postData => {
+          const authorData = await getDoc<UserRec>(postData.authorDoc)
+            .then(authorSnap => snapToData<UserRec>(authorSnap, { idField: 'id' }));
+          return {
+            ...postData,
+            authorDoc: authorData,
+            createdAt: (postData?.createdAt as Timestamp)?.toMillis() || 0,
+            updatedAt: (postData?.updatedAt as Timestamp)?.toMillis() || 0
+          };
+        });
     } catch (e: any) {
       error = e;
     }
     return { data, error };
   }
 
-  /**
-   * Get Post by post id
-   * @param id post id
-   * @returns post observable joined by author doc
-   */
-  private subPostById(id: string): Observable<Post | null> {
-    return expandRef<Post>(
-      docData<Post>(
-        doc(this.afs, 'posts', id)
-      ), ['authorDoc']).pipe(
-        // add id field, ssr dates
-        map(p => p ? ({
-          ...p,
-          id,
-          createdAt: (p?.createdAt as Timestamp)?.toMillis() || 0,
-          updatedAt: (p?.updatedAt as Timestamp)?.toMillis() || 0,
-        }) : null)
-      );
-  }
-  /**
-   * SEO by Post ID
-   * @param id
-   * @returns
-   */
-  async seoPostById(id: string): Promise<{ error: any, data: Post | null }> {
-    let error = null;
-    let data = null;
-    try {
-      data = (await getDoc(
-        doc(this.afs, 'posts', id)
-      )).data() as Post;
-    } catch (e: any) {
-      error = e;
-    }
-    return { error, data };
-  }
   /**
    * Get post by slug, use is mainly for backwards compatibility
    * @param slug
@@ -141,13 +117,7 @@ export class PostDbService {
           where('slug', '==', slug),
           limit(1)
         )
-      ).then(snap => {
-        const doc = snap.docs[0];
-        return {
-          id: doc.id,
-          ...doc.data()
-        } as Post;
-      });
+      ).then(arr => arr.empty ? null : arr.docs.map(snap => snapToData<Post>(snap, { idField: 'id' }) as Post)[0]);
     }
     catch (e: any) {
       error = e;

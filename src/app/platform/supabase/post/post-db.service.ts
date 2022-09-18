@@ -3,7 +3,7 @@ import { UserRec } from '@auth/user.model';
 import { DbModule } from '@db/db.module';
 import { UserDbService } from '@db/user/user-db.service';
 import { Post, PostInput } from '@post/post.model';
-import { combineLatest, firstValueFrom, map, Observable, of, switchMap } from 'rxjs';
+import { SupabaseService } from '../supabase.service';
 import { ActionDbService } from './action-db.service';
 import { TagDbService } from './tag-db.service';
 
@@ -16,7 +16,8 @@ export class PostDbService {
   constructor(
     private as: ActionDbService,
     private ts: TagDbService,
-    private us: UserDbService
+    private us: UserDbService,
+    private sb: SupabaseService
   ) { }
 
   /**
@@ -24,7 +25,7 @@ export class PostDbService {
   * @param col - Collection Path
   * @returns - total count
   */
-  async getTotal(col: string): Promise<{ data: string | null, error:any }> {
+  async getTotal(col: string): Promise<{ data: string | null, error: any }> {
     let error = null;
     let data = null;
     return { error, data };
@@ -37,20 +38,13 @@ export class PostDbService {
   }
 
   async getPostById(id: string, user?: UserRec): Promise<{ data: Post | null, error: any }> {
-
     let data = null;
     let error = null;
+    console.log(id);
+    ({ data, error } = await this.sb.supabase.from('posts').select('*, author!inner(*)').eq('id', id).eq('published', true).single());
     return { data, error };
   }
 
-  /**
-   * SEO by Post ID
-   * @param id
-   * @returns
-   */
-  async seoPostById(id: string): Promise<Post | undefined> {
-    return;
-  }
   /**
    * Get post by slug, use is mainly for backwards compatibility
    * @param slug
@@ -59,6 +53,7 @@ export class PostDbService {
   async getPostBySlug(slug: string): Promise<{ error: any, data: Post | null }> {
     let error = null;
     let data = null;
+    ({ data, error } = await this.sb.supabase.from('posts').select('*, author!inner(*)').eq('slug', slug).eq('published', true).single());
     return { data, error };
   }
 
@@ -88,11 +83,21 @@ export class PostDbService {
     let error = null;
     let posts = null;
     let count = null;
+    let data = null;
 
+    ({ data, count } = await this.sb.supabase.from('posts').select('*, author!inner(*)', { count: 'exact' }));
+
+    data = data?.map(_d => ({
+      ..._d,
+      authorDoc: _d.author,
+      createdAt: _d.created_at,
+      updatedAt: _d.updated_at
+    }));
+    console.log(data);
     return {
       error,
-      posts,
-      count
+      posts: data || null,
+      count: count?.toString() || null
     };
 
   }
