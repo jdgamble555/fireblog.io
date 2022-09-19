@@ -1,18 +1,15 @@
 @use "@angular/material" as mat;
 @import "@angular/material/theming";
 @import "https://fonts.googleapis.com/icon?family=Material+Icons";
+@import "http://fonts.cdnfonts.com/css/Open-Sans";
 
 // color reference - https://material.io/design/color/the-color-system.html#tools-for-picking-colors
 
 $custom-typography: mat.define-typography-config(
-  $font-family: '"Marr Sans",Helvetica,Arial,Roboto,sans-serif',
-  $headline: mat.define-typography-level(32px, 48px, 700),
-  $body-1: mat.define-typography-level(16px, 24px, 500),
+  $font-family: "Open Sans",
+  $headline: mat.define-typography-level(2rem, 1, 600),
+  $body-1: mat.define-typography-level(1rem, 1.5, 400)
 );
-
-@include mat.core($custom-typography);
-@include mat.typography-hierarchy($custom-typography);
-@include mat.all-component-typographies($custom-typography);
 
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
@@ -20,6 +17,8 @@ $custom-typography: mat.define-typography-config(
 $app-primary: mat.define-palette(mat.$light-blue-palette, 800);
 $app-accent: mat.define-palette(mat.$light-blue-palette, 700);
 $app-background: #fff;
+
+@include mat.core($custom-typography);
 
 // Create the theme object. A theme consists of configurations for individual
 // theming systems such as "color" or "typography".
@@ -30,6 +29,7 @@ $app-theme: mat.define-light-theme(
       accent: $app-accent,
       background: $app-background,
     ),
+    typography: $custom-typography,
   )
 );
 
@@ -52,6 +52,7 @@ $dark-theme: mat.define-dark-theme(
       is-dark: true,
       background: $dark-theme-background,
     ),
+    typography: $custom-typography,
   )
 );
 
@@ -74,7 +75,6 @@ body {
   height: 100%;
   min-height: 100%;
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
 a,
@@ -108,12 +108,6 @@ mat-card a:visited {
 
 // end material
 
-h1,
-h2,
-h3 {
-  font-family: "Marr Sans", Helvetica, Arial, Roboto, sans-serif;
-}
-
 .ng-login-container {
   max-width: 500px;
   margin: 0 auto;
@@ -126,7 +120,6 @@ h3 {
   font-weight: 500;
   letter-spacing: 0.0125em;
   -webkit-font-smoothing: antialiased;
-  font-family: Roboto, sans serif;
 }
 
 .ng-center {
@@ -242,16 +235,10 @@ h3 {
   justify-content: space-between;
 }
 
-.ng-welcome {
-  margin: 0 15px 15px;
-  text-align: left;
-  font-size: 18px;
-}
-
 .ng-card {
   margin: 0 15px 15px;
   text-align: left;
-  font-size: 18px;
+  font-size: 1rem;
   max-width: 86vw;
 }
 
@@ -298,7 +285,7 @@ h3 {
 }
 
 .ng-title {
-  font-size: 30px;
+  font-size: 3rem;
 }
 
 .ng-right {
@@ -548,6 +535,10 @@ code {
   font-size: 1rem !important;
 }
 
+markdown {
+  line-height: 2;
+}
+
 markdown a {
   color: #1e88e5;
   text-decoration: none;
@@ -726,7 +717,7 @@ mat-paginator .mat-form-field {
 }
 
 .ng-text {
-  font-size: 14px;
+  font-size: 1.25rem;
   font-weight: 500;
 }
 
@@ -739,7 +730,7 @@ mat-paginator .mat-form-field {
 }
 
 .ng-front {
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .ng-green {
@@ -777,7 +768,6 @@ mat-paginator .mat-form-field {
   border-radius: 5px;
   transition: 25ms ease-out;
   padding: 0.5em 0.75em;
-  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
 }
 
 .resp-sharing-button__icon svg {

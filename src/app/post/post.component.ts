@@ -38,7 +38,6 @@ export class PostComponent {
     const post = this.route.snapshot.data.post;
     this.meta(post);
     this.post = post;
-
     this.user$ = this.ns.isBrowser ? this.us.user$ : of(null);
   }
 

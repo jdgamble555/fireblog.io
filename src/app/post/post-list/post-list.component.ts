@@ -35,12 +35,7 @@ export class PostListComponent implements OnDestroy {
     @Inject(DOCUMENT) private doc: Document
   ) {
     this.env = environment;
-
-    // don't load on server or will loop
-    if (this.ns.isBrowser) {
-      this.user$ = this.us.user$;
-    }
-
+    this.user$ = this.ns.isBrowser ? this.us.user$ : of(null);
     this.routeSub = this.route.data
       .subscribe(async (p) => this.loadPage(p));
   }
