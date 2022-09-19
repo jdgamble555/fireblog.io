@@ -5,6 +5,9 @@
     "ng": "ng",
     "start": "ng serve",
     "build-dev": "ng build",
+    "build:stats": "ng build --stats-json",
+    "analyze": "webpack-bundle-analyzer dist/fireblog/browser/stats.json",
+    "stats": "npm run build:stats && npm run analyze",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "gc-deploy": "gcloud builds submit --tag gcr.io/fireblog-io/fireblog --timeout=3600",
@@ -74,6 +77,7 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.0.0",
     "tslib": "^2.4.0",
-    "typescript": "^4.7.2"
+    "typescript": "^4.7.2",
+    "webpack-bundle-analyzer": "^4.6.1"
   }
 }

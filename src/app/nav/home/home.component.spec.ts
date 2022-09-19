@@ -3,9 +3,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { DbModule } from '@db/db.module';
 import { MarkdownModule } from 'ngx-markdown';
-import { CoreModule } from '../core/core.module';
+import { CoreModule } from '../../core/core.module';
 
-import { PostListComponent } from '../post/post-list/post-list.component';
+import { PostListComponent } from '../../post/post-list/post-list.component';
 
 import { HomeComponent } from './home.component';
 

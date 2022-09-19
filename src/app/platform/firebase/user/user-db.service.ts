@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Auth, User, user } from '@angular/fire/auth';
+import { Auth, signOut, user } from '@angular/fire/auth';
 import {
   doc,
   docData,
@@ -10,14 +10,15 @@ import {
 import { UserRec, UserRequest } from '@auth/user.model';
 import { DbModule } from '@db/db.module';
 import { setWithCounter } from '@db/fb-tools';
-import { firstValueFrom, map, Observable, of, switchMap } from 'rxjs';
+import { snapToData } from 'rxfire/firestore';
+import { firstValueFrom, map, Observable, of, switchMap, tap } from 'rxjs';
 
 @Injectable({
   providedIn: DbModule
 })
 export class UserDbService {
 
-  userRec: Observable<UserRec | null>;
+  user$: Observable<UserRec | null>;
 
   constructor(
     private afs: Firestore,
@@ -25,39 +26,39 @@ export class UserDbService {
   ) {
 
     // get user doc if logged in
-    this.userRec = this._userSub();
+    this.user$ = this._userSub();
   }
 
   private _userSub(): Observable<UserRec | null> {
     return user(this.auth).pipe(
       switchMap(user =>
         user
-          ? this._subUserRec(user.uid)
+          ? this._subUserRec(user.uid, user.emailVerified)
           : of(null)
       )
     );
   }
 
-  private _subUserRec(id: string): Observable<UserRec> {
+  private _subUserRec(id: string, verified: boolean): Observable<UserRec> {
     return docData<UserRec>(
       doc(this.afs, 'users', id) as DocumentReference<UserRec>,
       { idField: 'uid' }
+    ).pipe(
+      map(d => ({ ...d, emailVerified: verified }))
     );
   }
 
-  async getUserRec(): Promise<UserRequest<UserRec | null>> {
+  async getUser(): Promise<UserRequest<UserRec | null>> {
     // get user record
     let data = null;
     let error = null;
     try {
-      const uid = (await firstValueFrom(user(this.auth)))?.uid;
-      if (uid) {
-        const docSnap = await getDoc<UserRec>(
-          doc(this.afs, 'users', uid) as DocumentReference<UserRec>
-        );
-        if (docSnap.exists()) {
-          data = docSnap.data();
-        }
+      const _user = (await firstValueFrom(user(this.auth)));
+      if (_user?.uid) {
+        data = await getDoc<UserRec>(
+          doc(this.afs, 'users', _user?.uid) as DocumentReference<UserRec>
+        ).then(snap => snapToData(snap, { idField: 'id' }))
+          .then(data => ({ ...data, emailVerified: _user.emailVerified }));
       }
     } catch (e: any) {
       error = e;
@@ -100,9 +101,10 @@ export class UserDbService {
 
   async getUsernameFromId(uid: string): Promise<{ error?: any, data: string | null }> {
     let error = null;
-    let data= null;
+    let data = null;
     try {
-      data = await getDoc<UserRec>(
+      // todo - fix typing here, add fb map
+      data = await getDoc<any>(
         doc(this.afs, 'users', uid)
       ).then(snap => (snap.data())?.username) || null;
     }
@@ -110,5 +112,17 @@ export class UserDbService {
       error = e;
     }
     return { data, error };
+  }
+
+  async logout(): Promise<void> {
+    await signOut(this.auth);
+  }
+
+  // Providers
+
+  async getProviders(): Promise<string[]> {
+    const _user = await firstValueFrom(user(this.auth));
+    return _user?.providerData
+      .map((p: any) => p.providerId) || [];
   }
 }

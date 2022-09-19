@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
-import { getStorage, provideStorage } from '@angular/fire/storage';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 
 import {
@@ -19,8 +18,7 @@ import { environment } from '@env/environment';
     provideAnalytics(() => getAnalytics()),
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideFirestore(() => getFirestore()),
-    provideAuth(() => getAuth()),
-    provideStorage(() => getStorage())
+    provideAuth(() => getAuth())
   ],
   providers: [
     ScreenTrackingService,

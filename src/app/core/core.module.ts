@@ -1,18 +1,15 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MaterialModule } from './material.module';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
+import { MaterialCoreModule } from './material-core.module';
 
 
 const modules = [
   CommonModule,
-  FormsModule,
   ReactiveFormsModule,
-  MaterialModule,
-  RouterModule,
-  HttpClientModule
+  MaterialCoreModule,
+  RouterModule
 ];
 
 const components: any[] = [];

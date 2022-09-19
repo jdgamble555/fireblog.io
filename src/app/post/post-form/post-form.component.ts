@@ -3,7 +3,6 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
 import { MatChipList } from '@angular/material/chips';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ImageUploadService } from '@db/image/image-upload.service';
-import { AuthService } from '@db/auth/auth.service';
 import { TagService } from '@shared/tag/tag.service';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { DialogService } from '@shared/confirm-dialog/dialog.service';
@@ -14,6 +13,7 @@ import { PostEditService } from '@db/post/post-edit.service';
 import { blobToData, blobToFile, previewImage } from '@shared/image-tools/image-tools';
 import { post_form_messages, post_form_validation_messages } from './post-form.messages';
 import { Subscription } from 'rxjs';
+import { UserDbService } from '@db/user/user-db.service';
 
 
 
@@ -56,8 +56,8 @@ export class PostFormComponent implements OnDestroy {
     private route: ActivatedRoute,
     public ts: TagService,
     public is: ImageUploadService,
-    private auth: AuthService,
     private ps: PostDbService,
+    private us: UserDbService,
     private pes: PostEditService,
     public sb: SnackbarService,
     private ns: NavService,
@@ -71,9 +71,20 @@ export class PostFormComponent implements OnDestroy {
 
     const r = this.router.url;
 
-    // edit post
     if (r.startsWith('/edit')) {
       this.isNewPage = false;
+    }
+
+    // add title
+    this.title = (this.isNewPage ? 'New' : 'Edit') + ' Post';
+
+    // nav bar
+    this.ns.addTitle(this.title);
+    this.ns.closeLeftNav();
+
+    // edit post
+    if (!this.isNewPage) {
+
       this.id = this.route.snapshot.paramMap.get('id') as string;
 
       if (!this.id) {
@@ -83,7 +94,7 @@ export class PostFormComponent implements OnDestroy {
       }
 
       this.patchPost = this.ps.getPostData(this.id)
-        .then(({ error, data }: { data: Post | null, error: any}) => {
+        .then(({ error, data }: { data: Post | null, error: any }) => {
 
           if (error) {
             console.error(error);
@@ -112,13 +123,6 @@ export class PostFormComponent implements OnDestroy {
             return;
           }
         });
-
-      // add title
-      this.title = (this.isNewPage ? 'New' : 'Edit') + ' Post';
-
-      // nav bar
-      this.ns.addTitle(this.title);
-      this.ns.closeLeftNav();
     }
   }
 
@@ -192,11 +196,15 @@ export class PostFormComponent implements OnDestroy {
       const file = target.files[0];
 
       // get user id
-      const uid = (await this.auth.getUser())?.uid;
-
+      let { data: user, error } = await this.us.getUser();
+      if (error) {
+        console.error(error);
+      }
+      const uid = user?.uid;
+      let image = null;
       // upload image with spinner
       this.imageLoading = true;
-      const { data: image, error } = await this.is.uploadImage(`post_images/${uid}`, file);
+      ({ data: image, error } = await this.is.uploadImage(`post_images/${uid}`, file));
       if (error) {
         console.error(error);
       }
@@ -241,7 +249,11 @@ export class PostFormComponent implements OnDestroy {
     const formValue = this.postForm.value;
     const slug = this.ts.slugify(formValue.title);
 
-    const uid = (await this.auth.getUser())?.uid;
+    let { data: user, error: _e2 } = (await this.us.getUser());
+    if (_e2) {
+      console.error(_e2);
+    }
+    const uid = user?.uid;
 
     let data: Post = {
       authorId: uid,

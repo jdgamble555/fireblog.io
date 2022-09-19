@@ -1,7 +1,11 @@
 import { NgModule } from '@angular/core';
-import { ImageModule } from './image/image.module';
+import { getStorage, provideStorage } from '@angular/fire/storage';
+import { ImageModule } from './image.module';
 
 @NgModule({
-  imports: [ImageModule]
+  imports: [
+    ImageModule,
+    provideStorage(() => getStorage())
+  ]
 })
 export class PostEditModule { }

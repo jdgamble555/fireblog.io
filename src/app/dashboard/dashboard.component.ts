@@ -23,7 +23,7 @@ export class DashboardComponent {
     this.ns.type = 'bookmarks';
 
     // see if logged in
-    this.user$ = this.us.userRec;
+    this.user$ = this.us.user$;
   }
 
   tabChange(index: number) {

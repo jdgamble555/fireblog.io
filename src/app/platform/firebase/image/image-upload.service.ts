@@ -10,7 +10,7 @@ import {
 } from '@angular/fire/storage';
 import { randomID } from '@shared/image-tools/image-tools';
 import { Observable } from 'rxjs';
-import { ImageModule } from './image.module';
+import { ImageModule } from '../image.module';
 
 
 @Injectable({

@@ -12,9 +12,9 @@ import {
   updateDoc,
   writeBatch
 } from '@angular/fire/firestore';
-import { AuthService } from '@db/auth/auth.service';
 import { deleteWithCounter, searchIndex, setWithCounter } from '@db/fb-tools';
 import { PostEditModule } from '@db/post-edit.module';
+import { UserDbService } from '@db/user/user-db.service';
 import { Post } from '@post/post.model';
 import { MarkdownService } from 'ngx-markdown';
 
@@ -26,7 +26,7 @@ export class PostEditService {
   constructor(
     private afs: Firestore,
     private markdownService: MarkdownService,
-    private auth: AuthService,
+    private us: UserDbService,
     @Inject(DOCUMENT) private document: Document
   ) { }
 
@@ -117,8 +117,11 @@ export class PostEditService {
    * @param id
    */
   async deletePost(id: string): Promise<{ error: any }> {
-    const uid = (await this.auth.getUser())?.uid;
-    let error = null;
+    let { data: user, error } = await this.us.getUser();
+    if (error) {
+      console.error(error);
+    }
+    const uid = user?.uid;
     if (uid) {
       try {
         await deleteWithCounter(

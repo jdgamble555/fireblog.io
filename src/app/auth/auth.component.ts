@@ -5,13 +5,11 @@ import {
   Validators,
   AbstractControl
 } from '@angular/forms';
-import { ActivatedRoute, Router, UrlSegment } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@db/auth/auth.service';
-
 import { NavService } from '@nav/nav.service';
 import { matchValidator, MyErrorStateMatcher } from '@shared/form-validators';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
-import { Subscription } from 'rxjs';
 import { auth_messages, auth_validation_messages } from './auth.messages';
 import { AuthAction } from './user.model';
 
@@ -21,15 +19,13 @@ import { AuthAction } from './user.model';
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.scss']
 })
-export class AuthComponent implements OnInit, OnDestroy {
+export class AuthComponent implements OnInit {
 
   matcher = new MyErrorStateMatcher();
   validationMessages: any = auth_validation_messages;
   messages = auth_messages;
 
   userForm!: FormGroup;
-
-  routeSub: Subscription;
 
   type!: 'login' | 'register' | 'reset' | 'verify' | 'passwordless';
   loading = false;
@@ -56,14 +52,9 @@ export class AuthComponent implements OnInit, OnDestroy {
   ) {
 
     // get type from route
-    this.routeSub = this.route.url
-      .subscribe((r: UrlSegment[]) => {
-        this.type = r[0].path as any;
-      });
+    this.type = this.route.parent?.routeConfig?.path as any;
     this.nav.closeLeftNav();
   }
-
-  // todo - create separate module for login
 
   async ngOnInit() {
 
@@ -225,9 +216,5 @@ export class AuthComponent implements OnInit, OnDestroy {
     } else {
       this.sb.showMsg(this.messages.emailVerifySent);
     }
-  }
-
-  ngOnDestroy(): void {
-    this.routeSub.unsubscribe();
   }
 }

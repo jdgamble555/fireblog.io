@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { environment } from '@env/environment';
 import { PostType } from '@post/post.model';
 import { SeoService } from '@shared/seo/seo.service';
-import { Observable, Subject } from 'rxjs';
 
 
 interface Link {
@@ -69,7 +68,6 @@ export class NavService {
       name,
       location
     };
-
     this.directories.push(data);
   }
 
@@ -81,6 +79,7 @@ export class NavService {
       }, 0);
     }
   }
+  
   closeLeftNav(): void {
     // wait for view to render
     if (this.isBrowser) {

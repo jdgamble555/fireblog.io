@@ -38,7 +38,7 @@ export class PostListComponent implements OnDestroy {
 
     // don't load on server or will loop
     if (this.ns.isBrowser) {
-      this.user$ = this.us.userRec;
+      this.user$ = this.us.user$;
     }
 
     this.routeSub = this.route.data

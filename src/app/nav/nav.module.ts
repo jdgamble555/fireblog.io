@@ -3,17 +3,21 @@ import { HeaderComponent } from './header/header.component';
 import { FooterComponent } from './footer/footer.component';
 import { LeftnavComponent } from './leftnav/leftnav.component';
 import { RightnavComponent } from './rightnav/rightnav.component';
-import { NavComponent } from './nav.component';
 import { CoreModule } from '@core/core.module';
 import { LeftnavService } from './leftnav/leftnav.service';
 import { TagListService } from '@post/tag-list/tag-list.service';
 import { TagListComponent } from '@post/tag-list/tag-list.component';
+import { SubheaderComponent } from './subheader/subheader.component';
+import { HomeComponent } from './home/home.component';
+import { PostListComponent } from '@post/post-list/post-list.component';
+import { PostListModule } from '@post/post-list/post-list.module';
 
 
 // todo - separate modules with shared so that only core is imported
 
 const components = [
-  NavComponent,
+  HomeComponent,
+  SubheaderComponent,
   HeaderComponent,
   FooterComponent,
   LeftnavComponent,
@@ -22,7 +26,8 @@ const components = [
 ];
 
 const modules = [
-  CoreModule
+  CoreModule,
+  PostListModule
 ];
 
 

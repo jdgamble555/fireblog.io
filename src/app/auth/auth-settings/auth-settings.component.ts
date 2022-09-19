@@ -35,7 +35,7 @@ export class AuthSettingsComponent implements OnInit {
   @ViewChild(FormGroupDirective) private passFormDirective!: FormGroupDirective;
 
   messages = auth_settings_messages;
-  validationMessages = {...auth_settings_validation_messages, ...username_validation_messages };
+  validationMessages = { ...auth_settings_validation_messages, ...username_validation_messages };
   errors = auth_settings_errors;
 
   matcher = new MyErrorStateMatcher();
@@ -66,7 +66,7 @@ export class AuthSettingsComponent implements OnInit {
     private nav: NavService,
     public is: ImageUploadService,
     private router: Router,
-    private us: UserDbService,
+    public us: UserDbService,
     private ues: UserEditService
   ) {
     this.nav.closeLeftNav();
@@ -79,7 +79,7 @@ export class AuthSettingsComponent implements OnInit {
     this.buildAccountForm();
 
     // get user info
-    const { error, data: user } = await this.us.getUserRec();
+    const { error, data: user } = await this.us.getUser();
     if (error) {
       console.error(error);
     }
@@ -101,14 +101,12 @@ export class AuthSettingsComponent implements OnInit {
       }
 
       // get email verified
-      this.auth.getUser().then(user => {
-        if (user) {
-          this.emailVerified = user?.emailVerified;
-        }
-      });
+      if (user) {
+        this.emailVerified = user?.emailVerified || null;
+      }
 
       // get providers
-      this.providers = await this.auth.getProviders() as string[];
+      this.providers = await this.us.getProviders() as string[];
 
     } else {
       this.router.navigate(['/login']);
@@ -245,7 +243,8 @@ export class AuthSettingsComponent implements OnInit {
     } else {
       if (error) {
         this.sb.showError(error);
-      } else {        this.sb.showMsg(this.messages.passUpdated);
+      } else {
+        this.sb.showMsg(this.messages.passUpdated);
       }
     }
   }
@@ -283,7 +282,7 @@ export class AuthSettingsComponent implements OnInit {
       r = await this.aes.addProvider(p);
     } else {
       // can't remove if only provider
-      const providers = await this.auth.getProviders();
+      const providers = await this.us.getProviders();
       if (providers.length < 2) {
         this.sb.showError(this.errors.removeProvider);
       } else {
@@ -333,7 +332,7 @@ export class AuthSettingsComponent implements OnInit {
         this.sb.showMsg(this.messages.accountRemoved);
       }
     }
-    this.auth.logout();
+    this.us.logout();
   }
   /**
    * Reauthenticate the user with a dialog
@@ -346,7 +345,7 @@ export class AuthSettingsComponent implements OnInit {
       panelClass: 'reAuthDialog',
       disableClose: true,
       data: {
-        providers: await this.auth.getProviders()
+        providers: await this.us.getProviders()
       }
     });
   }
@@ -363,7 +362,10 @@ export class AuthSettingsComponent implements OnInit {
   async deleteImage(): Promise<void> {
 
     // remove from storage bucket
-    const user = await this.auth.getUser();
+    const { data: user, error } = await this.us.getUser();
+    if (error) {
+      console.error(error);
+    }
     const url = user?.photoURL || '';
 
     // delete the image from url
@@ -397,11 +399,10 @@ export class AuthSettingsComponent implements OnInit {
       // convert to jpeg
       const image = blobToFile(file, file?.name);
 
-      const user = await this.auth.getUser();
+      let { data: user, error } = await this.us.getUser();
       const uid = user?.uid;
 
       let imageURL;
-      let error = null;
       try {
         ({ data: imageURL, error } = await this.is.uploadImage('profile_images', image, uid));
         if (error) {
@@ -426,7 +427,7 @@ export class AuthSettingsComponent implements OnInit {
   }
 
   logout(): void {
-    this.auth.logout();
+    this.us.logout();
     this.nav.home();
   }
 }

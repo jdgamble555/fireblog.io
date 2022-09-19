@@ -2,13 +2,12 @@ import { Injectable } from '@angular/core';
 import { Auth, user } from '@angular/fire/auth';
 import {
   doc,
-  DocumentSnapshot,
   Firestore,
   getDoc,
   setDoc,
   writeBatch
 } from '@angular/fire/firestore';
-import { UserAccount, UserRec, UserRequest } from '@auth/user.model';
+import { UserRec, UserRequest } from '@auth/user.model';
 import { AuthEditModule } from '@db/auth-edit.module';
 import { deleteWithCounter } from '@db/fb-tools';
 import { firstValueFrom } from 'rxjs';
@@ -27,7 +26,8 @@ export class UserEditService {
     return (await firstValueFrom(user(this.auth)))?.uid || null;
   }
 
-  async updateUser({ photoURL, displayName, phoneNumber, email }: UserAccount): Promise<UserRequest<void>> {
+  // todo - fix any type
+  async updateUser({ photoURL, displayName, phoneNumber, email }: any): Promise<UserRequest<void>> {
     const uid = await this.getUid();
     let error = null;
     if (uid) {
@@ -62,8 +62,9 @@ export class UserEditService {
   async validUsername(name: string): Promise<UserRequest<void>> {
     let exists: boolean | null = null;
     let error = null;
+    // todo - fix any type
     try {
-      exists = await getDoc<UserRec>(
+      exists = await getDoc<any>(
         doc(this.afs, 'usernames', name)
       ).then(doc => doc.exists());
     } catch (e: any) {
@@ -104,7 +105,8 @@ export class UserEditService {
     const uid = await this.getUid();
     if (uid) {
       try {
-        exists = await getDoc<UserRec>(
+        // todo - fix any type
+        exists = await getDoc<any>(
           doc(this.afs, 'users', uid)
         ).then(doc => {
           if (doc.exists()) {

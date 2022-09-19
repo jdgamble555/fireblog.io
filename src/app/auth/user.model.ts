@@ -19,16 +19,8 @@ export interface UserRec {
   bookmarksCount?: number;
   createdAt?: Date;
   updatedAt?: Date;
+  emailVerified?: boolean;
 };
-
-export interface UserAuth {
-  uid: string;
-  email: string;
-  displayName?: string | null;
-  phoneNumber?: string | null;
-  photoURL?: string | null;
-  emailVerified: boolean | null;
-}
 
 export interface AuthAction {
   reAuth?: boolean | null;
@@ -43,9 +35,3 @@ export interface UserRequest<T> {
   exists?: boolean | null
 }
 
-export interface UserAccount {
-  displayName?: string | null,
-  photoURL?: string | null,
-  phoneNumber?: string | null,
-  email?: string | null
-}

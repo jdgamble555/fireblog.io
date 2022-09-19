@@ -40,7 +40,6 @@ export class PostDbService {
   async getPostById(id: string, user?: UserRec): Promise<{ data: Post | null, error: any }> {
     let data = null;
     let error = null;
-    console.log(id);
     ({ data, error } = await this.sb.supabase.from('posts').select('*, author!inner(*)').eq('id', id).eq('published', true).single());
     return { data, error };
   }
@@ -93,7 +92,6 @@ export class PostDbService {
       createdAt: _d.created_at,
       updatedAt: _d.updated_at
     }));
-    console.log(data);
     return {
       error,
       posts: data || null,

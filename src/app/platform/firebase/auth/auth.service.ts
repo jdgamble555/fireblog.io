@@ -2,7 +2,6 @@ import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
 import {
   Auth,
-  signOut,
   signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -11,39 +10,29 @@ import {
   sendPasswordResetEmail,
   getAdditionalUserInfo,
   OAuthProvider,
-  User,
   user,
   sendSignInLinkToEmail,
   isSignInWithEmailLink,
   signInWithEmailLink
 } from '@angular/fire/auth';
-import { AuthAction, Role, UserAuth } from '@auth/user.model';
-import { DbModule } from '@db/db.module';
+import { AuthAction, Role } from '@auth/user.model';
+import { AuthDbModule } from '@db/auth-db.module';
 import { UserDbService } from '@db/user/user-db.service';
-import { firstValueFrom, map, Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { auth_messages } from './auth.messages';
 
 @Injectable({
-  providedIn: DbModule
+  providedIn: AuthDbModule
 })
 export class AuthService {
 
   messages = auth_messages;
-  user$: Observable<UserAuth | null>;
 
   constructor(
     private auth: Auth,
     private us: UserDbService,
     @Inject(DOCUMENT) private doc: Document
-  ) {
-    this.user$ = user(this.auth) as Observable<UserAuth | null>;
-  }
-
-  // User
-
-  async getUser(): Promise<UserAuth | null> {
-    return await firstValueFrom(this.user$);
-  }
+  ) { }
 
   // Login
 
@@ -119,7 +108,7 @@ export class AuthService {
 
       if (_user) {
         await sendEmailVerification(_user);
-        await this.logout();
+        await this.us.logout();
       }
     } catch (e: any) {
       error = e;
@@ -188,17 +177,5 @@ export class AuthService {
       error = e;
     }
     return { isNew, error };
-  }
-
-  async logout(): Promise<void> {
-    await signOut(this.auth);
-  }
-
-  // Providers
-
-  async getProviders(): Promise<string[]> {
-    const _user = await firstValueFrom(user(this.auth));
-    return _user?.providerData
-      .map((p: any) => p.providerId) || [];
   }
 }

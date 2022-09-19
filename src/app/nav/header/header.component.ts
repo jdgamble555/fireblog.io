@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Output, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserRec } from '@auth/user.model';
-import { AuthService } from '@db/auth/auth.service';
 import { PostDbService } from '@db/post/post-db.service';
 import { UserDbService } from '@db/user/user-db.service';
 import { environment } from '@env/environment';
@@ -29,14 +28,13 @@ export class HeaderComponent {
   user$: Observable<UserRec | null>;
 
   constructor(
-    private auth: AuthService,
     public ns: NavService,
     public dm: DarkModeService,
     private ps: PostDbService,
     private us: UserDbService,
     private router: Router
   ) {
-    this.user$ = this.ns.isBrowser ? this.us.userRec : of(null);
+    this.user$ = this.ns.isBrowser ? this.us.user$ : of(null);
     this.dm.setTheme();
     this.env = environment;
   }
@@ -58,7 +56,7 @@ export class HeaderComponent {
   }
 
   logout() {
-    this.auth.logout();
+    this.us.logout();
     this.ns.home();
   }
 

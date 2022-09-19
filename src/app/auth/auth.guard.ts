@@ -4,7 +4,6 @@ import {
   CanActivate,
   Router
 } from '@angular/router';
-import { AuthService } from '@db/auth/auth.service';
 import { UserDbService } from '@db/user/user-db.service';
 import { StateService } from '@shared/state/state.service';
 import { Role } from './user.model';
@@ -19,7 +18,7 @@ export class RoleGuard implements CanActivate {
     private router: Router
   ) { }
   async canActivate(): Promise<boolean> {
-    const { error, data: user } = await this.us.getUserRec();
+    const { error, data: user } = await this.us.getUser();
     if (error) {
       console.error(error);
     }
@@ -36,11 +35,14 @@ export class RoleGuard implements CanActivate {
 export class LoginGuard implements CanActivate {
   // must be logged in
   constructor(
-    private auth: AuthService,
+    private us: UserDbService,
     private router: Router
   ) { }
   async canActivate(): Promise<boolean> {
-    const user = await this.auth.getUser();
+    const { error, data: user } = await this.us.getUser();
+    if (error) {
+      console.error(error);
+    }
     const isLoggedIn = !!user;
     if (!isLoggedIn) {
       this.router.navigate(['/login']);
@@ -55,11 +57,14 @@ export class LoginGuard implements CanActivate {
 export class NotLoginGuard implements CanActivate {
   // cannot access if logged in
   constructor(
-    private auth: AuthService,
+    private us: UserDbService,
     private router: Router
   ) { }
   async canActivate(): Promise<boolean> {
-    const user = await this.auth.getUser();
+    const { error, data: user } = await this.us.getUser();
+    if (error) {
+      console.error(error);
+    }
     const isLoggedIn = !!user;
     if (isLoggedIn) {
       this.router.navigate(['/settings']);
@@ -74,12 +79,15 @@ export class NotLoginGuard implements CanActivate {
 export class EmailGuard implements CanActivate {
   // email must be verified
   constructor(
-    private auth: AuthService,
+    private us: UserDbService,
     private router: Router
   ) { }
   async canActivate(): Promise<boolean> {
     // make sure logged in first...
-    const user = await this.auth.getUser();
+    const { error, data: user } = await this.us.getUser();
+    if (error) {
+      console.error(error);
+    }
     const emailVerified = !!(user && user?.emailVerified);
     if (!emailVerified) {
       this.router.navigate(['/verify']);
@@ -94,14 +102,16 @@ export class EmailGuard implements CanActivate {
 export class NotUsernameGuard implements CanActivate {
   constructor(
     private us: UserDbService,
-    private auth: AuthService,
     private router: Router
   ) { }
   async canActivate(): Promise<boolean> {
 
     // only allow if logged in and no username
-    const uid = (await this.auth.getUser())?.uid;
-
+    const { error, data: user } = await this.us.getUser();
+    if (error) {
+      console.error(error);
+    }
+    const uid = user?.uid;
     // if logged in
     if (uid) {
       const { data: username, error } = await this.us.getUsernameFromId(uid);
@@ -140,8 +150,6 @@ export class UserPostGuard implements CanActivate {
     let isValidUsername = false;
 
     if (uid) {
-      // username checks
-      // todo -fix!
       const fetch_un = this.us.getUsernameFromId(uid);
       const { data: currentUsername, error } = await this.state.loadState('user', fetch_un);
       if (error) {

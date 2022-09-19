@@ -9,7 +9,6 @@ import { MarkdownService } from 'ngx-markdown';
 import { Observable, of, Subscription } from 'rxjs';
 import { Post } from './post.model';
 
-
 @Component({
   selector: 'app-post',
   templateUrl: './post.component.html',
@@ -40,10 +39,7 @@ export class PostComponent {
     this.meta(post);
     this.post = post;
 
-    // todo - fix this
-    if (this.ns.isBrowser) {
-      this.user$ = this.us.userRec;
-    }
+    this.user$ = this.ns.isBrowser ? this.us.user$ : of(null);
   }
 
   meta(r: Post) {

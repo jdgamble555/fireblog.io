@@ -4,6 +4,7 @@ import { SharedModule } from '@shared/shared.module';
 import { DashboardComponent } from './dashboard.component';
 import { PostListModule } from '@post/post-list/post-list.module';
 import { NavModule } from '@nav/nav.module';
+import { MaterialModule } from '@core/material.module';
 
 
 @NgModule({
@@ -14,7 +15,8 @@ import { NavModule } from '@nav/nav.module';
     SharedModule,
     DashboardRoutingModule,
     PostListModule,
-    NavModule
+    NavModule,
+    MaterialModule
   ]
 })
 export class DashboardModule { }
