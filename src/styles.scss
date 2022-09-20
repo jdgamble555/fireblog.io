@@ -1063,20 +1063,27 @@ mat-paginator .mat-form-field {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #1e1e1e;
-  border: 1px solid #666666;
-  border-radius: 4px;
+  //background-color: #1e1e1e;
+  //border: 1px solid #666666;
+  //border-radius: 4px;
+  color: #fff;
+  background-color: transparent;
+  border: 0;
   padding: 6px;
   cursor: pointer;
-  transition: all 200ms ease-out;
+  transition: all 200ms ease-in;
 
-  &:active,
-  &:hover {
-    border-color: #888888;
+  &:not(:hover) {
+    transition: all 200ms ease-out;
   }
 
   &:active {
-    background-color: #3e3e3e;
     transform: scale(0.95);
   }
+}
+
+.btn-icon {
+  font-size: 1rem;
+  height: 1rem;
+  width: 1rem;
 }
