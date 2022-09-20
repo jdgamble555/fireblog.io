@@ -1,8 +1,10 @@
-<mat-card class="ng-card mat-elevation-z0 ng-card-outline" *ngIf="tags as _tags">
-  <mat-card-content>
-    <ul class="tag_list">
-      <li *ngFor="let tag of _tags" [routerLink]="['t', tag.name]">{{ tag.name }}
-        ({{ tag.count }})</li>
-    </ul>
-  </mat-card-content>
-</mat-card>
+<div class="ng-border">
+  <mat-card class="ng-card mat-elevation-z0 ng-card-outline" *ngIf="tags as _tags">
+    <mat-card-content>
+      <ul class="tag_list">
+        <li *ngFor="let tag of _tags" [routerLink]="['t', tag.name]">{{ tag.name }}
+          ({{ tag.count }})</li>
+      </ul>
+    </mat-card-content>
+  </mat-card>
+</div>

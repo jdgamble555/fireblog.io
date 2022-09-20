@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AuthAction, UserAuth } from '@auth/user.model';
+import { AuthAction, UserRec } from '@auth/user.model';
 import { DbModule } from '@db/db.module';
 import { UserDbService } from '@db/user/user-db.service';
 import { map, Observable, tap } from 'rxjs';
@@ -11,7 +11,7 @@ import { SupabaseService } from '../supabase.service';
 })
 export class AuthService {
 
-  user$: Observable<UserAuth | null>;
+  user$: Observable<UserRec | null>;
 
   constructor(
     private us: UserDbService,
@@ -22,7 +22,7 @@ export class AuthService {
 
   // User
 
-  private _mapUser(u: User): UserAuth {
+  private _mapUser(u: User): UserRec {
     return ({
       uid: u.id,
       email: u.email,
@@ -30,13 +30,13 @@ export class AuthService {
       photoURL: u?.user_metadata['avatar_url'],
       phoneNumber: u.phone,
       displayName: u?.user_metadata['full_name']
-    } as UserAuth);
+    } as UserRec);
   }
 
-  private _user(): Observable<UserAuth | null> {
+  private _user(): Observable<UserRec | null> {
     return this.sb.authState().pipe(
       map(u => u ? this._mapUser(u) : null),
-      tap(async (u: UserAuth | null) => {
+      tap(async (u: UserRec | null) => {
         if (u) {
           // add user info if user DNE
           await this._userCheck(u);
@@ -45,19 +45,19 @@ export class AuthService {
     )
   }
 
-  private async _userCheck(u: UserAuth): Promise<void> {
+  private async _userCheck(u: UserRec): Promise<void> {
 
     // create user if DNE
-    const { error, data: user } = await this.us.getUserRec();
+    const { error, data: user } = await this.us.getUser();
     if (error) {
       console.error(error);
     }
-    if (!user) {
+    if (!user && u.uid) {
       await this.us.createUser(u, u.uid);
     }
   }
 
-  async getUser(): Promise<UserAuth | null> {
+  async getUser(): Promise<UserRec | null> {
     const user = (await this.sb.supabase.auth.getSession()).data.session?.user;
     const _data = user ? this._mapUser(user) : null;
     return _data;
@@ -108,14 +108,5 @@ export class AuthService {
     if (error) {
       console.error(error);
     }
-  }
-
-  // Providers
-
-  async getProviders(): Promise<string[]> {
-    const sb = await this.sb.supabase.auth.getSession();
-    let providers = sb.data.session?.user.app_metadata.providers;
-    providers = providers.map((p: string) => p === 'google' ? 'google.com' : p);
-    return providers;
   }
 }

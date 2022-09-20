@@ -13,6 +13,13 @@ import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { auth_messages, auth_validation_messages } from './auth.messages';
 import { AuthAction } from './user.model';
 
+enum AuthType {
+  login = 'login',
+  register = 'register',
+  reset = 'reset',
+  verify = 'verify',
+  passwordless = 'passwordless'
+};
 
 @Component({
   selector: 'app-auth',
@@ -27,7 +34,7 @@ export class AuthComponent implements OnInit {
 
   userForm!: FormGroup;
 
-  type!: 'login' | 'register' | 'reset' | 'verify' | 'passwordless';
+  type!: AuthType;
   loading = false;
 
   passhide = true;
@@ -52,7 +59,7 @@ export class AuthComponent implements OnInit {
   ) {
 
     // get type from route
-    this.type = this.route.parent?.routeConfig?.path as any;
+    this.type = this.route.parent?.routeConfig?.path as AuthType;
     this.nav.closeLeftNav();
   }
 

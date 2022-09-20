@@ -34,7 +34,8 @@
               "src/sitemap.xsl"
             ],
             "styles": [
-              "node_modules/prismjs/themes/prism-tomorrow.css",
+              "node_modules/prismjs/themes/prism-tomorrow.min.css",
+              "node_modules/prismjs/plugins/line-numbers/prism-line-numbers.css",
               "./node_modules/@angular/material/prebuilt-themes/pink-bluegrey.css",
               "src/styles.scss"
             ],
@@ -42,7 +43,8 @@
               "node_modules/marked/marked.min.js",
               "node_modules/prismjs/prism.js",
               "node_modules/prismjs/components/prism-typescript.min.js",
-              "node_modules/prismjs/components/prism-xml-doc.min.js"
+              "node_modules/prismjs/plugins/line-numbers/prism-line-numbers.js",
+              "node_modules/clipboard/dist/clipboard.min.js"
             ],
             "serviceWorker": true,
             "ngswConfigPath": "ngsw-config.json",
@@ -149,7 +151,8 @@
               "src/sitemap.xsl"
             ],
             "styles": [
-              "node_modules/prismjs/themes/prism-tomorrow.css",
+              "node_modules/prismjs/themes/prism-coy.min.css",
+              "node_modules/prismjs/plugins/line-numbers/prism-line-numbers.css",
               "./node_modules/@angular/material/prebuilt-themes/pink-bluegrey.css",
               "src/styles.scss"
             ],
@@ -157,7 +160,8 @@
               "node_modules/marked/marked.min.js",
               "node_modules/prismjs/prism.js",
               "node_modules/prismjs/components/prism-typescript.min.js",
-              "node_modules/prismjs/components/prism-xml-doc.min.js"
+              "node_modules/clipboard/dist/clipboard.min.js",
+              "node_modules/prismjs/plugins/line-numbers/prism-line-numbers.js"
             ],
             "codeCoverage": true,
             "codeCoverageExclude": ["src/app/platform/supabase/**/*"]

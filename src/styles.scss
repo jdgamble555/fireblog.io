@@ -7,9 +7,40 @@
 
 $custom-typography: mat.define-typography-config(
   $font-family: "Open Sans",
-  $headline: mat.define-typography-level(2rem, 1, 600),
-  $body-1: mat.define-typography-level(1rem, 1.5, 400)
+  $display-4:     mat.define-typography-level(112px, 112px, 300, $letter-spacing: -0.05em),
+  $display-3:     mat.define-typography-level(56px, 56px, 400, $letter-spacing: -0.02em),
+  $display-2:     mat.define-typography-level(45px, 48px, 400, $letter-spacing: -0.005em),
+  $display-1:     mat.define-typography-level(34px, 40px, 400),
+  $headline:      mat.define-typography-level(24px, 32px, 400),
+  $title:         mat.define-typography-level(20px, 32px, 500),
+  $subheading-2:  mat.define-typography-level(16px, 28px, 400),
+  $subheading-1:  mat.define-typography-level(15px, 24px, 400),
+  $body-2:        mat.define-typography-level(14px, 24px, 500),
+  $body-1:        mat.define-typography-level(14px, 20px, 400),
+  $caption:       mat.define-typography-level(12px, 20px, 400),
+  $button:        mat.define-typography-level(14px, 14px, 500),
+  // Line-height must be unit-less fraction of the font-size.
+  $input:         mat.define-typography-level(inherit, 1.125, 400)
 );
+
+/*
+  $font-family:   'Roboto, "Helvetica Neue", sans-serif',
+  $display-4:     define-typography-level(112px, 112px, 300, $letter-spacing: -0.05em),
+  $display-3:     define-typography-level(56px, 56px, 400, $letter-spacing: -0.02em),
+  $display-2:     define-typography-level(45px, 48px, 400, $letter-spacing: -0.005em),
+  $display-1:     define-typography-level(34px, 40px, 400),
+  $headline:      define-typography-level(24px, 32px, 400),
+  $title:         define-typography-level(20px, 32px, 500),
+  $subheading-2:  define-typography-level(16px, 28px, 400),
+  $subheading-1:  define-typography-level(15px, 24px, 400),
+  $body-2:        define-typography-level(14px, 24px, 500),
+  $body-1:        define-typography-level(14px, 20px, 400),
+  $caption:       define-typography-level(12px, 20px, 400),
+  $button:        define-typography-level(14px, 14px, 500),
+  // Line-height must be unit-less fraction of the font-size.
+  $input:         define-typography-level(inherit, 1.125, 400)
+
+*/
 
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
@@ -236,10 +267,10 @@ mat-card a:visited {
 }
 
 .ng-card {
-  margin: 0 15px 15px;
   text-align: left;
   font-size: 1rem;
   max-width: 86vw;
+  margin-bottom: 15px;
 }
 
 .ng-cat {
@@ -438,7 +469,6 @@ mat-form-field.mat-form-field {
 .ng-footer {
   border-collapse: collapse;
   max-width: 1000px;
-  min-width: 300px;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -491,14 +521,18 @@ mat-form-field.mat-form-field {
 
 // Breadcrumbs
 
+.arrow-button {
+  white-space: pre-wrap !important;
+}
+
 .arrows {
-  white-space: nowrap;
+  white-space: wrap;
 }
 .arrows li {
-  display: inline;
+  display: inline-block;
   position: relative;
   word-wrap: break-word;
-  white-space: normal;
+  white-space: wrap !important;
 }
 
 .arrows li::after {
@@ -532,7 +566,7 @@ mat-form-field.mat-form-field {
 }
 
 code {
-  font-size: 1rem !important;
+  font-size: .75rem !important;
 }
 
 markdown {
@@ -965,7 +999,7 @@ mat-paginator .mat-form-field {
 }
 .leftnav {
   grid-area: leftnav;
-  min-width: 220px;
+  min-width: 200px;
 }
 .footer {
   grid-area: footer;
@@ -975,6 +1009,8 @@ mat-paginator .mat-form-field {
   margin-right: auto;
   margin-left: auto;
   max-width: 995px;
+  width: 95%;
+  grid-gap: 15px;
   display: grid;
   grid-template-areas:
     "header"
@@ -994,6 +1030,7 @@ mat-paginator .mat-form-field {
   margin-right: auto;
   margin-left: auto;
   max-width: 995px;
+  width: 95%;
   display: grid;
   grid-template-areas:
     "header"
@@ -1016,5 +1053,27 @@ mat-paginator .mat-form-field {
   }
   nav ul {
     flex-direction: column;
+  }
+}
+
+.btn-clipboard {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #1e1e1e;
+  border: 1px solid #666666;
+  border-radius: 4px;
+  padding: 6px;
+  cursor: pointer;
+  transition: all 200ms ease-out;
+
+  &:active,
+  &:hover {
+    border-color: #888888;
+  }
+
+  &:active {
+    background-color: #3e3e3e;
+    transform: scale(0.95);
   }
 }

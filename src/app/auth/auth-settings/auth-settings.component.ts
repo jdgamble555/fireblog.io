@@ -17,7 +17,11 @@ import { DialogService } from '@shared/confirm-dialog/dialog.service';
 import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { matchValidator, MyErrorStateMatcher } from '@shared/form-validators';
 import { NavService } from '@nav/nav.service';
-import { auth_settings_errors, auth_settings_messages, auth_settings_validation_messages } from './auth-settings.messages';
+import {
+  auth_settings_errors,
+  auth_settings_messages,
+  auth_settings_validation_messages
+} from './auth-settings.messages';
 import { ImageUploadService } from '@db/image/image-upload.service';
 import { UserDbService } from '@db/user/user-db.service';
 import { UserEditService } from '@db/user/user-edit.service';
@@ -106,7 +110,7 @@ export class AuthSettingsComponent implements OnInit {
       }
 
       // get providers
-      this.providers = await this.us.getProviders() as string[];
+      this.providers = user.providers;
 
     } else {
       this.router.navigate(['/login']);
@@ -282,8 +286,8 @@ export class AuthSettingsComponent implements OnInit {
       r = await this.aes.addProvider(p);
     } else {
       // can't remove if only provider
-      const providers = await this.us.getProviders();
-      if (providers.length < 2) {
+      const providers = (await this.us.getUser()).data?.providers;
+      if (providers && providers.length < 2) {
         this.sb.showError(this.errors.removeProvider);
       } else {
         r = await this.aes.removeProvider(p);
@@ -338,6 +342,7 @@ export class AuthSettingsComponent implements OnInit {
    * Reauthenticate the user with a dialog
    */
   private async reAuth(): Promise<any> {
+    const providers = (await this.us.getUser()).data?.providers;
     // open reauth dialog with providers
     return this.d.open(ReLoginComponent, {
       width: '300px',
@@ -345,7 +350,7 @@ export class AuthSettingsComponent implements OnInit {
       panelClass: 'reAuthDialog',
       disableClose: true,
       data: {
-        providers: await this.us.getProviders()
+        providers
       }
     });
   }

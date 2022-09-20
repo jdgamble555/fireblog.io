@@ -16,7 +16,7 @@ import {
 } from '@angular/fire/firestore';
 import { UserRec } from '@auth/user.model';
 import { DbModule } from '@db/db.module';
-import { expandRef, expandRefs, soundex } from '@db/fb-tools';
+import { expandRefs, soundex } from '@db/fb-tools';
 import { UserDbService } from '@db/user/user-db.service';
 import { Post, PostInput } from '@post/post.model';
 import { snapToData } from 'rxfire/firestore';
@@ -50,15 +50,6 @@ export class PostDbService {
       error = e;
     }
     return { error, data };
-  }
-
-
-  private subTotal(col: string): Observable<string> {
-    return docData<any>(
-      doc(this.afs, '_counters', col)
-    ).pipe(
-      map(r => r ? r.count : null)
-    );
   }
 
   async getPostData(id: string): Promise<{ error: any, data: Post | null }> {
@@ -289,9 +280,9 @@ export class PostDbService {
 
     // count
     if (uid && field) {
-      count = this.us.subUserTotal(uid, field);
+      count = this.subUserTotal(uid, field);
     } else if (tag) {
-      count = this.ts.subTagTotal(tag);
+      count = this.subTagTotal(tag);
     } else {
       count = this.subTotal('posts');
     }
@@ -308,5 +299,29 @@ export class PostDbService {
       count,
       error
     };
+  }
+
+  private subUserTotal(uid: string, col: string): Observable<string> {
+    return docData<any>(
+      doc(this.afs, 'users', uid)
+    ).pipe(
+      map(r => r ? r[col + 'Count'] : null)
+    );
+  }
+
+  private subTotal(col: string): Observable<string> {
+    return docData<any>(
+      doc(this.afs, '_counters', col)
+    ).pipe(
+      map(r => r ? r.count : null)
+    );
+  }
+
+  private subTagTotal(t: string): Observable<string> {
+    return docData<any>(
+      doc(this.afs, 'tags', t)
+    ).pipe(
+      map((r: any) => r ? r.count : null)
+    );
   }
 }

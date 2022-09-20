@@ -44,7 +44,6 @@
     "rxfire": "^6.0.0",
     "rxjs": "~7.5.0",
     "sitemap": "^7.1.1",
-    "uuid": "^9.0.0",
     "zone.js": "~0.11.4"
   },
   "devDependencies": {

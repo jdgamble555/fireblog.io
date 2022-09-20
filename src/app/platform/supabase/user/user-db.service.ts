@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { UserAuth, UserRec, UserRequest } from '@auth/user.model';
+import { UserRec, UserRequest } from '@auth/user.model';
 import { DbModule } from '@db/db.module';
 import { User } from '@supabase/supabase-js';
 import { map, Observable, of, switchMap, tap } from 'rxjs';
@@ -43,14 +43,14 @@ export class UserDbService {
     );
   }
 
-  async getUserRec(): Promise<UserRequest<UserRec | null>> {
+  async getUserRec(): Promise<UserRequest> {
     const user = (await this.sb.supabase.auth.getSession()).data.session?.user;
     let { data, error } = await this.sb.supabase.from('profiles').select('*').eq('id', user?.id).single();
     data = { ...data, email: user?.email };
     return { data: data ? this.mapUser(data) : null, error };
   }
 
-  async createUser(user: UserAuth, id: string): Promise<{ error: any }> {
+  async createUser(user: UserRec, id: string): Promise<{ error: any }> {
     const { error } = await this.sb.supabase.from('profiles').upsert({
       id,
       photo_url: user.photoURL,

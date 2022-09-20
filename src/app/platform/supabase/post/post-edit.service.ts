@@ -4,7 +4,6 @@ import { PostEditModule } from '@db/post-edit.module';
 import { Post } from '@post/post.model';
 import { MarkdownService } from 'ngx-markdown';
 import { SupabaseService } from '../supabase.service';
-import { v4 } from 'uuid';
 
 @Injectable({
   providedIn: PostEditModule
@@ -80,15 +79,6 @@ export class PostEditService {
   async deletePostImage(id: string, url: string): Promise<{ error: any }> {
     let error = null;
     return { error };
-  }
-
-  /**
-  * Generates an id for a new firestore doc
-  * @returns
-  */
-  getId(): string {
-    // todo - change to function in images ?
-    return v4();
   }
 
   //

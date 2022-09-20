@@ -1,5 +1,5 @@
 <div *ngIf="posts" class="ng-border">
-  <mat-card class="ng-card" *ngFor="let post of posts">
+  <mat-card class="ng-card mat-elevation-z0 ng-card-outline" *ngFor="let post of posts">
     <ng-container *ngIf="post.id">
       <img *ngIf="post.image" mat-card-image src="{{ post.image }}" alt="{{ post.title }}"
         [routerLink]="['/post', post.id, post.slug]" class="ng-link" />

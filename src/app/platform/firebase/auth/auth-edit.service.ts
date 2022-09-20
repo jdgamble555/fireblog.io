@@ -54,6 +54,7 @@ export class AuthEditService {
   // Providers
 
   async addProvider(p: string): Promise<AuthAction> {
+    p = p === 'google' ? 'google.com' : p;
     let error = null;
     try {
       // get provider object from id
@@ -83,6 +84,7 @@ export class AuthEditService {
   }
 
   async removeProvider(p: string): Promise<AuthAction> {
+    p = p === 'google' ? 'google.com' : p;
     // remove provider from user
     let error = null;
     try {

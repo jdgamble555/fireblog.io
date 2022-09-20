@@ -8,7 +8,7 @@ import { DbModule } from '@db/db.module';
 import { environment } from '@env/environment';
 import { NavModule } from '@nav/nav.module';
 import { PostModule } from '@post/post.module';
-import { MarkdownModule } from 'ngx-markdown';
+import { ClipboardOptions, MarkdownModule } from 'ngx-markdown';
 
 
 @NgModule({

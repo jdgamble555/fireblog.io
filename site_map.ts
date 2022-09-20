@@ -1,11 +1,12 @@
 import { environment } from '@env/environment';
 import { getApp, getApps, initializeApp } from '@firebase/app';
 import { Post, Tag } from '@post/post.model';
+import type { Response } from 'express';
 import { collection, CollectionReference, getDocs, getFirestore, limit, orderBy, query, QueryDocumentSnapshot, Timestamp, where } from "firebase/firestore";
 import { SitemapStream } from 'sitemap';
 import { createGzip } from 'zlib';
 
-export const site_map = async ({ }, res: any) => {
+export const site_map = async ({ }, res: Response) => {
 
   res.header("Content-Type", "application/xml");
   res.header("Content-Encoding", "gzip");

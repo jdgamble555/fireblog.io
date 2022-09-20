@@ -20,6 +20,7 @@ export interface UserRec {
   createdAt?: Date;
   updatedAt?: Date;
   emailVerified?: boolean;
+  providers?: string[];
 };
 
 export interface AuthAction {
@@ -29,9 +30,8 @@ export interface AuthAction {
   error: any;
 }
 
-export interface UserRequest<T> {
+export interface UserRequest {
   error: any,
-  data?: T
-  exists?: boolean | null
+  data?: UserRec | null;
+  exists?: boolean | null;
 }
-

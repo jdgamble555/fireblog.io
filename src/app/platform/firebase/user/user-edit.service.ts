@@ -26,8 +26,7 @@ export class UserEditService {
     return (await firstValueFrom(user(this.auth)))?.uid || null;
   }
 
-  // todo - fix any type
-  async updateUser({ photoURL, displayName, phoneNumber, email }: any): Promise<UserRequest<void>> {
+  async updateUser({ photoURL, displayName, phoneNumber, email }: UserRec): Promise<UserRequest> {
     const uid = await this.getUid();
     let error = null;
     if (uid) {
@@ -44,7 +43,7 @@ export class UserEditService {
     return { error };
   }
 
-  async deleteUser(): Promise<UserRequest<void>> {
+  async deleteUser(): Promise<UserRequest> {
     const uid = await this.getUid();
     let error = null;
     try {
@@ -59,7 +58,7 @@ export class UserEditService {
     return { error };
   }
 
-  async validUsername(name: string): Promise<UserRequest<void>> {
+  async validUsername(name: string): Promise<UserRequest> {
     let exists: boolean | null = null;
     let error = null;
     // todo - fix any type
@@ -73,7 +72,7 @@ export class UserEditService {
     return { exists, error };
   }
 
-  async updateUsername(username: string, currentUsername?: string): Promise<UserRequest<void>> {
+  async updateUsername(username: string, currentUsername?: string): Promise<UserRequest> {
     let error = null;
     const uid = await this.getUid();
     if (uid) {
@@ -99,7 +98,7 @@ export class UserEditService {
     return { error };
   }
 
-  async hasUsername(): Promise<UserRequest<void>> {
+  async hasUsername(): Promise<UserRequest> {
     let error = null;
     let exists = null;
     const uid = await this.getUid();

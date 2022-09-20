@@ -10,7 +10,8 @@
           </mat-expansion-panel-header>
           <div libDropZone (dropped)="uploadImage($event)" (hovered)="toggleHover($event)">
             <div (click)="file.click()">
-              <img *ngIf="user.photoURL" [src]="user.photoURL | urlSanitizer" class="drop-image" [alt]="user.displayName" />
+              <img *ngIf="user.photoURL" [src]="user.photoURL | urlSanitizer" class="drop-image"
+                [alt]="user.displayName" />
               <div *ngIf="!user.photoURL">
                 <mat-icon class="ng-account-icon">account_circle</mat-icon>
                 <p>Click to upload an image!</p>
@@ -144,8 +145,8 @@
               <button class="g-button provider-button ng-button-space" mat-button>
                 Google
               </button>
-              <mat-slide-toggle color="primary" #g [checked]="isProvider('google.com')"
-                (change)="updateProvider(g, 'google.com')">
+              <mat-slide-toggle color="primary" #g [checked]="isProvider('google')"
+                (change)="updateProvider(g, 'google')">
               </mat-slide-toggle>
             </div>
           </div>

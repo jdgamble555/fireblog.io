@@ -5,6 +5,7 @@ import { UserDbService } from '@db/user/user-db.service';
 import { environment } from '@env/environment';
 import { NavService } from '@nav/nav.service';
 import { SeoService } from '@shared/seo/seo.service';
+import { SnackbarService } from '@shared/snack-bar/snack-bar.service';
 import { MarkdownService } from 'ngx-markdown';
 import { Observable, of, Subscription } from 'rxjs';
 import { Post } from './post.model';
@@ -31,7 +32,8 @@ export class PostComponent {
     private us: UserDbService,
     private seo: SeoService,
     public ns: NavService,
-    private ms: MarkdownService
+    private ms: MarkdownService,
+    private sb: SnackbarService
   ) {
     this.env = environment;
     this.ns.openLeftNav();
@@ -39,6 +41,10 @@ export class PostComponent {
     this.meta(post);
     this.post = post;
     this.user$ = this.ns.isBrowser ? this.us.user$ : of(null);
+  }
+
+  onCopyToClipboard(): void {
+    this.sb.showMsg('Copied to clipboard!');
   }
 
   meta(r: Post) {
