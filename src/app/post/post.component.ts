@@ -43,10 +43,6 @@ export class PostComponent {
     this.user$ = this.ns.isBrowser ? this.us.user$ : of(null);
   }
 
-  onCopyToClipboard(): void {
-    this.sb.showMsg('Copied to clipboard!');
-  }
-
   meta(r: Post) {
 
     // add bread crumbs

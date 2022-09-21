@@ -1,6 +1,6 @@
 <form [formGroup]="postForm" appAutoSave [getData]="patchPost" [setData]="onSubmit.bind(this)"
   (stateChange)="updateState($event)">
-  <mat-card class="ng-card centered ng-edit">
+  <mat-card class="ng-card centered ng-edit mat-elevation-z0 ng-card-outline">
     <mat-card-title>{{ title }}</mat-card-title>
     <br />
     <mat-card-content>
@@ -19,21 +19,6 @@
         <input matInput id="title" placeholder="Title" formControlName="title">
         <mat-error *ngIf="getField('title')?.invalid">
           {{ getError('title') }}
-        </mat-error>
-      </mat-form-field>
-      <mat-form-field class="chip-list">
-        <mat-chip-list #chipList aria-label="Tag selection">
-          <mat-chip *ngFor="let tag of tagsField.controls; let i = index" [selectable]="ts.selectable"
-            [removable]="ts.removable" (removed)="ts.remove(i, tagsField, chipList)">
-            {{ tag.value }}
-            <mat-icon matChipRemove *ngIf="ts.removable">cancel</mat-icon>
-          </mat-chip>
-          <input placeholder="Tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="ts.separatorKeysCodes"
-            [matChipInputAddOnBlur]="ts.addOnBlur" (matChipInputTokenEnd)="ts.add($event, tagsField, chipList)"
-            formArrayName="tags" />
-        </mat-chip-list>
-        <mat-error *ngIf="getField('tags')?.invalid">
-          {{ getError('tags') }}
         </mat-error>
       </mat-form-field>
       <mat-tab-group animationDuration="0ms">
@@ -80,6 +65,22 @@
           </mat-card>
         </mat-tab>
       </mat-tab-group>
+      <br />
+      <mat-form-field class="chip-list">
+        <mat-chip-list #chipList aria-label="Tag selection">
+          <mat-chip *ngFor="let tag of tagsField.controls; let i = index" [selectable]="ts.selectable"
+            [removable]="ts.removable" (removed)="ts.remove(i, tagsField, chipList)">
+            {{ tag.value }}
+            <mat-icon matChipRemove *ngIf="ts.removable">cancel</mat-icon>
+          </mat-chip>
+          <input placeholder="Tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="ts.separatorKeysCodes"
+            [matChipInputAddOnBlur]="ts.addOnBlur" (matChipInputTokenEnd)="ts.add($event, tagsField, chipList)"
+            formArrayName="tags" />
+        </mat-chip-list>
+        <mat-error *ngIf="getField('tags')?.invalid">
+          {{ getError('tags') }}
+        </mat-error>
+      </mat-form-field>
     </mat-card-content>
     <mat-card-actions>
       <div class="flex-container">

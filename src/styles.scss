@@ -7,20 +7,23 @@
 
 $custom-typography: mat.define-typography-config(
   $font-family: "Open Sans",
-  $display-4:     mat.define-typography-level(112px, 112px, 300, $letter-spacing: -0.05em),
-  $display-3:     mat.define-typography-level(56px, 56px, 400, $letter-spacing: -0.02em),
-  $display-2:     mat.define-typography-level(45px, 48px, 400, $letter-spacing: -0.005em),
-  $display-1:     mat.define-typography-level(34px, 40px, 400),
-  $headline:      mat.define-typography-level(24px, 32px, 400),
-  $title:         mat.define-typography-level(20px, 32px, 500),
-  $subheading-2:  mat.define-typography-level(16px, 28px, 400),
-  $subheading-1:  mat.define-typography-level(15px, 24px, 400),
-  $body-2:        mat.define-typography-level(14px, 24px, 500),
-  $body-1:        mat.define-typography-level(14px, 20px, 400),
-  $caption:       mat.define-typography-level(12px, 20px, 400),
-  $button:        mat.define-typography-level(14px, 14px, 500),
+  $display-4:
+    mat.define-typography-level(112px, 112px, 300, $letter-spacing: -0.05em),
+  $display-3:
+    mat.define-typography-level(56px, 56px, 400, $letter-spacing: -0.02em),
+  $display-2:
+    mat.define-typography-level(45px, 48px, 400, $letter-spacing: -0.005em),
+  $display-1: mat.define-typography-level(34px, 40px, 400),
+  $headline: mat.define-typography-level(24px, 32px, 400),
+  $title: mat.define-typography-level(20px, 32px, 500),
+  $subheading-2: mat.define-typography-level(16px, 28px, 400),
+  $subheading-1: mat.define-typography-level(15px, 24px, 400),
+  $body-2: mat.define-typography-level(14px, 24px, 500),
+  $body-1: mat.define-typography-level(14px, 20px, 400),
+  $caption: mat.define-typography-level(12px, 20px, 400),
+  $button: mat.define-typography-level(14px, 14px, 500),
   // Line-height must be unit-less fraction of the font-size.
-  $input:         mat.define-typography-level(inherit, 1.125, 400)
+  $input: mat.define-typography-level(inherit, 1.125, 400),
 );
 
 /*
@@ -566,7 +569,7 @@ mat-form-field.mat-form-field {
 }
 
 code {
-  font-size: .75rem !important;
+  font-size: 0.75rem !important;
 }
 
 markdown {
@@ -583,7 +586,7 @@ markdown a:hover {
   display: block;
 }
 .line-numbers {
-  font-size: .75rem !important;
+  font-size: 0.75rem !important;
 }
 
 /* Drop Zone */
@@ -1068,14 +1071,28 @@ mat-paginator .mat-form-field {
   border: 0;
   padding: 6px;
   cursor: pointer;
-  transition: all 200ms ease-in;
 
-  &:not(:hover) {
-    transition: all 200ms ease-out;
+  transition: all 2s ease-out;
+
+  #copy {
+    display: block;
+  }
+
+  #check {
+    display: none;
   }
 
   &:active {
     transform: scale(0.95);
+  }
+  &:active {
+    transition: all 2s ease-out;
+    > #check {
+      display: block;
+    }
+    > #copy {
+      display: none;
+    }
   }
 }
 
@@ -1083,4 +1100,39 @@ mat-paginator .mat-form-field {
   font-size: 1rem;
   height: 1rem;
   width: 1rem;
+}
+
+#check {
+  color: lightgreen;
+  font-weight: 500;
+}
+
+.markdown-clipboard-button {
+  background-color: transparent;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 1rem;
+  width: 50px;
+  padding-left: 25px;
+  transition: all 250ms ease-out;
+  visibility: hidden;
+  content: "";
+  &::before {
+    font-family: "Material Icons";
+    content: "content_copy";
+    visibility: visible;
+  }
+}
+
+.markdown-clipboard-button:active {
+  transform: scale(0.95);
+}
+
+.markdown-clipboard-button.copied {
+  &::before {
+    font-family: "Material Icons";
+    content: "check";
+    color: lightgreen;
+  }
 }

@@ -20,14 +20,8 @@
         </small></p>
     </div>
     <br />
-    <markdown clipboard [clipboardButtonTemplate]="buttonTemplate" lineNumbers [data]="post.content"
-      ngPreserveWhitespaces>
+    <markdown clipboard lineNumbers [data]="post.content" ngPreserveWhitespaces>
     </markdown>
-    <ng-template #buttonTemplate>
-      <button class="btn-clipboard" (click)="onCopyToClipboard()">
-        <mat-icon class="btn-icon">content_copy</mat-icon>
-      </button>
-    </ng-template>
     <br />
     <div class="mat-chip-area">
       <mat-chip-list aria-label="Tags" *ngFor="let tag of post.tags" class="tags">
