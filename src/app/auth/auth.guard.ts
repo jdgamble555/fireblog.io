@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
 import {
-  ActivatedRouteSnapshot,
   CanActivate,
   Router
 } from '@angular/router';
 import { UserDbService } from '@db/user/user-db.service';
-import { StateService } from '@shared/state/state.service';
 import { Role } from './user.model';
 
 @Injectable({
@@ -76,29 +74,6 @@ export class NotLoginGuard implements CanActivate {
 @Injectable({
   providedIn: 'root'
 })
-export class EmailGuard implements CanActivate {
-  // email must be verified
-  constructor(
-    private us: UserDbService,
-    private router: Router
-  ) { }
-  async canActivate(): Promise<boolean> {
-    // make sure logged in first...
-    const { error, data: user } = await this.us.getUser();
-    if (error) {
-      console.error(error);
-    }
-    const emailVerified = !!(user && user?.emailVerified);
-    if (!emailVerified) {
-      this.router.navigate(['/verify']);
-    }
-    return emailVerified;
-  }
-}
-
-@Injectable({
-  providedIn: 'root'
-})
 export class NotUsernameGuard implements CanActivate {
   constructor(
     private us: UserDbService,
@@ -107,18 +82,12 @@ export class NotUsernameGuard implements CanActivate {
   async canActivate(): Promise<boolean> {
 
     // only allow if logged in and no username
-    const { error, data: user } = await this.us.getUser();
+    const { error, data } = await this.us.getUser();
     if (error) {
       console.error(error);
     }
-    const uid = user?.uid;
-    // if logged in
-    if (uid) {
-      const { data: username, error } = await this.us.getUsernameFromId(uid);
-      if (error) {
-        console.error(error);
-      }
-      if (!username) {
+    if (data && data.uid) {
+      if (!data.username) {
         return true;
       }
 
@@ -132,47 +101,32 @@ export class NotUsernameGuard implements CanActivate {
     return false;
   }
 }
+
 @Injectable({
   providedIn: 'root'
 })
-export class UserPostGuard implements CanActivate {
-  // must be an admin
+export class UsernameEmailVerifiedGuard implements CanActivate {
+  // must be logged in, email verified, and has username
   constructor(
     private us: UserDbService,
-    private router: Router,
-    private state: StateService
+    private router: Router
   ) { }
-  async canActivate(next: ActivatedRouteSnapshot): Promise<boolean> {
-
-    // preloads post component from routes only
-    const uid = next.paramMap.get('uid') || undefined;
-    const username = next.paramMap.get('username') || undefined;
-    let isValidUsername = false;
-
-    if (uid) {
-      const fetch_un = this.us.getUsernameFromId(uid);
-      const { data: currentUsername, error } = await this.state.loadState('user', fetch_un);
-      if (error) {
-        console.error(error);
-      }
-      // if no username in db
-      if (!currentUsername) {
-
-        // invalid id, go home
-        this.router.navigate(['/']);
-
-        // if no username in route, or invalid username
-      } else if ((uid && !username) || (username !== currentUsername)) {
-
-        // navigate to proper url
-        this.router.navigate(['/u', uid, currentUsername]);
-
-        // otherwise valid username url
-      } else {
-        isValidUsername = true;
-      }
+  async canActivate(): Promise<boolean> {
+    const { error, data } = await this.us.getUser();
+    if (error) {
+      console.error(error);
     }
-    return isValidUsername;
+    if (data) {
+      if (!data.emailVerified) {
+        this.router.navigate(['/verify']);
+      } else if (!data.username) {
+        this.router.navigate(['/username']);
+      } else {
+        return true;
+      }
+    } else {
+      this.router.navigate(['/login']);
+    }
+    return false;
   }
 }
-

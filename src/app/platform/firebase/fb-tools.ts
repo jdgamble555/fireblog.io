@@ -22,6 +22,10 @@ import {
   switchMap
 } from "rxjs/operators";
 
+export async function docExists<T>(ref: DocumentReference<T>): Promise<boolean> {
+  return (await getDoc<T>(ref)).exists();
+}
+
 export async function setWithCounter<T>(
   ref: DocumentReference<T>,
   data: PartialWithFieldValue<T>,

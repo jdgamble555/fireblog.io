@@ -14,10 +14,10 @@ export class PostGuard implements CanActivate {
     private state: StateService
   ) { }
 
-  async canActivate(route: ActivatedRouteSnapshot): Promise<boolean> {
+  async canActivate(next: ActivatedRouteSnapshot): Promise<boolean> {
 
-    let slug = route.paramMap.get('slug');
-    const id = route.paramMap.get('id');
+    let slug = next.paramMap.get('slug');
+    const id = next.paramMap.get('id');
     let error = null;
     let data = null;
 
@@ -32,7 +32,7 @@ export class PostGuard implements CanActivate {
       if (slug && data && (data.slug === slug)) {
 
         // use guard as a resolver to pass data to component
-        route.data = { ...route.data, post: data };
+        next.data = { ...next.data, post: data };
         return true;
       }
 

@@ -17,11 +17,9 @@ import {
 import { UserRec } from '@auth/user.model';
 import { DbModule } from '@db/db.module';
 import { expandRefs, soundex } from '@db/fb-tools';
-import { UserDbService } from '@db/user/user-db.service';
 import { Post, PostInput } from '@post/post.model';
 import { snapToData } from 'rxfire/firestore';
 import { firstValueFrom, map, Observable, of } from 'rxjs';
-import { TagDbService } from './tag-db.service';
 
 
 @Injectable({
@@ -30,9 +28,7 @@ import { TagDbService } from './tag-db.service';
 export class PostDbService {
 
   constructor(
-    private afs: Firestore,
-    private ts: TagDbService,
-    private us: UserDbService
+    private afs: Firestore
   ) { }
 
   /**
@@ -161,7 +157,7 @@ export class PostDbService {
     uid,
     field,
     drafts = false
-  }: PostInput = {}): Promise<{ error: any, posts: Post[] | null, count: string | null }> {
+  }: PostInput = {}): Promise<{ error: any, data: Post[] | null, count: string | null }> {
 
     const { error, posts, count } = this.subPosts({
       sortField,
@@ -177,7 +173,7 @@ export class PostDbService {
 
     return {
       error,
-      posts: await firstValueFrom(posts),
+      data: await firstValueFrom(posts),
       count: await firstValueFrom(count)
     };
   }

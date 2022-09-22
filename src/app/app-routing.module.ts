@@ -1,31 +1,31 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import {
-  EmailGuard,
   LoginGuard,
   NotLoginGuard,
   NotUsernameGuard,
-  UserPostGuard
+  UsernameEmailVerifiedGuard
 } from '@auth/auth.guard';
 import { PostListComponent } from '@post/post-list/post-list.component';
-import { PostListResolver } from '@post/post-list/post-list.resolver';
+import { PostListGuard } from '@post/post-list/post-list.guard';
 import { PostComponent } from '@post/post.component';
 import { PostGuard } from '@post/post.guard';
 import { HomeComponent } from './nav/home/home.component';
 
 const routes: Routes = [
-  { path: '', component: HomeComponent, resolve: { posts: PostListResolver } },
+  { path: '', component: HomeComponent, canActivate: [PostListGuard] },
 
   // backwards compatible with old app, will be removed later
   { path: 'blog/post/:slug', component: PostComponent, canActivate: [PostGuard] },
 
-  // posts
-  // todo - p instead of post
+  // post
   { path: 'post/:id', component: PostComponent, canActivate: [PostGuard] },
   { path: 'post/:id/:slug', component: PostComponent, canActivate: [PostGuard] },
-  { path: 't/:tag', component: PostListComponent, resolve: { posts: PostListResolver } },
-  { path: 'u/:uid', component: PostListComponent, canActivate: [UserPostGuard] },
-  { path: 'u/:uid/:username', component: PostListComponent, canActivate: [UserPostGuard], resolve: { posts: PostListResolver } },
+
+  // post list
+  { path: 't/:tag', component: PostListComponent, canActivate: [PostListGuard] },
+  { path: 'u/:uid', component: PostListComponent, canActivate: [PostListGuard] },
+  { path: 'u/:uid/:username', component: PostListComponent, canActivate: [PostListGuard] },
 
   // auth
   { path: 'login', loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule), canActivate: [NotLoginGuard] },
@@ -36,10 +36,10 @@ const routes: Routes = [
   { path: 'verify', loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule), canActivate: [LoginGuard] },
 
   // logged in
-  { path: 'new', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [EmailGuard, LoginGuard] },
-  { path: 'edit/:id', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [EmailGuard, LoginGuard] },
+  { path: 'new', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [UsernameEmailVerifiedGuard] },
+  { path: 'edit/:id', loadChildren: () => import('./post/post-form/post-form.module').then(m => m.PostFormModule), canActivate: [UsernameEmailVerifiedGuard] },
   { path: 'settings', loadChildren: () => import('./auth/auth-settings/auth-settings.module').then(m => m.AuthSettingsModule), canActivate: [LoginGuard] },
-  { path: 'username', loadChildren: () => import('./auth/username/username.module').then(m => m.UsernameModule), canActivate: [LoginGuard, NotUsernameGuard] },
+  { path: 'username', loadChildren: () => import('./auth/username/username.module').then(m => m.UsernameModule), canActivate: [NotUsernameGuard] },
   { path: 'dashboard', loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule), canActivate: [LoginGuard] },
   { path: '**', redirectTo: '/' }
 ];

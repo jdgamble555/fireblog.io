@@ -45,8 +45,8 @@ export class PostListComponent implements OnDestroy {
     this.ns.openLeftNav();
     this.ns.resetBC();
 
-    let count: string | null = p.posts?.count;
-    let posts: Post[] | null = p.posts?.posts;
+    let count: string | null = p.count;
+    let data: Post[] | null = p.posts;
 
     // dynamic routes not ssr
     const tag = this.route.snapshot.params['tag'];
@@ -63,7 +63,7 @@ export class PostListComponent implements OnDestroy {
     // handle resolver router or new tab clicks
     if (type === 'new') {
       this.total = count;
-      this.posts = posts;
+      this.posts = data;
       return;
     }
 
@@ -90,13 +90,13 @@ export class PostListComponent implements OnDestroy {
     }
 
     // grab posts
-    ({ count, posts } = await this.ps.getPosts(this.input));
+    ({ count, data } = await this.ps.getPosts(this.input));
 
     this.meta(type, username);
 
-    if (count && posts) {
+    if (count && data) {
       this.total = count;
-      this.posts = posts;
+      this.posts = data;
     }
   }
 
@@ -108,7 +108,7 @@ export class PostListComponent implements OnDestroy {
       pageSize: event.pageSize
     };
 
-    const { posts, count, error } = await this.ps.getPosts({
+    const { data, count, error } = await this.ps.getPosts({
       ...this.input,
       ...paging
     });
@@ -118,7 +118,7 @@ export class PostListComponent implements OnDestroy {
     }
 
     this.total = count;
-    this.posts = posts;
+    this.posts = data;
 
     // scroll to top
     this.doc.defaultView?.scrollTo(0, 0);
