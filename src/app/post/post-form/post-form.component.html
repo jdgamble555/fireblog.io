@@ -35,34 +35,30 @@
           </mat-form-field>-->
         </mat-tab>
         <mat-tab label="Preview">
-          <mat-card>
-            <markdown [data]="postForm.value.content"></markdown>
-          </mat-card>
+          <markdown [data]="postForm.value.content"></markdown>
         </mat-tab>
         <mat-tab label="Images" [disabled]="!this.id || this.state !== 'synced'">
-          <mat-card>
-            <button type="button" class="ng-button-space" mat-raised-button (click)="inlineInput.click()">Upload
-              Image</button>
-            <p></p>
-            <input hidden type="file" accept="image/*" #inlineInput (change)="addPostImage($event)" multiple>
-            <mat-spinner *ngIf="imageLoading"></mat-spinner>
-            <mat-form-field *ngFor="let url of imageUploads" appearance="fill">
-              <input matInput value="![Alt Text]({{ url }})">
-              <button type="button" matSuffix mat-icon-button cdkCopyToClipboard="![Alt Text]({{ url }})"
-                (click)="sb.showMsg('Copied!', 500)">
-                <mat-icon>content_copy</mat-icon>
-              </button>
-              <button type="button" matSuffix mat-icon-button [matMenuTriggerFor]="menu">
-                <mat-icon>preview</mat-icon>
-              </button>
-              <mat-menu class="img-preview" #menu="matMenu" xPosition="before">
-                <img [src]="url" width="200px">
-              </mat-menu>
-              <button type="button" matSuffix mat-icon-button (click)="deletePostImage(url)">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </mat-form-field>
-          </mat-card>
+          <button type="button" class="ng-button-space" mat-raised-button (click)="inlineInput.click()">Upload
+            Image</button>
+          <p></p>
+          <input hidden type="file" accept="image/*" #inlineInput (change)="addPostImage($event)" multiple>
+          <mat-spinner *ngIf="imageLoading"></mat-spinner>
+          <mat-form-field *ngFor="let url of imageUploads" appearance="fill">
+            <input matInput value="![Alt Text]({{ url }})">
+            <button type="button" matSuffix mat-icon-button cdkCopyToClipboard="![Alt Text]({{ url }})"
+              (click)="sb.showMsg('Copied!', 500)">
+              <mat-icon>content_copy</mat-icon>
+            </button>
+            <button type="button" matSuffix mat-icon-button [matMenuTriggerFor]="menu">
+              <mat-icon>preview</mat-icon>
+            </button>
+            <mat-menu class="img-preview" #menu="matMenu" xPosition="before">
+              <img [src]="url" width="200px">
+            </mat-menu>
+            <button type="button" matSuffix mat-icon-button (click)="deletePostImage(url)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-form-field>
         </mat-tab>
       </mat-tab-group>
       <br />

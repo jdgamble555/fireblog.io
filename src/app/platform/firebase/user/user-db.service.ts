@@ -62,7 +62,7 @@ export class UserDbService {
       if (_user?.uid) {
         data = await getDoc<UserRec>(
           doc(this.afs, 'users', _user?.uid) as DocumentReference<UserRec>
-        ).then(snap => snapToData(snap, { idField: 'id' }))
+        ).then(snap => snapToData(snap, { idField: 'uid' }))
           .then(data => ({ ...data, emailVerified, providers }));
       }
     } catch (e: any) {

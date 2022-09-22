@@ -249,9 +249,9 @@ export class PostFormComponent implements OnDestroy {
     const formValue = this.postForm.value;
     const slug = this.ts.slugify(formValue.title);
 
-    let { data: user, error: _e2 } = (await this.us.getUser());
-    if (_e2) {
-      console.error(_e2);
+    let { data: user, error: e } = await this.us.getUser();
+    if (e) {
+      console.error(e);
     }
     const uid = user?.uid;
 
@@ -267,10 +267,11 @@ export class PostFormComponent implements OnDestroy {
 
     // if new image, upload it
     if (this.imageFile) {
-      try {
-        const { data: image, error } = await this.is.uploadImage(`cover_images/${uid}`, this.imageFile);
-        if (error) {
-          console.error(error);
+
+        const { data: image, error: e1 } = await this.is.uploadImage(`cover_images/${uid}`, this.imageFile);
+        if (e1) {
+          console.error(e1);
+          error = true;
         }
         if (image) {
           data = {
@@ -280,19 +281,16 @@ export class PostFormComponent implements OnDestroy {
           this.imageFile = undefined;
           this.imageTmp = image;
         }
-      } catch (e: any) {
-        console.error(e);
-        error = true;
-      }
     }
 
     // if delete image or change image
     if (publish && this.image !== this.imageView) {
+
       // delete old cover image file
       if (this.image) {
-        const { error: _e } = await this.is.deleteImage(this.image);
-        if (_e) {
-          console.error(_e);
+        const { error: e2 } = await this.is.deleteImage(this.image);
+        if (e2) {
+          console.error(e2);
           error = true;
         }
       }
@@ -307,12 +305,10 @@ export class PostFormComponent implements OnDestroy {
     }
 
     // add post to db
-
-    const { data: _data, error: _e } = await this.pes.setPost(data, this.id, publish);
-    this.image = _data?.id;
+    const { data: _data, error: e3 } = await this.pes.setPost(data, this.id, publish);
     this.id = _data?.id;
-    if (_e) {
-      console.error(_e);
+    if (e3) {
+      console.error(e3);
       error = true;
     }
 
