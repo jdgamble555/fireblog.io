@@ -9,7 +9,7 @@ import {
 } from '@angular/fire/firestore';
 import { UserRec, UserRequest } from '@auth/user.model';
 import { AuthEditModule } from '@db/auth-edit.module';
-import { deleteWithCounter } from '@db/fb-tools';
+import { deleteWithCounter } from 'j-firestore';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({

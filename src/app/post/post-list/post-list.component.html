@@ -8,8 +8,10 @@
       </h1>
       <h6><i>{{ post.minutes }} min read</i></h6>
       <div class="ng-author ng-link" [routerLink]="['/u', post.authorId, post.authorDoc?.username]">
-        <img *ngIf="post.authorDoc?.photoURL" class="avatar" src="{{ post.authorDoc?.photoURL }}" />
-        <mat-icon *ngIf="!post.authorDoc?.photoURL" class="ng-photo-icon">account_circle</mat-icon>
+        <div mat-icon-button>
+          <img *ngIf="post.authorDoc?.photoURL" class="avatar" src="{{ post.authorDoc?.photoURL }}" />
+          <mat-icon *ngIf="!post.authorDoc?.photoURL" class="ng-photo-icon">account_circle</mat-icon>
+        </div>
         <p><small><b>{{ post.authorDoc?.username }}</b>
             <ng-container *ngIf="post.createdAt"> on
               {{ post.createdAt | date: 'EEEE, MMMM d, yyyy' }}</ng-container>
@@ -34,7 +36,8 @@
               <app-heart [count]="post.heartsCount" [postId]="post.id" [userId]="user.uid">
               </app-heart>
             </div>
-            <ng-container *ngIf="post.authorId === user.uid || (user.role | lowercase) === 'admin' || (user.role | lowercase) === 'editor'">
+            <ng-container
+              *ngIf="post.authorId === user.uid || (user.role | lowercase) === 'admin' || (user.role | lowercase) === 'editor'">
               <button mat-icon-button [routerLink]="['/edit', post.id]">
                 <mat-icon>edit</mat-icon>
               </button>

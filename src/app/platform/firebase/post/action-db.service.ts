@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { doc, DocumentSnapshot, Firestore, getDoc } from '@angular/fire/firestore';
 import { DbModule } from '@db/db.module';
-import { deleteWithCounter, setWithCounter } from '@db/fb-tools';
+import { deleteWithCounter, setWithCounter } from 'j-firestore';
 
 @Injectable({
   providedIn: DbModule

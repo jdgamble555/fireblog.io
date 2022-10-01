@@ -12,7 +12,7 @@ import {
   updateDoc,
   writeBatch
 } from '@angular/fire/firestore';
-import { deleteWithCounter, searchIndex, setWithCounter } from '@db/fb-tools';
+import { deleteWithCounter, searchIndex, setWithCounter } from 'j-firestore';
 import { PostEditModule } from '@db/post-edit.module';
 import { UserDbService } from '@db/user/user-db.service';
 import { Post } from '@post/post.model';

@@ -9,7 +9,7 @@ import {
 } from '@angular/fire/firestore';
 import { UserRec, UserRequest } from '@auth/user.model';
 import { DbModule } from '@db/db.module';
-import { setWithCounter } from '@db/fb-tools';
+import { setWithCounter } from 'j-firestore';
 import { snapToData } from 'rxfire/firestore';
 import { firstValueFrom, map, Observable, of, switchMap, tap } from 'rxjs';
 

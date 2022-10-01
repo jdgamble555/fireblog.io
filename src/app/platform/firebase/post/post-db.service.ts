@@ -16,7 +16,7 @@ import {
 } from '@angular/fire/firestore';
 import { UserRec } from '@auth/user.model';
 import { DbModule } from '@db/db.module';
-import { expandRefs, soundex } from '@db/fb-tools';
+import { expandRefs, soundex } from 'j-firestore';
 import { Post, PostInput } from '@post/post.model';
 import { snapToData } from 'rxfire/firestore';
 import { firstValueFrom, map, Observable, of } from 'rxjs';

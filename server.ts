@@ -5,7 +5,7 @@ import * as express from 'express';
 import { join } from 'path';
 
 import { AppServerModule } from './src/main.server';
-import { APP_BASE_HREF } from '@angular/common';
+//import { APP_BASE_HREF } from '@angular/common';
 import { existsSync } from 'fs';
 import { site_map } from 'site_map';
 import { ISRHandler } from 'ngx-isr';
