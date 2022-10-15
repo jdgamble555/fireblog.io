@@ -35,7 +35,7 @@
           </mat-form-field>-->
         </mat-tab>
         <mat-tab label="Preview">
-          <markdown [data]="postForm.value.content"></markdown>
+          <markdown clipboard linenumbers [data]="postForm.value.content"></markdown>
         </mat-tab>
         <mat-tab label="Images" [disabled]="!this.id || this.state !== 'synced'">
           <button type="button" class="ng-button-space" mat-raised-button (click)="inlineInput.click()">Upload

@@ -195,10 +195,12 @@ export class PostEditService {
   async indexPost(id: string, data: any): Promise<{ error: any }> {
     let error = null;
     try {
-      await searchIndex(this.document, {
+      await searchIndex({
         ref: doc(this.afs, 'posts', id),
-        after: data,
-        fields: ['content', 'title', 'tags']
+        data,
+        indexFields: ['content', 'title', 'tags'],
+        docObj: this.document,
+        copyFields: ['slug', 'title']
       });
     } catch (e: any) {
       error = e;

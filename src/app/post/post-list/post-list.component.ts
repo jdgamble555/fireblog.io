@@ -22,6 +22,7 @@ export class PostListComponent implements OnDestroy {
   posts!: Post[] | null;
   total!: string | null;
   input: PostInput = {};
+  username!: string;
   env: any;
   private routeSub!: Subscription;
 
@@ -51,32 +52,36 @@ export class PostListComponent implements OnDestroy {
     // dynamic routes not ssr
     const tag = this.route.snapshot.params['tag'];
     const authorId = this.route.snapshot.params['uid'];
-    const username = this.route.snapshot.params['username'];
+    this.username = this.route.snapshot.params['username'];
+    this.input.tag = tag ?? this.input.tag;
+    this.input.authorId = authorId ?? this.input.authorId;
 
     // set dynamic types
-    const type: PostType = tag
-      ? 'tag'
-      : authorId
-        ? 'user'
-        : this.ns.type;
+    const type = this.ns.type;
 
-    // handle resolver router or new tab clicks
-    if (type === 'new') {
-      this.total = count;
-      this.posts = data;
-      return;
-    }
+    this.meta(type);
 
     // handle input types
     switch (type) {
-      case 'bookmarks':
-        this.input.field = 'bookmarks';
-        break;
+      case 'new':
+        this.total = count;
+        this.posts = data;
+        return;
+      //break;
       case 'tag':
         this.input.tag = tag;
-        break;
+        this.total = count;
+        this.posts = data;
+        return;
+      //break;
       case 'user':
         this.input.authorId = authorId;
+        this.total = count;
+        this.posts = data;
+        return;
+      //break;
+      case 'bookmarks':
+        this.input.field = 'bookmarks';
         break;
       case 'liked':
         this.input.sortField = 'heartsCount';
@@ -92,8 +97,6 @@ export class PostListComponent implements OnDestroy {
     // grab posts
     ({ count, data } = await this.ps.getPosts(this.input));
 
-    this.meta(type, username);
-
     if (count && data) {
       this.total = count;
       this.posts = data;
@@ -107,7 +110,6 @@ export class PostListComponent implements OnDestroy {
       page: event.pageIndex + 1,
       pageSize: event.pageSize
     };
-
     const { data, count, error } = await this.ps.getPosts({
       ...this.input,
       ...paging
@@ -124,8 +126,9 @@ export class PostListComponent implements OnDestroy {
     this.doc.defaultView?.scrollTo(0, 0);
   }
 
-  meta(type: PostType, username?: string) {
+  meta(type: PostType) {
 
+    const username = this.username;
     const posts = this.posts;
     const url = this.router.url;
     const isDash = url === '/dashboard';
@@ -141,7 +144,7 @@ export class PostListComponent implements OnDestroy {
         break;
       case 'tag':
         const tag = this.input.tag;
-        const uTag = tag!.charAt(0).toUpperCase() + tag!.slice(1);
+        const uTag = tag?.charAt(0).toUpperCase() + tag!.slice(1);
         this.ns.setBC(uTag);
         this.seo.generateTags({
           title: uTag + ' - ' + this.env.title

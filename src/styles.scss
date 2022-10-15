@@ -5,26 +5,22 @@
 
 // color reference - https://material.io/design/color/the-color-system.html#tools-for-picking-colors
 
-$custom-typography: mat.define-typography-config(
-  $font-family: "Open Sans",
-  $display-4:
-    mat.define-typography-level(112px, 112px, 300, $letter-spacing: -0.05em),
-  $display-3:
-    mat.define-typography-level(56px, 56px, 400, $letter-spacing: -0.02em),
-  $display-2:
-    mat.define-typography-level(45px, 48px, 400, $letter-spacing: -0.005em),
-  $display-1: mat.define-typography-level(34px, 40px, 400),
-  $headline: mat.define-typography-level(24px, 32px, 400),
-  $title: mat.define-typography-level(20px, 32px, 500),
-  $subheading-2: mat.define-typography-level(16px, 28px, 400),
-  $subheading-1: mat.define-typography-level(15px, 24px, 400),
-  $body-2: mat.define-typography-level(14px, 24px, 500),
-  $body-1: mat.define-typography-level(14px, 20px, 400),
-  $caption: mat.define-typography-level(12px, 20px, 400),
-  $button: mat.define-typography-level(14px, 14px, 500),
-  // Line-height must be unit-less fraction of the font-size.
-  $input: mat.define-typography-level(inherit, 1.125, 400),
-);
+$custom-typography: mat.define-typography-config($font-family: "Open Sans",
+    $display-4: mat.define-typography-level(112px, 112px, 300, $letter-spacing: -0.05em),
+    $display-3: mat.define-typography-level(56px, 56px, 400, $letter-spacing: -0.02em),
+    $display-2: mat.define-typography-level(45px, 48px, 400, $letter-spacing: -0.005em),
+    $display-1: mat.define-typography-level(34px, 40px, 400),
+    $headline: mat.define-typography-level(24px, 32px, 400),
+    $title: mat.define-typography-level(20px, 32px, 500),
+    $subheading-2: mat.define-typography-level(16px, 28px, 400),
+    $subheading-1: mat.define-typography-level(15px, 24px, 400),
+    $body-2: mat.define-typography-level(14px, 24px, 500),
+    $body-1: mat.define-typography-level(14px, 20px, 400),
+    $caption: mat.define-typography-level(12px, 20px, 400),
+    $button: mat.define-typography-level(14px, 14px, 500),
+    // Line-height must be unit-less fraction of the font-size.
+    $input: mat.define-typography-level(inherit, 1.125, 400),
+  );
 
 /*
   $font-family:   'Roboto, "Helvetica Neue", sans-serif',
@@ -56,16 +52,12 @@ $app-background: #fff;
 
 // Create the theme object. A theme consists of configurations for individual
 // theming systems such as "color" or "typography".
-$app-theme: mat.define-light-theme(
-  (
-    color: (
-      primary: $app-primary,
-      accent: $app-accent,
-      background: $app-background,
-    ),
-    typography: $custom-typography,
-  )
-);
+$app-theme: mat.define-light-theme((color: (primary: $app-primary,
+        accent: $app-accent,
+        background: $app-background,
+      ),
+      typography: $custom-typography,
+    ));
 
 //@include mat.all-component-themes($fireblog-theme);
 @include angular-material-theme($app-theme);
@@ -78,17 +70,13 @@ $app-theme: mat.define-light-theme(
 $dark-primary: mat.define-palette(mat.$light-blue-palette, 700);
 $dark-accent: mat.define-palette(mat.$blue-gray-palette, 100);
 $dark-theme-background: mat.define-palette(mat.$gray-palette, 600);
-$dark-theme: mat.define-dark-theme(
-  (
-    color: (
-      primary: $dark-primary,
-      accent: $dark-accent,
-      is-dark: true,
-      background: $dark-theme-background,
-    ),
-    typography: $custom-typography,
-  )
-);
+$dark-theme: mat.define-dark-theme((color: (primary: $dark-primary,
+        accent: $dark-accent,
+        is-dark: true,
+        background: $dark-theme-background,
+      ),
+      typography: $custom-typography,
+    ));
 
 //$theme-app-theme: mat.define-light-theme($theme-app-primary, $theme-app-accent, $theme-app-warn);
 
@@ -246,6 +234,7 @@ mat-card a:visited {
   padding-right: 14px;
   margin-bottom: 4px;
 }
+
 .ng-button-icon {
   //padding: 0 14px;
   padding-right: 14px;
@@ -292,7 +281,7 @@ mat-card a:visited {
   flex-wrap: wrap;
 }
 
-.ng-cat-area > * {
+.ng-cat-area>* {
   flex: 1 50%;
 }
 
@@ -494,6 +483,7 @@ mat-form-field.mat-form-field {
 .tag-med {
   font-size: 1.25em;
 }
+
 .tag-lg {
   font-size: 1.5em;
 }
@@ -531,6 +521,7 @@ mat-form-field.mat-form-field {
 .arrows {
   white-space: wrap;
 }
+
 .arrows li {
   display: inline-block;
   position: relative;
@@ -585,6 +576,7 @@ markdown a:hover {
   text-decoration: underline;
   display: block;
 }
+
 .line-numbers {
   font-size: 0.75rem !important;
 }
@@ -637,7 +629,7 @@ markdown a:hover {
   align-items: center;
 }
 
-.img-preview > .mat-menu-content {
+.img-preview>.mat-menu-content {
   padding-bottom: 0px !important;
   padding-top: 0px !important;
   margin-bottom: -8px;
@@ -663,6 +655,7 @@ div.trim {
     display: none !important;
     visibility: hidden;
   }
+
   .ng-mobile {
     display: block;
     visibility: visible;
@@ -674,6 +667,7 @@ div.trim {
     display: none !important;
     visibility: hidden;
   }
+
   .ng-browser {
     display: block;
     visibility: visible;
@@ -716,6 +710,7 @@ mat-paginator .mat-form-field {
 .gravatar {
   height: 90px;
 }
+
 .gravatar-title {
   padding: 10px;
   height: 80px;
@@ -918,6 +913,7 @@ mat-paginator .mat-form-field {
 .resp-sharing-button--hackernews {
   background-color: #ff6600;
 }
+
 .resp-sharing-button--hackernews:hover,
 .resp-sharing-button--hackernews:focus {
   background-color: #fb6200;
@@ -1000,17 +996,21 @@ mat-paginator .mat-form-field {
 .header {
   grid-area: header;
 }
+
 .content {
   grid-area: content;
 }
+
 .leftnav {
   grid-area: leftnav;
   min-width: 200px;
 }
+
 .footer {
   grid-area: footer;
   text-align: center;
 }
+
 .wrapper {
   margin-right: auto;
   margin-left: auto;
@@ -1026,7 +1026,7 @@ mat-paginator .mat-form-field {
 }
 
 @media (max-width: 699px) {
-  .tag_list > li {
+  .tag_list>li {
     display: inline-block;
     margin-left: 5px;
   }
@@ -1043,6 +1043,7 @@ mat-paginator .mat-form-field {
     "content"
     "footer";
 }
+
 .simple-wrapper .leftnav {
   visibility: hidden;
   display: none;
@@ -1057,6 +1058,7 @@ mat-paginator .mat-form-field {
       "leftnav content"
       "footer footer";
   }
+
   nav ul {
     flex-direction: column;
   }
@@ -1085,12 +1087,15 @@ mat-paginator .mat-form-field {
   &:active {
     transform: scale(0.95);
   }
+
   &:active {
     transition: all 2s ease-out;
-    > #check {
+
+    >#check {
       display: block;
     }
-    > #copy {
+
+    >#copy {
       display: none;
     }
   }
@@ -1118,6 +1123,7 @@ mat-paginator .mat-form-field {
   transition: all 250ms ease-out;
   visibility: hidden;
   content: "";
+
   &::before {
     font-family: "Material Icons";
     content: "content_copy";

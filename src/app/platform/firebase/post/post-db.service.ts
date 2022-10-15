@@ -16,10 +16,11 @@ import {
 } from '@angular/fire/firestore';
 import { UserRec } from '@auth/user.model';
 import { DbModule } from '@db/db.module';
-import { expandRefs, soundex } from 'j-firestore';
+import { expandRefs, searchDocs } from 'j-firestore';
 import { Post, PostInput } from '@post/post.model';
 import { snapToData } from 'rxfire/firestore';
-import { firstValueFrom, map, Observable, of } from 'rxjs';
+import { firstValueFrom, map, Observable, of, take, tap } from 'rxjs';
+import { docJoin } from '@db/temp';
 
 
 @Injectable({
@@ -118,29 +119,13 @@ export class PostDbService {
  * @returns Observable of search
  */
   async searchPost(term: string): Promise<{ data: Post[] | null, error: any }> {
-    term = term.split(' ')
-      .map(v => soundex(v)
-      ).join(' ');
     let data = null;
     let error = null;
     try {
-      data = await getDocs<Post>(
-        query<Post>(
-          collection(this.afs, '_search/posts/_all'),
-          orderBy('_term.' + term)
-        )
-      ).then((data) => {
-        if (!data.empty) {
-          const docs: Post[] = [];
-          for (const doc of data.docs) {
-            docs.push({ id: doc.id, ...doc.data() });
-          }
-          if (docs.length > 0) {
-            return docs;
-          }
-        }
-        return null;
-      });
+      data = await searchDocs<Post>(
+        collection(this.afs, 'posts'),
+        term
+      );
     } catch (e: any) {
       error = e;
     }
@@ -158,6 +143,18 @@ export class PostDbService {
     field,
     drafts = false
   }: PostInput = {}): Promise<{ error: any, data: Post[] | null, count: string | null }> {
+
+    const docRef = doc(this.afs, 'users', 'd3FHweoSMJVNY3CVsNEhyDfZRHH3');
+    docJoin(docRef, ['_postsDoc'], )
+      .pipe(take(1), tap(x => console.log(x))).subscribe();
+
+    // todo - add regular joins ✔️
+    // add , { posts: [..filters], bookmarks: [...filters] } ✔️
+    // add subcollections (userRef, ['/hearts'])
+    // infinite nested ?
+    // default limit ? ✔️
+    // allow non doc reference id ... authorId => authorId.users
+    // caching - copying doc Ref, collection Ref ?
 
     const { error, posts, count } = this.subPosts({
       sortField,
