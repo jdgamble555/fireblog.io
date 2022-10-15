@@ -328,10 +328,6 @@
                 "source": "/",
                 "destination": "https://code.build/",
                 "permanent": true
-            },
-            {
-                "source": "/(.*)",
-                "destination": "https://code.build/"
             }
         ]
     ]
