@@ -3,331 +3,332 @@
         {
             "source": "/blog/post/firestore-data-model-threaded-comments-on-several-pages",
             "destination": "https://code.build/p/5dHJUBQJon265bqUcCy9LB/firestore-data-model-threaded-comments-on-several-pages",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/firestore-many-to-many-part-5-scalable-arrays",
             "destination": "https://code.build/p/K2F7sdPW5x73Jh7L7tyZoC/firestore-many-to-many-part-5-scalable-arrays",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/firestore-trigram-fuzzy-search",
             "destination": "https://code.build/p/9oWJFyPfBmw1wBsdrckwna/firestore-trigram-fuzzy-search",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/quick-firestore-frontend-search-index",
             "destination": "https://code.build/p/T5bEbE4F29qGi5S1QyNC1X/quick-firestore-frontend-search-index",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/automatic-firestore-timestamps",
             "destination": "https://code.build/p/FNqgCcgVsGFrHCRjjf4vg/automatic-firestore-timestamps",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/dear-firebase-team",
             "destination": "https://code.build/p/VCg7fQ3GAwbrqWmqgaXMec/dear-firebase-team",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/firestore-many-to-many-part-6-the-final-backend-solution",
             "destination": "https://code.build/p/7YEK4XaQLpH16b7dPe1T4Q/firestore-many-to-many-part-6-the-final-backend-solution",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/firestore-observables-to-promises",
             "destination": "https://code.build/p/99vKvi9QaqCDP7wwJW4g3o/firestore-observables-to-promises",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/firestore-counters-everything-there-is-to-know",
             "destination": "https://code.build/p/6hXVf8masa1aNEp7ZpDh6H/firestore-counters-everything-there-is-to-know",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/how-to-build-a-scalable-follower-feed-in-firestore",
             "destination": "https://code.build/p/CnZ7wGZWS7xri7NUMTasDH/how-to-build-a-scalable-follower-feed-in-firestore",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/deploy-angular-universal-app-to-firebase-functions",
             "destination": "https://code.build/p/HM16SX9CAwzUVYfedQk8tE/deploy-angular-universal-app-to-firebase-functions",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/angular-12-with-firebase-9",
             "destination": "https://code.build/p/LWmSi3HfQzu5TMKPzb5p6i/angular-12-with-firebase-9",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/firestore-full-text-search",
             "destination": "https://code.build/p/9dbVBEos4ZynCR8de8d91s/firestore-full-text-search",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/firestore-many-to-many-part-4-follower-feeds",
             "destination": "https://code.build/p/3nS7832oyuWxuLCxb1Ynu8/firestore-many-to-many-part-4-follower-feeds",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/firestore-counters",
             "destination": "https://code.build/p/9DicAmrnRoK4uk62Hw1bEV/firestore-counters",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/firestore-many-to-many",
             "destination": "https://code.build/p/7opsdGrJYUZTvfw3DazMFm/firestore-many-to-many",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/firestore-many-to-many-part-3-maps",
             "destination": "https://code.build/p/Togu8GtEVjTybMm3ZzeVJN/firestore-many-to-many-part-3-maps",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/firestore-using-reference-types-for-joins",
             "destination": "https://code.build/p/NTYMcXqyns7PiPbLsDzCrJ/firestore-using-reference-types-for-joins",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/which-full-text-search-index-do-i-use",
             "destination": "https://code.build/p/5XSkVJhq5BpEUuKPfzkJXU/which-full-text-search-index-do-i-use",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/firestore-relevant-search",
             "destination": "https://code.build/p/3ri7Gk89qywYisztzetSTU/firestore-relevant-search",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/firestore-many-to-many-part-2-array-contains-all",
             "destination": "https://code.build/p/R6WD7Lfx9UW6TahE7eW29k/firestore-many-to-many-part-2-array-contains-all",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/firestore-full-text-search-package",
             "destination": "https://code.build/p/DW3eM61ad3iwvFnbV7dPDf/firestore-full-text-search-package",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/check-firestore-function-type",
             "destination": "https://code.build/p/FtNyq1HABxT52jiKrRnikM/check-firestore-function-type",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/blog/post/firestore-redisgraph-cloud-the-best-of-both-worlds",
             "destination": "https://code.build/p/9kW3ky9Zdks2vAq8TuwSwQ/firestore-redisgraph-cloud-the-best-of-both-worlds",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/4uXDl47IP4TgxHkPLrgC/firestore-data-model-threaded-comments-on-several-pages",
             "destination": "https://code.build/p/5dHJUBQJon265bqUcCy9LB/firestore-data-model-threaded-comments-on-several-pages",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/6tri4Fk8MMDx5a6YQK2X/firestore-many-to-many-part-5-scalable-arrays",
             "destination": "https://code.build/p/K2F7sdPW5x73Jh7L7tyZoC/firestore-many-to-many-part-5-scalable-arrays",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/ASg8Nw64wJQcHMeDOLbN/firestore-trigram-fuzzy-search",
             "destination": "https://code.build/p/9oWJFyPfBmw1wBsdrckwna/firestore-trigram-fuzzy-search",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/AbvJIs2xlZvpaXEBjOeo/quick-firestore-frontend-search-index",
             "destination": "https://code.build/p/T5bEbE4F29qGi5S1QyNC1X/quick-firestore-frontend-search-index",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/AhEld80Vf0FOn2t8MlZG/automatic-firestore-timestamps",
             "destination": "https://code.build/p/FNqgCcgVsGFrHCRjjf4vg/automatic-firestore-timestamps",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/CEE8VxjXqu2Fo2r17COo/dear-firebase-team",
             "destination": "https://code.build/p/VCg7fQ3GAwbrqWmqgaXMec/dear-firebase-team",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/DJefKui4OJJvs8LiLV35/firestore-many-to-many-part-6-the-final-backend-solution",
             "destination": "https://code.build/p/7YEK4XaQLpH16b7dPe1T4Q/firestore-many-to-many-part-6-the-final-backend-solution",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/Dg1VVSx8JlCEchYCEd9u/firestore-observables-to-promises",
             "destination": "https://code.build/p/99vKvi9QaqCDP7wwJW4g3o/firestore-observables-to-promises",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/Mi1q1LEWkwQevqkgnPPm/firestore-counters-everything-there-is-to-know",
             "destination": "https://code.build/p/6hXVf8masa1aNEp7ZpDh6H/firestore-counters-everything-there-is-to-know",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/Q5bOGfWwM8ict9CudnXk/how-to-build-a-scalable-follower-feed-in-firestore",
             "destination": "https://code.build/p/CnZ7wGZWS7xri7NUMTasDH/how-to-build-a-scalable-follower-feed-in-firestore",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/T5QPFguvB8U0GWqqaN5H/deploy-angular-universal-app-to-firebase-functions",
             "destination": "https://code.build/p/HM16SX9CAwzUVYfedQk8tE/deploy-angular-universal-app-to-firebase-functions",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/VSvvgHwaGVbxanba6rSJ/angular-12-with-firebase-9",
             "destination": "https://code.build/p/LWmSi3HfQzu5TMKPzb5p6i/angular-12-with-firebase-9",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/VTgSmCmdh1OUcXsDmXFt/firestore-full-text-search",
             "destination": "https://code.build/p/9dbVBEos4ZynCR8de8d91s/firestore-full-text-search",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/YMOaDWjMnWbn2MsLYRNv/firestore-many-to-many-part-4-follower-feeds",
             "destination": "https://code.build/p/3nS7832oyuWxuLCxb1Ynu8/firestore-many-to-many-part-4-follower-feeds",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/Zebl6sSbaLdrnSFKbCJx/firestore-counters",
             "destination": "https://code.build/p/9DicAmrnRoK4uk62Hw1bEV/firestore-counters",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/c5cbr4KrFoB4TwhSoYgg/firestore-many-to-many",
             "destination": "https://code.build/p/7opsdGrJYUZTvfw3DazMFm/firestore-many-to-many",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/d8kEQ65X4xwTpIpTrQT0/firestore-many-to-many-part-3-maps",
             "destination": "https://code.build/p/Togu8GtEVjTybMm3ZzeVJN/firestore-many-to-many-part-3-maps",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/dDWbmhetCy4QZzwnvnEI/firestore-using-reference-types-for-joins",
             "destination": "https://code.build/p/NTYMcXqyns7PiPbLsDzCrJ/firestore-using-reference-types-for-joins",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/fTRENRzg7nbEDMJKLPdu/which-full-text-search-index-do-i-use",
             "destination": "https://code.build/p/5XSkVJhq5BpEUuKPfzkJXU/which-full-text-search-index-do-i-use",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/fl2NIqht3Gyr0twuFUsa/firestore-relevant-search",
             "destination": "https://code.build/p/3ri7Gk89qywYisztzetSTU/firestore-relevant-search",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/o23vtf9ouqepxost6Yhc/firestore-many-to-many-part-2-array-contains-all",
             "destination": "https://code.build/p/R6WD7Lfx9UW6TahE7eW29k/firestore-many-to-many-part-2-array-contains-all",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/rpHmfuOtcxSi35O5Ft1d/firestore-full-text-search-package",
             "destination": "https://code.build/p/DW3eM61ad3iwvFnbV7dPDf/firestore-full-text-search-package",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/vi06LYLZzjFfyBlGf7aS/check-firestore-function-type",
             "destination": "https://code.build/p/FtNyq1HABxT52jiKrRnikM/check-firestore-function-type",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/post/ynxZDpRYhOfCW4A8omDG/firestore-redisgraph-cloud-the-best-of-both-worlds",
             "destination": "https://code.build/p/9kW3ky9Zdks2vAq8TuwSwQ/firestore-redisgraph-cloud-the-best-of-both-worlds",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/t/angular",
             "destination": "https://code.build/t/angular",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/t/cloudfunction",
             "destination": "https://code.build/t/cloud-functions",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/t/counter",
             "destination": "https://code.build/t/counters",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/t/databases",
             "destination": "https://code.build/t/databases",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/t/datamodeling",
             "destination": "https://code.build/t/data-modeling",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/t/faq",
             "destination": "https://code.build/t/cloud-firestore",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/t/firestorerules",
             "destination": "https://code.build/t/cloud-firestore",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/t/followerfeed",
             "destination": "https://code.build/t/data-modeling",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/t/helperfunction",
             "destination": "https://code.build/t/cloud-functions",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/t/index",
             "destination": "https://code.build/t/indexing",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/t/manytomany",
             "destination": "https://code.build/t/data-modeling",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/t/rxjs",
             "destination": "https://code.build/t/rxjs",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/t/search",
             "destination": "https://code.build/t/full-text-search",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/t/timestamp",
             "destination": "https://code.build/t/timestamp",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/t/triggerfunction",
             "destination": "https://code.build/t/cloud-functions",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/sitemap.xml",
             "destination": "https://code.build/sitemap.xml",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/",
             "destination": "https://code.build/",
-            "permanent": true
+            "statusCode": 301
         },
         {
             "source": "/(.*)",
-            "destination": "https://code.build/"
+            "destination": "https://code.build/",
+            "statusCode": 301
         }
     ]
 }
